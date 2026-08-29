@@ -20,7 +20,7 @@ if (!function_exists('sunder_ui_output_filter')) {
             'Sanruth Softtech' => 'Sanruth Softtech',
             'SANRUTH SOFTTECH' => 'Sanruth Softtech',
             'sanruth softtech' => 'Sanruth Softtech',
-            'owner@sanruth.com' => 'owner@sunder.com',
+            'owner@sunder.com' => 'owner@sunder.com',
             'SANRUTH' => 'SUNDER MACHINES WORKS',
             'Sanruth' => 'Sunder Machines Works',
             'sanruth' => 'sunder machines works'

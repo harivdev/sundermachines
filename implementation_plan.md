@@ -13,26 +13,26 @@ This plan outlines the design and implementation of user management features. Ad
 
 ### Navigation Header Integration
 
-#### [MODIFY] [header.php](file:///c:/Apache24/htdocs/sanruth_billing_new/includes/header.php)
+#### [MODIFY] [header.php](file:///c:/Apache24/htdocs/sunder_billing_new/includes/header.php)
 - Add a new "Users" menu option in the main menu bar, wrapped in a check `if ($_SESSION['role'] === 'ADMIN')` to ensure it is only visible to admin accounts.
 
 ---
 
 ### User Management Components
 
-#### [NEW] [manage_users.php](file:///c:/Apache24/htdocs/sanruth_billing_new/users/manage_users.php)
+#### [NEW] [manage_users.php](file:///c:/Apache24/htdocs/sunder_billing_new/users/manage_users.php)
 - A new file under a new `users` directory.
 - Features a clean, green-accented table listing all users in the system.
 - Includes a filter/search bar for searching users by username.
 - Integrates modals for **Add User** and **Edit User**.
 - Restricts access to users with `ADMIN` role.
 
-#### [NEW] [user_save.php](file:///c:/Apache24/htdocs/sanruth_billing_new/users/user_save.php)
+#### [NEW] [user_save.php](file:///c:/Apache24/htdocs/sunder_billing_new/users/user_save.php)
 - Handles user creation and updating via POST requests.
 - Escapes input values and processes queries against `$conn_login`.
 - Restricts access to users with `ADMIN` role.
 
-#### [NEW] [user_delete.php](file:///c:/Apache24/htdocs/sanruth_billing_new/users/user_delete.php)
+#### [NEW] [user_delete.php](file:///c:/Apache24/htdocs/sunder_billing_new/users/user_delete.php)
 - Handles deleting users by `id` from the database via GET/POST requests.
 - Prevents admins from deleting their own currently logged-in account to avoid lockouts.
 - Restricts access to users with `ADMIN` role.

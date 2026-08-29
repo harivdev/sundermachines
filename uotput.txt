@@ -133,7 +133,7 @@ db_diagnostic.php:48:        $cnt = $c ? mysqli_fetch_assoc($c)['cnt'] : 'unknow
 db_diagnostic.php:50:        $sample = mysqli_query($conn, "SELECT username, role FROM credential LIMIT 5");
 db_diagnostic.php:51:        if ($sample && mysqli_num_rows($sample) > 0) {
 db_diagnostic.php:53:            while ($s = mysqli_fetch_assoc($sample)) {
-db_diagnostic.php:62:echo "\nNote: open this file in browser: /sanruth_billing_new/db_diagnostic.php\n";
+db_diagnostic.php:62:echo "\nNote: open this file in browser: /sunder_billing_new/db_diagnostic.php\n";
 includes\barcode_scanner_modal.php:393:                const detector = new BarcodeDetector({ formats: ['code_128', 'code_39', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'qr_code'] });
 includes\barcode_scanner_modal.php:411:                const hints = new Map();
 includes\barcode_scanner_modal.php:421:                const reader = new ZXing.BrowserMultiFormatReader(hints);
@@ -1059,7 +1059,7 @@ supplier\manage_supplier.php:1184:      document.getElementById('editModalTitle'
 supplier\supplier_save.php:2:// supplier_save.php ΓÇô Insert or Update supplier + address (plain mysqli queries)
 supplier\supplier_save.php:48:    // Insert new address
 supplier\supplier_save.php:74:    // Insert new supplier
-tools\check_admin_user.php:3:// Usage: http://localhost/sanruth_billing_new/tools/check_admin_user.php?username=admin
+tools\check_admin_user.php:3:// Usage: http://localhost/sunder_billing_new/tools/check_admin_user.php?username=admin
 tools\check_admin_user.php:20:$safe = mysqli_real_escape_string($conn_login, $username);
 tools\check_admin_user.php:24:$res = @mysqli_query($conn_login, "SELECT id, username, password, role FROM `user` WHERE username = '$safe' LIMIT 1");
 tools\check_admin_user.php:26:    echo "Query failed: " . mysqli_error($conn_login) . "\n";
