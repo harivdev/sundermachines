@@ -5,91 +5,95 @@ requireAdmin();
 include("../includes/header.php");
 ?>
 
-<div style="padding: 20px; background: #f8fafc; min-height: calc(100vh - 110px);">
+<div style="padding: 30px 20px; background: #f8fafc; min-height: calc(100vh - 110px); display: flex; justify-content: center;">
 
-    <!-- HEADER BAR -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 style="margin: 0; color: #1e293b; font-size: 20px; font-weight: 700;">Supplier Info</h3>
-        <a href="list.php"
-            style="text-decoration: none; color: #1e293b; font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 6px;">
-            <span>☰</span> Suppliers
-        </a>
-    </div>
+    <div style="width: 100%; max-width: 820px;">
 
-    <!-- MAIN CONTENT CARD -->
-    <div
-        style="background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); padding: 30px; border: 1px solid #e2e8f0;">
+        <!-- HEADER BAR -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; color: #1e293b; font-size: 22px; font-weight: 700;">Add New Supplier</h3>
+            <a href="list.php"
+                style="text-decoration: none; color: #475569; font-weight: 700; font-size: 13.5px; display: inline-flex; align-items: center; gap: 6px; background: #fff; padding: 8px 14px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <span>☰</span> Supplier List
+            </a>
+        </div>
 
-        <form action="insert.php" method="POST">
+        <!-- MAIN CONTENT CARD -->
+        <div style="background: #fff; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04); padding: 35px 40px; border: 1px solid #e2e8f0;">
 
-            <!-- SECTION 1: SUPPLIER INFO -->
-            <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
-                <!-- ACTIVE TOGGLE -->
-                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                    <div class="switch-container">
-                        <input type="checkbox" name="active" checked id="activeSwitch" hidden>
-                        <div class="switch-slider"></div>
+            <form action="insert.php" method="POST">
+
+                <!-- SECTION 1: SUPPLIER INFO HEADER & ACTIVE TOGGLE -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;">
+                    <span style="font-size: 16px; font-weight: 700; color: #1e293b;">Supplier Information</span>
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <div class="switch-container">
+                            <input type="checkbox" name="active" checked id="activeSwitch" hidden>
+                            <div class="switch-slider"></div>
+                        </div>
+                        <span style="font-weight: 700; color: #64748b; font-size: 13px;">Active</span>
+                    </label>
+                </div>
+
+                <!-- NAME FIELD (FULL WIDTH) -->
+                <div class="form-group" style="margin-bottom: 22px;">
+                    <label>Supplier Name <span class="required">*</span></label>
+                    <input type="text" name="name" required placeholder="Enter supplier or business name">
+                </div>
+
+                <!-- CONTACT FIELDS (3 EQUAL COLUMNS) -->
+                <div class="contact-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-bottom: 30px;">
+                    <div class="form-group">
+                        <label>Phone # Primary <span class="required">*</span></label>
+                        <input type="text" name="phoneNo1" required placeholder="Phone number">
                     </div>
-                    <span style="font-weight: 700; color: #64748b; font-size: 13px;">Active</span>
-                </label>
-            </div>
+                    <div class="form-group">
+                        <label>Phone # WhatsApp</label>
+                        <input type="text" name="whatsAppNo" placeholder="WhatsApp number">
+                    </div>
+                    <div class="form-group">
+                        <label>Email ID</label>
+                        <input type="email" name="emailId" placeholder="supplier@example.com">
+                    </div>
+                </div>
 
-            <div class="form-grid">
-                <div class="form-group" style="grid-column: span 1;">
-                    <label>Name <span class="required">*</span></label>
-                    <input type="text" name="name" required placeholder="">
+                <!-- SECTION 2: ADDRESS -->
+                <div style="margin-top: 35px; margin-bottom: 22px; border-top: 2px solid #f1f5f9; padding-top: 22px;">
+                    <h3 style="margin: 0; color: #1e293b; font-size: 16px; font-weight: 700;">Address Details</h3>
                 </div>
-            </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 20px; margin-bottom: 25px;">
-                <div class="form-group">
-                    <label>Phone # Primary<span class="required">*</span></label>
-                    <input type="text" name="phoneNo1" required placeholder="">
+                <!-- ADDRESS LINES (FULL WIDTH EACH) -->
+                <div class="form-group" style="margin-bottom: 18px;">
+                    <label>Address Line 1 <span class="required">*</span></label>
+                    <input type="text" name="line1" required placeholder="Street address, building, door no.">
                 </div>
-                <div class="form-group">
-                    <label>Phone # WhatsApp</label>
-                    <input type="text" name="whatsAppNo" placeholder="">
-                </div>
-                <div class="form-group">
-                    <label>Email ID</label>
-                    <input type="email" name="emailId" placeholder="">
-                </div>
-            </div>
 
-            <!-- SECTION 2: ADDRESS -->
-            <div style="margin-top: 40px; margin-bottom: 20px; border-top: 1px solid #f1f5f9; padding-top: 25px;">
-                <h3 style="margin: 0 0 20px 0; color: #1e293b; font-size: 18px; font-weight: 700;">Address</h3>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Line 1 <span class="required">*</span></label>
-                    <input type="text" name="line1" required placeholder="">
+                <div class="form-group" style="margin-bottom: 22px;">
+                    <label>Address Line 2</label>
+                    <input type="text" name="line2" placeholder="Suite, unit, landmark (optional)">
                 </div>
-                <div class="form-group">
-                    <label>Line 2</label>
-                    <input type="text" name="line2" placeholder="">
-                </div>
-            </div>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>City <span class="required">*</span></label>
-                    <input type="text" name="city" required placeholder="">
+                <!-- CITY & ZIP CODE (2 EQUAL COLUMNS) -->
+                <div class="location-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 35px;">
+                    <div class="form-group">
+                        <label>City <span class="required">*</span></label>
+                        <input type="text" name="city" required placeholder="City name">
+                    </div>
+                    <div class="form-group">
+                        <label>Zip / Pincode <span class="required">*</span></label>
+                        <input type="text" name="zipCode" required placeholder="Pincode / Postal code">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Zip Code <span class="required">*</span></label>
-                    <input type="text" name="zipCode" required placeholder="">
+
+                <!-- ACTION BUTTONS -->
+                <div style="margin-top: 35px; border-top: 1px solid #f1f5f9; padding-top: 25px; display: flex; justify-content: flex-end; gap: 12px;">
+                    <a href="list.php" class="prime-btn" style="background: #e2e8f0; color: #475569; text-decoration: none; display: inline-flex; align-items: center;">Cancel</a>
+                    <button type="reset" class="prime-btn" style="background: #94a3b8; color: #fff;">Reset</button>
+                    <button type="submit" class="prime-btn" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff;">Submit Supplier</button>
                 </div>
-            </div>
 
-            <!-- ACTIONS -->
-            <div style="margin-top: 40px; display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="submit" class="prime-btn" style="background: #2563eb;">Submit</button>
-                <button type="reset" class="prime-btn" style="background: #64748b;">Reset</button>
-            </div>
-
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -110,28 +114,15 @@ include("../includes/header.php");
     /* INPUTS */
     .form-group input {
         width: 100%;
-        height: 42px;
-        padding: 0 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
+        height: 44px;
+        padding: 0 14px;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 8px;
         font-size: 14px;
         color: #334155;
         background: #fff;
-        transition: 0.2s;
-    }
-
-    .form-group input:focus {
-        outline: none;
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
-
-    /* GRID LAYOUTS */
-    .form-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        margin-bottom: 20px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-sizing: border-box;
     }
 
     /* SWITCH TOGGLE */
@@ -144,7 +135,7 @@ include("../includes/header.php");
     .switch-slider {
         position: absolute;
         inset: 0;
-        background: #e2e8f0;
+        background: #cbd5e1;
         border-radius: 30px;
         transition: 0.3s;
     }
@@ -162,7 +153,7 @@ include("../includes/header.php");
     }
 
     #activeSwitch:checked+.switch-slider {
-        background: #6366f1;
+        background: #2563eb;
     }
 
     #activeSwitch:checked+.switch-slider::before {
@@ -171,24 +162,24 @@ include("../includes/header.php");
 
     /* BUTTONS */
     .prime-btn {
-        padding: 10px 25px;
+        padding: 11px 26px;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         color: white;
         font-weight: 700;
         font-size: 14px;
         cursor: pointer;
-        transition: 0.2s;
+        transition: opacity 0.2s, transform 0.1s;
     }
 
     .prime-btn:hover {
-        opacity: 0.9;
+        opacity: 0.92;
     }
 
     /* RESPONSIVE */
     @media (max-width: 768px) {
-        .form-grid {
-            grid-template-columns: 1fr;
+        .contact-grid, .location-grid {
+            grid-template-columns: 1fr !important;
         }
     }
 </style>
