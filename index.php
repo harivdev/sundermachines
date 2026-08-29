@@ -177,17 +177,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         .logo-container {
-            width: 76px;
-            height: 76px;
-            background: #FDD017;
-            border-radius: 18px;
+            width: 80px;
+            height: 80px;
+            background: transparent;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 15px;
-            box-shadow: 0 10px 25px -5px rgba(253, 208, 23, 0.5);
-            border: 2px solid #eab308;
-            padding: 6px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+            border: none;
+            padding: 0;
             overflow: hidden;
         }
 
@@ -195,7 +195,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 12px;
+            transform: scale(1.15);
+            border-radius: 20px;
         }
 
         .brand-name {
@@ -240,14 +241,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border-radius: 12px;
             font-size: 15px;
             color: var(--text-main);
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .input-field:focus {
             outline: none;
-            border-color: #FDD017;
+            border: 2px solid #d97706;
             background: #fff;
-            box-shadow: 0 0 0 4px rgba(253, 208, 23, 0.25);
+            box-shadow: none;
         }
 
         .input-icon {
