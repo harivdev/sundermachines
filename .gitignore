@@ -1,0 +1,6 @@
+# Scratch and temporary files
+.db_cleaned_v2
+config/.db_cleaned_v2
+scratch_*
+*.tmp
+*.log

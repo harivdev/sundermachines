@@ -1,0 +1,587 @@
+/* ==========================================================================
+   SUNDER ERP - GLOBAL COMMON & RESPONSIVE DESIGN SYSTEM
+   MASTER UI REFERENCE: JOB CARD LIST
+   SUPPORTED BREAKPOINTS: 320px, 360px, 375px, 390px, 412px, 480px, 600px,
+                          768px, 820px, 1024px, 1280px, 1366px, 1440px, 1600px, 1920px
+   ========================================================================== */
+
+:root {
+    /* Color Palette */
+    --erp-primary: #2563eb;
+    --erp-primary-hover: #1d4ed8;
+    --erp-secondary: #64748b;
+    --erp-secondary-hover: #475569;
+    --erp-success: #16a34a;
+    --erp-success-hover: #15803d;
+    --erp-warning: #f59e0b;
+    --erp-warning-hover: #d97706;
+    --erp-danger: #ef4444;
+    --erp-danger-hover: #dc2626;
+    --erp-dark: #1e293b;
+    --erp-dark-hover: #0f172a;
+
+    /* Backgrounds & Surfaces */
+    --erp-bg: #f8fafc;
+    --erp-card-bg: #ffffff;
+    --erp-subtle-bg: #f1f5f9;
+    
+    /* Borders & Dividers */
+    --erp-border: #e2e8f0;
+    --erp-border-input: #cbd5e1;
+    --erp-border-dark: #94a3b8;
+
+    /* Typography */
+    --erp-text-main: #1e293b;
+    --erp-text-muted: #64748b;
+    --erp-text-light: #94a3b8;
+    --erp-font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+    /* Radii */
+    --erp-radius-sm: 4px;
+    --erp-radius-md: 6px;
+    --erp-radius-lg: 8px;
+    --erp-radius-xl: 12px;
+
+    /* Shadows */
+    --erp-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --erp-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+    --erp-shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+/* ── 0. GLOBAL RESET & OVERFLOW PREVENTION ── */
+*, *::before, *::after {
+    box-sizing: border-box !important;
+}
+
+html {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden !important;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden !important;
+    background-color: var(--erp-bg) !important;
+    font-family: var(--erp-font) !important;
+    color: var(--erp-text-main) !important;
+}
+
+img, video, canvas, svg {
+    max-width: 100% !important;
+    height: auto;
+}
+
+input, select, textarea, button {
+    max-width: 100%;
+    font-family: inherit;
+}
+
+/* ── 1. COMMON PAGE CONTAINER ── */
+.erp-container, .page-wrapper, .container-box, .container, .app-container {
+    width: 100% !important;
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+    min-height: calc(100vh - 110px);
+}
+
+/* ── 2. COMMON HEADER BAR ── */
+.erp-header-bar, .header-bar, .page-header, .header {
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 8px 8px 0 0;
+    padding: 15px 20px;
+    border: 1px solid var(--erp-border);
+    border-bottom: none;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.erp-header-title, .page-header h1, .header h2, .po-title-bar h2 {
+    color: var(--erp-dark);
+    font-weight: 700;
+    font-size: 20px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.erp-header-actions, .header-actions, .actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* ── 3. COMMON BUTTONS ── */
+.btn-erp, .btn, .btn-top, .prime-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--erp-radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    box-sizing: border-box;
+    font-family: inherit;
+    line-height: 1.2;
+    min-height: 36px;
+}
+
+.btn-erp-new, .btn-dark, .btn-black {
+    background: var(--erp-dark);
+    color: #ffffff !important;
+}
+.btn-erp-new:hover, .btn-dark:hover {
+    background: var(--erp-dark-hover);
+}
+
+.btn-erp-primary, .btn-blue, .btn-primary {
+    background: var(--erp-primary);
+    color: #ffffff !important;
+}
+.btn-erp-primary:hover, .btn-blue:hover, .btn-primary:hover {
+    background: var(--erp-primary-hover);
+}
+
+.btn-erp-success, .btn-green, .btn-success {
+    background: var(--erp-success);
+    color: #ffffff !important;
+}
+.btn-erp-success:hover, .btn-green:hover, .btn-success:hover {
+    background: var(--erp-success-hover);
+}
+
+.btn-erp-warning, .btn-warning, .btn-yellow {
+    background: var(--erp-warning);
+    color: #ffffff !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+.btn-erp-warning:hover, .btn-warning:hover {
+    background: var(--erp-warning-hover);
+}
+
+.btn-erp-danger, .btn-danger, .btn-red {
+    background: var(--erp-danger);
+    color: #ffffff !important;
+}
+.btn-erp-danger:hover, .btn-danger:hover {
+    background: var(--erp-danger-hover);
+}
+
+.btn-erp-secondary, .btn-light-gray, .btn-gray, .btn-outline, .btn-secondary {
+    background: var(--erp-subtle-bg);
+    color: var(--erp-text-main) !important;
+    border-color: var(--erp-border-input);
+}
+.btn-erp-secondary:hover, .btn-light-gray:hover, .btn-gray:hover, .btn-outline:hover {
+    background: var(--erp-border);
+}
+
+.btn-erp-sm, .btn-sm {
+    padding: 5px 12px;
+    font-size: 12px;
+    min-height: 30px;
+    border-radius: var(--erp-radius-sm);
+}
+
+/* ── 4. COMMON FILTER PANEL ── */
+.erp-filter-panel, .filter-panel, #jobcardFilter, #purchaseFilter, #salesFilter, #filterDrawer, #filterPanel {
+    background: #ffffff;
+    padding: 15px 20px;
+    border: 1px solid var(--erp-border);
+    border-bottom: none;
+    box-sizing: border-box;
+}
+
+.erp-filter-form, .filter-panel form {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+/* ── 5. COMMON TABLE & RESPONSIVE SCROLL CONTAINER ── */
+.erp-table-box, .table-box, .table-wrap, .table-responsive {
+    background: #ffffff;
+    border-radius: 0 0 12px 12px;
+    box-shadow: var(--erp-shadow-lg);
+    padding: 0;
+    border: 1px solid var(--erp-border);
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+.erp-table, table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 800px;
+}
+
+.erp-table th, table th {
+    background: #f8fafc;
+    padding: 12px 15px;
+    border-bottom: 2px solid var(--erp-border);
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--erp-text-main);
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.erp-table td, table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--erp-border);
+    font-size: 13.5px;
+    color: #334155;
+    vertical-align: middle;
+}
+
+.erp-table tbody tr, table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.erp-table tbody tr:hover, table tbody tr:hover {
+    background-color: #f1f5f9 !important;
+}
+
+/* ── 6. COMMON CARDS & FORM DESIGN ── */
+.erp-card, .card, .po-card {
+    background: #ffffff;
+    border-radius: var(--erp-radius-xl);
+    box-shadow: var(--erp-shadow-md);
+    padding: 20px;
+    border: 1px solid var(--erp-border);
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+.erp-card-header, .po-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--erp-text-main);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--erp-border);
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.erp-form-grid, .grid-2, .form-row, .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.erp-form-grid-3, .grid-3, .form-row-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.erp-form-group, .form-group {
+    margin-bottom: 14px;
+}
+
+.erp-label, .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--erp-text-muted);
+    margin-bottom: 5px;
+}
+
+.erp-label span.req, label span.required, label span.req {
+    color: var(--erp-danger);
+}
+
+.erp-input, .erp-select, .erp-textarea, .form-control, .form-select, input[type="text"], input[type="number"], input[type="email"], input[type="date"], select, textarea {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--erp-border-input);
+    border-radius: var(--erp-radius-md);
+    font-size: 13.5px;
+    color: var(--erp-text-main);
+    background: #ffffff;
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.erp-textarea, textarea {
+    height: auto;
+    padding: 10px 12px;
+}
+
+.erp-input:focus, .erp-select:focus, .erp-textarea:focus, .form-control:focus, .form-select:focus, input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--erp-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* ── 7. COMMON STATUS BADGES ── */
+.erp-badge, .status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: capitalize;
+}
+
+.erp-badge-new, .badge-new, .status-badge.new {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.erp-badge-pending, .badge-pending, .status-badge.pending {
+    background: #f59e0b;
+    color: #ffffff;
+}
+
+.erp-badge-completed, .erp-badge-delivered, .erp-badge-success, .badge-active, .status-badge.completed {
+    background: #16a34a;
+    color: #ffffff;
+}
+
+.erp-badge-info, .erp-badge-blue, .badge-info {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.erp-badge-light, .badge-inactive {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+/* ── 8. COMMON PAGINATION ── */
+.erp-pagination, .pagination, .pagination-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    font-size: 13.5px;
+    color: var(--erp-text-muted);
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.erp-pagination-controls, .pag-btns {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.erp-pagination-btn, .pag-btn {
+    padding: 6px 12px;
+    background: #e2e8f0;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #1e293b;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.erp-pagination-btn.active, .pag-btn.active {
+    background: var(--erp-primary);
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.erp-pagination-btn.disabled, .pag-btn:disabled {
+    color: #94a3b8;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* ── 9. COMMON RESPONSIVE MODALS ── */
+.erp-modal-overlay, .modal-overlay, .dl-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    box-sizing: border-box;
+}
+
+.erp-modal-overlay.open, .modal-overlay.open {
+    display: flex !important;
+}
+
+.erp-modal-dialog, .modal, .dl-modal-box {
+    background: #ffffff;
+    border-radius: var(--erp-radius-lg);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    width: calc(100% - 24px) !important;
+    max-width: 580px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    box-sizing: border-box;
+    animation: erpModalFade 0.2s ease-out;
+    margin: 12px auto;
+}
+
+@keyframes erpModalFade {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.erp-modal-header, .modal-header, .dl-modal-header {
+    background: #f8fafc;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--erp-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.erp-modal-header h4, .modal-header h2, .dl-modal-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--erp-text-main);
+}
+
+.erp-modal-body, .modal-body, .dl-modal-body {
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.erp-modal-footer, .modal-footer, .dl-modal-footer {
+    background: #f8fafc;
+    padding: 12px 20px;
+    border-top: 1px solid var(--erp-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* ── 10. BREAKPOINT SPECIFIC MEDIA QUERIES ── */
+
+/* 1440px to 1920px Wide Screens */
+@media (min-width: 1440px) {
+    .erp-container, .page-wrapper, .container-box, .container {
+        max-width: 1400px;
+    }
+}
+
+/* 1024px to 1366px Laptop & Small Desktop */
+@media (max-width: 1280px) {
+    .erp-container, .page-wrapper, .container-box, .container {
+        padding: 16px;
+    }
+}
+
+/* 768px to 1024px Tablets */
+@media (max-width: 1024px) {
+    .erp-container, .page-wrapper, .container-box, .container {
+        padding: 14px;
+    }
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* Mobile Devices (<= 768px) */
+@media (max-width: 768px) {
+    body {
+        padding-top: 105px !important;
+    }
+    
+    .erp-container, .page-wrapper, .container-box, .container {
+        padding: 10px !important;
+    }
+
+    .erp-form-grid, .erp-form-grid-3, .grid-2, .grid-3, .form-row, .form-row-3, .form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    .erp-header-bar, .header-bar, .page-header, .header, .po-title-bar {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        padding: 12px 14px !important;
+    }
+
+    .erp-header-actions, .header-actions, .actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+    }
+
+    .erp-filter-form, .filter-panel form {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+
+    .erp-filter-form input, .erp-filter-form select, .erp-filter-form button, .erp-filter-form a {
+        width: 100% !important;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .btn-erp, .btn, .btn-top {
+        min-height: 42px; /* Touch friendly height */
+        padding: 8px 14px;
+    }
+
+    /* Prevent iOS form input zoom */
+    input[type="text"], input[type="number"], input[type="email"], input[type="date"], select, textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* Small Mobile Screens (320px to 480px) */
+@media (max-width: 480px) {
+    .erp-container, .page-wrapper, .container-box, .container {
+        padding: 6px !important;
+    }
+    
+    .erp-card, .card, .po-card {
+        padding: 14px !important;
+        border-radius: 8px !important;
+    }
+    
+    .erp-pagination {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+}

@@ -1,0 +1,1093 @@
+C:\servers\billing_sanruth-main>"C:\servers\mysql\data\bin\mysql.exe" -u root -p -e "USE billing; DESCRIBE employee;"
+Enter password: ***********
++---------------------+--------------+------+-----+---------+----------------+
+| Field               | Type         | Null | Key | Default | Extra          |
++---------------------+--------------+------+-----+---------+----------------+
+| id                  | bigint       | NO   | PRI | NULL    | auto_increment |
+| createdBy           | varchar(255) | YES  |     | NULL    |                |
+| createdOn           | datetime(6)  | YES  |     | NULL    |                |
+| modifiedBy          | varchar(255) | YES  |     | NULL    |                |
+| modifiedOn          | datetime(6)  | YES  |     | NULL    |                |
+| active              | bit(1)       | NO   |     | NULL    |                |
+| city                | varchar(255) | YES  |     | NULL    |                |
+| designation         | varchar(255) | YES  |     | NULL    |                |
+| dob                 | date         | YES  |     | NULL    |                |
+| empId               | varchar(255) | YES  |     | NULL    |                |
+| employmentType      | varchar(255) | YES  |     | NULL    |                |
+| exitDate            | date         | YES  |     | NULL    |                |
+| gender              | varchar(255) | YES  |     | NULL    |                |
+| joinedDate          | date         | YES  |     | NULL    |                |
+| line1               | varchar(255) | YES  |     | NULL    |                |
+| line2               | varchar(255) | YES  |     | NULL    |                |
+| name                | varchar(255) | YES  |     | NULL    |                |
+| phoneNo1            | varchar(255) | YES  |     | NULL    |                |
+| phoneNo2            | varchar(255) | YES  |     | NULL    |                |
+| zipCode             | varchar(255) | YES  |     | NULL    |                |
+| credential          | bigint       | YES  | UNI | NULL    |                |
+| aadhaarNo           | varchar(255) | YES  |     | NULL    |                |
+| aadharCardPhoto     | varchar(255) | YES  |     | NULL    |                |
+| drivingLicence      | varchar(255) | YES  |     | NULL    |                |
+| drivingLicencePhoto | varchar(255) | YES  |     | NULL    |                |
+| profilePhoto        | varchar(255) | YES  |     | NULL    |                |
++---------------------+--------------+------+-----+---------+----------------+
+
+C:\servers\billing_sanruth-main>
+
+
+
+
+C:\servers\billing_sanruth-main>findstr /S /I /N "mysqli_connect mysqli new mysqli PDO DB_HOST DB_NAME" *.php
+brand\list.php:10:        $brandName = mysqli_real_escape_string($conn, $_POST['brandName']);
+brand\list.php:16:            $check = mysqli_query($conn, "SELECT id FROM brand WHERE brandName = '$brandName'");
+brand\list.php:17:            if (mysqli_num_rows($check) > 0) {
+brand\list.php:22:            mysqli_query($conn, $sql);
+brand\list.php:26:            $check = mysqli_query($conn, "SELECT id FROM brand WHERE brandName = '$brandName' AND id != $id");
+brand\list.php:27:            if (mysqli_num_rows($check) > 0) {
+brand\list.php:32:            mysqli_query($conn, $sql);
+brand\list.php:41:$brands = mysqli_query($conn, "SELECT * FROM brand ORDER BY id ASC");
+brand\list.php:48:            <button type="button" onclick="openAddModal()" class="btn-erp btn-erp-new">+ New Brand</button>
+brand\list.php:63:                while ($brand = mysqli_fetch_assoc($brands)): ?>
+brand\list.php:85:        <!-- ADD NEW BRAND (Footer-like row) -->
+check_db.php:3:$res = mysqli_query($conn, "DESCRIBE stock");
+check_db.php:4:while($row = mysqli_fetch_assoc($res)) {
+clean_old_records.php:13:    mysqli_query($conn, "SET FOREIGN_KEY_CHECKS = 0");
+clean_old_records.php:16:    mysqli_query($conn, "TRUNCATE TABLE jobcarditems");
+clean_old_records.php:17:    mysqli_query($conn, "TRUNCATE TABLE jobcard");
+clean_old_records.php:20:    mysqli_query($conn, "TRUNCATE TABLE salesitems");
+clean_old_records.php:21:    mysqli_query($conn, "TRUNCATE TABLE sales");
+clean_old_records.php:24:    mysqli_query($conn, "TRUNCATE TABLE purchaseitems");
+clean_old_records.php:25:    mysqli_query($conn, "TRUNCATE TABLE purchase");
+clean_old_records.php:28:    mysqli_query($conn, "DELETE FROM address WHERE id IN (SELECT address FROM customer WHERE address IS NOT NULL)");
+clean_old_records.php:31:    mysqli_query($conn, "TRUNCATE TABLE customer");
+clean_old_records.php:34:    mysqli_query($conn, "SET FOREIGN_KEY_CHECKS = 1");
+clean_old_records.php:43:    mysqli_query($conn, "SET FOREIGN_KEY_CHECKS = 1");
+clean_old_records.php:70:            <a href="jobcard/create.php" class="btn btn-secondary">New Job Card</a>
+clean_old_records.php:71:            <a href="sales/create.php" class="btn btn-secondary">New Sales</a>
+config\db.php:5:$conn = mysqli_connect("localhost", "root", "", "billing", 3306);
+config\db.php:8:    die("Database connection failed: " . mysqli_connect_error());
+config\db.php:11:@mysqli_query($conn, "SET time_zone = '+05:30'");
+config\db.php:14:$conn_login = @mysqli_connect("localhost", "root", "", "billing_login", 3306);
+config\db.php:22:    @mysqli_query($conn, "SET FOREIGN_KEY_CHECKS = 0");
+config\db.php:23:    @mysqli_query($conn, "TRUNCATE TABLE jobcarditems");
+config\db.php:24:    @mysqli_query($conn, "TRUNCATE TABLE jobcard");
+config\db.php:25:    @mysqli_query($conn, "TRUNCATE TABLE salesitems");
+config\db.php:26:    @mysqli_query($conn, "TRUNCATE TABLE sales");
+config\db.php:27:    @mysqli_query($conn, "TRUNCATE TABLE purchaseitems");
+config\db.php:28:    @mysqli_query($conn, "TRUNCATE TABLE purchase");
+config\db.php:29:    @mysqli_query($conn, "DELETE FROM address WHERE id IN (SELECT address FROM customer WHERE address IS NOT NULL)");
+config\db.php:30:    @mysqli_query($conn, "TRUNCATE TABLE customer");
+config\db.php:31:    @mysqli_query($conn, "SET FOREIGN_KEY_CHECKS = 1");
+customers\api_save_customer.php:41:// Auto-generate customerId if creating new and none provided
+customers\api_save_customer.php:43:    $last_row = mysqli_fetch_assoc(mysqli_query($conn, "SELECT customerId FROM customer WHERE customerId LIKE 'C%' ORDER BY id DESC LIMIT 1"));
+customers\api_save_customer.php:52:$e_customerId = mysqli_real_escape_string($conn, $customerId);
+customers\api_save_customer.php:53:$e_name = mysqli_real_escape_string($conn, $name);
+customers\api_save_customer.php:54:$e_phoneNo1 = mysqli_real_escape_string($conn, $phoneNo1);
+customers\api_save_customer.php:55:$e_phoneNo2 = mysqli_real_escape_string($conn, $phoneNo2);
+customers\api_save_customer.php:56:$e_whatsAppNo = mysqli_real_escape_string($conn, $whatsAppNo);
+customers\api_save_customer.php:57:$e_emailId = mysqli_real_escape_string($conn, $emailId);
+customers\api_save_customer.php:59:$e_line1 = mysqli_real_escape_string($conn, $line1);
+customers\api_save_customer.php:60:$e_line2 = mysqli_real_escape_string($conn, $line2);
+customers\api_save_customer.php:61:$e_city = mysqli_real_escape_string($conn, $city);
+customers\api_save_customer.php:62:$e_zipCode = mysqli_real_escape_string($conn, $zipCode);
+customers\api_save_customer.php:69:    mysqli_query($conn, $sql_addr);
+customers\api_save_customer.php:73:    if (mysqli_query($conn, $sql_addr)) {
+customers\api_save_customer.php:74:        $address_id = mysqli_insert_id($conn);
+customers\api_save_customer.php:92:    if (!mysqli_query($conn, $sql_cust)) {
+customers\api_save_customer.php:93:        echo json_encode(['success' => false, 'error' => mysqli_error($conn)]);
+customers\api_save_customer.php:99:    if (!mysqli_query($conn, $sql_cust)) {
+customers\api_save_customer.php:100:        echo json_encode(['success' => false, 'error' => mysqli_error($conn)]);
+customers\api_save_customer.php:103:    $id = mysqli_insert_id($conn);
+customers\api_save_customer.php:113:$saved_res = mysqli_query($conn, $fetch_sql);
+customers\api_save_customer.php:114:$saved_cust = mysqli_fetch_assoc($saved_res);
+customers\api_search_customers.php:61:$countStmt = mysqli_prepare($conn, $countSql);
+customers\api_search_customers.php:64:    mysqli_stmt_bind_param($countStmt, $types, ...$params);
+customers\api_search_customers.php:67:mysqli_stmt_execute($countStmt);
+customers\api_search_customers.php:68:$countRes = mysqli_stmt_get_result($countStmt);
+customers\api_search_customers.php:69:$totalRow = mysqli_fetch_assoc($countRes);
+customers\api_search_customers.php:87:$dataStmt = mysqli_prepare($conn, $dataSql);
+customers\api_search_customers.php:91:mysqli_stmt_bind_param($dataStmt, $dataTypes, ...$dataParams);
+customers\api_search_customers.php:92:mysqli_stmt_execute($dataStmt);
+customers\api_search_customers.php:93:$res = mysqli_stmt_get_result($dataStmt);
+customers\api_search_customers.php:96:    echo json_encode(['success' => false, 'error' => mysqli_error($conn)]);
+customers\api_search_customers.php:101:while ($row = mysqli_fetch_assoc($res)) {
+customers\customer_save.php:2:// customer_save.php ΓÇô Insert or Update customer + address (plain mysqli queries)
+customers\customer_save.php:47:    // Insert new address
+customers\customer_save.php:73:    // Insert new customer
+customers\manage_customers.php:224:      <button type="button" class="btn-erp btn-erp-new" onclick="openNewCustomer()">
+customers\manage_customers.php:225:        <span style="background: #ffffff; color: #1e293b; padding: 1px 6px; border-radius: 4px; font-size: 11px;">+</span> New
+customers\manage_customers.php:380:<!-- ΓòÉΓòÉ EDIT / NEW CUSTOMER MODAL ΓòÉΓòÉ -->
+customers\manage_customers.php:559:   FORM VALIDATION ΓÇö EDIT / NEW MODAL
+customers\manage_customers.php:718:  var fd = new FormData();
+customers\manage_customers.php:844:   NEW customer
+customers\manage_customers.php:846:function openNewCustomer(){
+customers\manage_customers.php:847:  document.getElementById('editModalTitle').innerHTML='<i class="fa fa-plus" style="margin-right:8px"></i>New Customer';
+db_diagnostic.php:12:$conn = @mysqli_connect($host, $user, $pass, null, $port);
+db_diagnostic.php:14:    echo "Cannot connect to MySQL on $host:$port ΓÇö " . mysqli_connect_error() . "\n";
+db_diagnostic.php:21:$res = mysqli_query($conn, "SHOW DATABASES");
+db_diagnostic.php:23:    while ($r = mysqli_fetch_row($res)) {
+db_diagnostic.php:40:    if (!mysqli_select_db($conn, $db)) {
+db_diagnostic.php:44:    $q = mysqli_query($conn, "SHOW TABLES LIKE 'credential'");
+db_diagnostic.php:45:    if ($q && mysqli_num_rows($q) > 0) {
+db_diagnostic.php:47:        $c = mysqli_query($conn, "SELECT COUNT(*) AS cnt FROM credential");
+db_diagnostic.php:48:        $cnt = $c ? mysqli_fetch_assoc($c)['cnt'] : 'unknown';
+db_diagnostic.php:50:        $sample = mysqli_query($conn, "SELECT username, role FROM credential LIMIT 5");
+db_diagnostic.php:51:        if ($sample && mysqli_num_rows($sample) > 0) {
+db_diagnostic.php:53:            while ($s = mysqli_fetch_assoc($sample)) {
+db_diagnostic.php:62:echo "\nNote: open this file in browser: /sanruth_billing_new/db_diagnostic.php\n";
+includes\barcode_scanner_modal.php:393:                const detector = new BarcodeDetector({ formats: ['code_128', 'code_39', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'qr_code'] });
+includes\barcode_scanner_modal.php:411:                const hints = new Map();
+includes\barcode_scanner_modal.php:421:                const reader = new ZXing.BrowserMultiFormatReader(hints);
+includes\barcode_scanner_modal.php:446:                const detector = new BarcodeDetector({ formats: supportedFormats });
+includes\barcode_scanner_modal.php:483:                const hints = new Map();
+includes\barcode_scanner_modal.php:493:                commonZxingCodeReader = new ZXing.BrowserMultiFormatReader(hints);
+includes\barcode_scanner_modal.php:563:            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+includes\camera_modal.php:277:            const u8arr = new Uint8Array(n);
+includes\camera_modal.php:281:            const file = new File([u8arr], 'camera_photo_' + Date.now() + '.jpg', { type: mime });
+includes\camera_modal.php:292:        const reader = new FileReader();
+includes\footer.php:4:        document.querySelectorAll(".has-dropdown > .menu-link").forEach(link => {
+includes\header.php:168:        /* DROPDOWN */
+includes\header.php:169:        .dropdown {
+includes\header.php:185:        .menu-item.active>.dropdown,
+includes\header.php:186:        .menu-item:hover>.dropdown {
+includes\header.php:190:        .submenu:hover>.submenu-dropdown {
+includes\header.php:194:        .dropdown>a {
+includes\header.php:205:        .dropdown>a:hover {
+includes\header.php:211:        .dropdown>a.active-link {
+includes\header.php:218:        .dropdown-divider {
+includes\header.php:249:        .submenu-dropdown {
+includes\header.php:262:        .submenu.active>.submenu-dropdown {
+includes\header.php:266:        .submenu-dropdown a {
+includes\header.php:276:        .submenu-dropdown a:hover {
+includes\header.php:360:            .dropdown {
+includes\header.php:368:            .submenu-dropdown {
+includes\header.php:424:                <li class="menu-item has-dropdown">
+includes\header.php:426:                    <div class="dropdown">
+includes\header.php:438:            <li class="menu-item has-dropdown">
+includes\header.php:440:                <div class="dropdown">
+includes\header.php:453:            <li class="menu-item has-dropdown">
+includes\header.php:455:                <div class="dropdown">
+includes\header.php:471:            <li class="menu-item has-dropdown">
+includes\header.php:473:                <div class="dropdown">
+includes\header.php:485:                <li class="menu-item has-dropdown">
+includes\header.php:487:                    <div class="dropdown">
+includes\header.php:500:                <li class="menu-item has-dropdown">
+includes\header.php:502:                    <div class="dropdown">
+includes\header.php:519:                <li class="menu-item has-dropdown">
+includes\header.php:521:                    <div class="dropdown">
+includes\header.php:525:                            <div class="submenu-dropdown">
+includes\header.php:531:                        <hr class="dropdown-divider">
+includes\header.php:535:                            <div class="submenu-dropdown">
+includes\header.php:541:                        <hr class="dropdown-divider">
+includes\header.php:545:                            <div class="submenu-dropdown">
+includes\header.php:557:                <li class="menu-item has-dropdown">
+includes\header.php:559:                    <div class="dropdown">
+index.php:20:        $usernameSafe = mysqli_real_escape_string($conn_login, $username);
+index.php:23:        $tableCheck = mysqli_query($conn_login, "SHOW TABLES LIKE 'user'");
+index.php:24:        if ($tableCheck && mysqli_num_rows($tableCheck) > 0) {
+index.php:26:            $result = mysqli_query($conn_login, $query);
+index.php:28:            if ($result && mysqli_num_rows($result) > 0) {
+index.php:29:                $user = mysqli_fetch_assoc($result);
+index.php:48:        $res1 = mysqli_query($conn, "SHOW TABLES LIKE 'employee_auth'");
+index.php:49:        if ($res1 && mysqli_num_rows($res1) > 0) {
+index.php:52:            $res2 = mysqli_query($conn, "SHOW TABLES LIKE 'credential'");
+index.php:53:            if ($res2 && mysqli_num_rows($res2) > 0) {
+index.php:60:            $emailColumn = mysqli_query($conn, "SHOW COLUMNS FROM {$userTable} LIKE 'email'");
+index.php:61:            if ($emailColumn && mysqli_num_rows($emailColumn) > 0) {
+index.php:65:            $employeeResult = mysqli_query($conn, $employeeQuery);
+index.php:67:            if ($employeeResult && mysqli_num_rows($employeeResult) > 0) {
+index.php:68:                $employee = mysqli_fetch_assoc($employeeResult);
+jobcard\create.php:17:    $cardResult = mysqli_query($conn, $lastSql);
+jobcard\create.php:21:        while ($row = mysqli_fetch_assoc($cardResult)) {
+jobcard\create.php:48:// Fetch Machines for dropdown
+jobcard\create.php:49:$machines = mysqli_query($conn, "SELECT id, machineName FROM machine WHERE active = 1");
+jobcard\create.php:52:$employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1 ORDER BY name ASC");
+jobcard\create.php:61:            <a href="list.php" class="btn-erp btn-erp-new">
+jobcard\create.php:139:                                <button type="button" onclick="openErpCamera(function(dataUrl, file){ if(file){ try { let c = new DataTransfer(); c.items.add(file); const inp = document.getElementById('createCameraInput'); inp.files = c.files; previewPhotos(inp); } catch(e){} } })" style="background: #2563eb; color: #fff; border: none; padding: 7px 12px; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
+jobcard\create.php:211:                <button type="button" onclick="openNewCustomerModal()" style="background: #16a34a; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;">
+jobcard\create.php:212:                    + New Customer
+jobcard\create.php:241:<!-- CUSTOMER EDIT / NEW MODAL -->
+jobcard\create.php:474:                                <button type="button" onclick="openNewCustomerModal('${escapeHtml(query)}')" style="background: #16a34a; color: #fff; border: none; padding: 8px 18px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
+jobcard\create.php:475:                                    + Add New Customer
+jobcard\create.php:520:    // New / Edit Customer Modal
+jobcard\create.php:521:    function openNewCustomerModal(initialPhoneOrName = '') {
+jobcard\create.php:522:        document.getElementById('editModalTitle').textContent = 'New Customer';
+jobcard\create.php:568:        const formData = new FormData(form);
+jobcard\create.php:595:            // If it was a new customer or the current selected customer, auto select into jobcard form!
+jobcard\create.php:644:            const reader = new FileReader();
+jobcard\edit.php:16:$jcRes = mysqli_query($conn, "
+jobcard\edit.php:26:if (!$jcRes || mysqli_num_rows($jcRes) === 0) {
+jobcard\edit.php:32:$jobcard = mysqli_fetch_assoc($jcRes);
+jobcard\edit.php:36:$itemRes = mysqli_query($conn, "SELECT * FROM jobcarditems WHERE jobCard = $id OR id = $id LIMIT 1");
+jobcard\edit.php:37:$jcItem = $itemRes ? mysqli_fetch_assoc($itemRes) : [];
+jobcard\edit.php:40:$machines = mysqli_query($conn, "SELECT id, machineName FROM machine WHERE active = 1");
+jobcard\edit.php:43:$employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1 ORDER BY name ASC");
+jobcard\edit.php:61:$existingSparesRes = mysqli_query($conn, $sparesQuery);
+jobcard\edit.php:64:    while ($spRow = mysqli_fetch_assoc($existingSparesRes)) {
+jobcard\edit.php:122:                                    $statuses = ['New', 'In Progress', 'Completed', 'Delivered', 'Cancelled'];
+jobcard\edit.php:123:                                    $currStatus = $jobcard['jobStatus'] ?? 'New';
+jobcard\edit.php:295:                            <!-- EXISTING & NEW PREVIEW PHOTO GALLERY -->
+jobcard\edit.php:335:                                <button type="button" onclick="openErpCamera(function(dataUrl, file){ if(file){ try { let c = new DataTransfer(); c.items.add(file); const inp = document.getElementById('editCameraInput'); inp.files = c.files; previewPhotos(inp); } catch(e){} } })" style="background: #2563eb; color: #ffffff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 12.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+jobcard\edit.php:450:                <button type="button" onclick="openNewCustomerModal()" style="background: #16a34a; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;">
+jobcard\edit.php:451:                    + New Customer
+jobcard\edit.php:480:<!-- ==================== CUSTOMER EDIT / NEW MODAL ==================== -->
+jobcard\edit.php:711:        // Auto-update jobStatus dropdown based on paid amount, labor charge, and spares
+jobcard\edit.php:718:            } else if (rows.length > 0 && (statusSelect.value === 'New' || statusSelect.value === 'New Job')) {
+jobcard\edit.php:931:                                <button type="button" onclick="openNewCustomerModal('${escapeHtml(query)}')" style="background: #16a34a; color: #fff; border: none; padding: 8px 18px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
+jobcard\edit.php:932:                                    + Add New Customer
+jobcard\edit.php:974:    function openNewCustomerModal(initialVal = '') {
+jobcard\edit.php:975:        document.getElementById('editModalTitle').textContent = 'New Customer';
+jobcard\edit.php:1021:        const formData = new FormData(form);
+jobcard\edit.php:1083:        const formData = new FormData(form);
+jobcard\edit.php:1149:            const reader = new FileReader();
+jobcard\insert_jobcard.php:28:    $givenDate = mysqli_real_escape_string($conn, $givenDate);
+jobcard\insert_jobcard.php:31:    $customerPhone = mysqli_real_escape_string($conn, trim($_POST['customerPhone'] ?? ''));
+jobcard\insert_jobcard.php:32:    $customerName = mysqli_real_escape_string($conn, trim($_POST['customerName'] ?? ''));
+jobcard\insert_jobcard.php:33:    $customerCity = mysqli_real_escape_string($conn, trim($_POST['city'] ?? ''));
+jobcard\insert_jobcard.php:37:        $res = mysqli_query($conn, "SELECT id FROM customer WHERE id = $customerId LIMIT 1");
+jobcard\insert_jobcard.php:38:        if (!$res || mysqli_num_rows($res) === 0) {
+jobcard\insert_jobcard.php:44:        $res = mysqli_query($conn, "SELECT id FROM customer WHERE phoneNo1 = '$customerPhone' LIMIT 1");
+jobcard\insert_jobcard.php:45:        if ($res && $row = mysqli_fetch_assoc($res)) {
+jobcard\insert_jobcard.php:52:        $last_row = mysqli_fetch_assoc(mysqli_query($conn, "SELECT customerId FROM customer WHERE customerId LIKE 'C%' ORDER BY id DESC LIMIT 1"));
+jobcard\insert_jobcard.php:61:        mysqli_query($conn, $addrSql);
+jobcard\insert_jobcard.php:62:        $addrId = mysqli_insert_id($conn);
+jobcard\insert_jobcard.php:65:        mysqli_query($conn, $custSql);
+jobcard\insert_jobcard.php:66:        $customerId = (int)mysqli_insert_id($conn);
+jobcard\insert_jobcard.php:88:            $cardResult = mysqli_query($conn, $lastSql);
+jobcard\insert_jobcard.php:92:                while ($row = mysqli_fetch_assoc($cardResult)) {
+jobcard\insert_jobcard.php:116:        $e_cardNo = mysqli_real_escape_string($conn, $finalCardNo);
+jobcard\insert_jobcard.php:118:        mysqli_begin_transaction($conn);
+jobcard\insert_jobcard.php:122:            $checkRes = mysqli_query($conn, "SELECT id FROM jobcard WHERE cardNo = '$e_cardNo' LIMIT 1");
+jobcard\insert_jobcard.php:123:            if ($checkRes && mysqli_num_rows($checkRes) > 0) {
+jobcard\insert_jobcard.php:125:                mysqli_rollback($conn);
+jobcard\insert_jobcard.php:131:            $empName = mysqli_real_escape_string($conn, trim($_POST['employeeName'] ?? $_POST['employee'] ?? ''));
+jobcard\insert_jobcard.php:134:                $empRes = mysqli_query($conn, "SELECT id FROM employee WHERE name = '$empName' LIMIT 1");
+jobcard\insert_jobcard.php:135:                if ($empRes && $empRow = mysqli_fetch_assoc($empRes)) {
+jobcard\insert_jobcard.php:139:                    mysqli_query($conn, "INSERT INTO employee (name, active, createdOn, modifiedOn) VALUES ('$empName', 1, '$nowEmp', '$nowEmp')");
+jobcard\insert_jobcard.php:140:                    $empIdVal = (int)mysqli_insert_id($conn);
+jobcard\insert_jobcard.php:143:            $e_jobCategory = mysqli_real_escape_string($conn, $_POST['jobCategory'] ?? 'Onsite');
+jobcard\insert_jobcard.php:146:                      VALUES ('$e_cardNo', '$givenDate', $custVal, $empIdVal, 'New', '$e_jobCategory', 0, 0, 0, 0, 0, 0, '$user', '$now', '$user', '$now')";
+jobcard\insert_jobcard.php:148:            if (!mysqli_query($conn, $jcSql)) {
+jobcard\insert_jobcard.php:149:                throw new Exception("Error inserting jobcard: " . mysqli_error($conn));
+jobcard\insert_jobcard.php:152:            $jobcardId = mysqli_insert_id($conn);
+jobcard\insert_jobcard.php:188:                            $newPhotoName = $finalCardNo . '_' . ($fIdx + 1) . '.' . $ext;
+jobcard\insert_jobcard.php:189:                            if (move_uploaded_file($fileTmpNames[$fIdx], $uploadDir . $newPhotoName)) {
+jobcard\insert_jobcard.php:190:                                $uploadedPhotos[] = 'uploads/jobcards/' . $newPhotoName;
+jobcard\insert_jobcard.php:215:            $pictureVal = !empty($uploadedPhotos) ? mysqli_real_escape_string($conn, json_encode(array_values(array_unique($uploadedPhotos)))) : '';
+jobcard\insert_jobcard.php:218:            $mName = mysqli_real_escape_string($conn, trim($_POST['machineName'] ?? $_POST['machine'] ?? ''));
+jobcard\insert_jobcard.php:221:                $mRes = mysqli_query($conn, "SELECT machineName FROM machine WHERE id = $mId LIMIT 1");
+jobcard\insert_jobcard.php:222:                if ($mRes && $mRow = mysqli_fetch_assoc($mRes)) {
+jobcard\insert_jobcard.php:223:                    $mName = mysqli_real_escape_string($conn, $mRow['machineName']);
+jobcard\insert_jobcard.php:226:            $serial = mysqli_real_escape_string($conn, $_POST['serial'] ?? '');
+jobcard\insert_jobcard.php:227:            $wDetails = mysqli_real_escape_string($conn, $_POST['workDetails'] ?? 'Service');
+jobcard\insert_jobcard.php:228:            $remarks = mysqli_real_escape_string($conn, $_POST['remarks'] ?? '');
+jobcard\insert_jobcard.php:234:            if (!mysqli_query($conn, $itemSql)) {
+jobcard\insert_jobcard.php:235:                throw new Exception("Error inserting jobcard item: " . mysqli_error($conn));
+jobcard\insert_jobcard.php:238:            mysqli_commit($conn);
+jobcard\insert_jobcard.php:242:            mysqli_rollback($conn);
+jobcard\list.php:14:    $safeSearch = mysqli_real_escape_string($conn, $search);
+jobcard\list.php:19:    $safeStatus = mysqli_real_escape_string($conn, $statusFilter);
+jobcard\list.php:31:$countResult = mysqli_query($conn, $countQuery);
+jobcard\list.php:32:$totalRows = (int)mysqli_fetch_assoc($countResult)['total'];
+jobcard\list.php:67:$result = mysqli_query($conn, $query);
+jobcard\list.php:70:    die("Error fetching job cards: " . mysqli_error($conn));
+jobcard\list.php:85:                <span style="background: #1e293b; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 12px;">+</span> New
+jobcard\list.php:110:                    <option value="New Job" <?= $statusFilter === 'New Job' ? 'selected' : '' ?>>New Job</option>
+jobcard\list.php:155:                    while($row = mysqli_fetch_assoc($result)):
+jobcard\list.php:186:                        $rawSt = $row['jobStatus'] ?? 'New';
+jobcard\list.php:188:                        $statusDisplay = 'New<br>Job';
+jobcard\list.php:190:                        if ($rawSt === 'New' || $rawSt === 'New Job') {
+jobcard\list.php:192:                            $statusDisplay = 'New<br>Job';
+jobcard\print_receipt.php:27:$jcRes = mysqli_query($conn, $jcQuery);
+jobcard\print_receipt.php:28:if (!$jcRes || mysqli_num_rows($jcRes) == 0) {
+jobcard\print_receipt.php:32:$jobcard = mysqli_fetch_assoc($jcRes);
+jobcard\print_receipt.php:44:$sRes = mysqli_query($conn, $sQuery);
+jobcard\print_receipt.php:47:    while ($row = mysqli_fetch_assoc($sRes)) {
+jobcard\print_summary.php:11:    $safeStatus = mysqli_real_escape_string($conn, $_GET['status']);
+jobcard\print_summary.php:16:    $search = mysqli_real_escape_string($conn, trim($_GET['search']));
+jobcard\print_summary.php:21:    $fromDate = mysqli_real_escape_string($conn, $_GET['fromDate']);
+jobcard\print_summary.php:26:    $toDate = mysqli_real_escape_string($conn, $_GET['toDate']);
+jobcard\print_summary.php:52:$res = mysqli_query($conn, $query);
+jobcard\print_summary.php:55:    while ($row = mysqli_fetch_assoc($res)) {
+jobcard\print_summary.php:146:                    $rawSt = $row['jobStatus'] ?? 'New';
+jobcard\print_summary.php:147:                    if ($rawSt === 'New' || $rawSt === 'New Job') {
+jobcard\print_summary.php:148:                        $statusDisp = 'New Job';
+jobcard\spares_list.php:35:    $safeSearch = mysqli_real_escape_string($conn, $search);
+jobcard\spares_list.php:40:    $safeFrom = mysqli_real_escape_string($conn, $fromDate);
+jobcard\spares_list.php:45:    $safeTo = mysqli_real_escape_string($conn, $toDate);
+jobcard\spares_list.php:61:$chronoResult = mysqli_query($conn, $chronoQuery);
+jobcard\spares_list.php:66:    while ($cRow = mysqli_fetch_assoc($chronoResult)) {
+jobcard\spares_list.php:103:    $exportResult = mysqli_query($conn, $exportQuery);
+jobcard\spares_list.php:117:        while ($exRow = mysqli_fetch_assoc($exportResult)) {
+jobcard\spares_list.php:156:$countResult = mysqli_query($conn, $countQuery);
+jobcard\spares_list.php:157:$totalRows = (int)mysqli_fetch_assoc($countResult)['total'];
+jobcard\spares_list.php:183:$result = mysqli_query($conn, $query);
+jobcard\spares_list.php:186:    die("Error fetching job card spares: " . mysqli_error($conn));
+jobcard\spares_list.php:318:                <?php if (mysqli_num_rows($result) > 0): ?>
+jobcard\spares_list.php:319:                    <?php while ($row = mysqli_fetch_assoc($result)):
+jobcard\update_jobcard.php:31:$givenDate = mysqli_real_escape_string($conn, $givenDate);
+jobcard\update_jobcard.php:34:$customerPhone = mysqli_real_escape_string($conn, trim($_POST['customerPhone'] ?? ''));
+jobcard\update_jobcard.php:35:$customerName = mysqli_real_escape_string($conn, trim($_POST['customerName'] ?? ''));
+jobcard\update_jobcard.php:36:$customerCity = mysqli_real_escape_string($conn, trim($_POST['city'] ?? ''));
+jobcard\update_jobcard.php:40:    $res = mysqli_query($conn, "SELECT id FROM customer WHERE id = $customerId LIMIT 1");
+jobcard\update_jobcard.php:41:    if (!$res || mysqli_num_rows($res) === 0) {
+jobcard\update_jobcard.php:47:    $res = mysqli_query($conn, "SELECT id FROM customer WHERE phoneNo1 = '$customerPhone' LIMIT 1");
+jobcard\update_jobcard.php:48:    if ($res && $row = mysqli_fetch_assoc($res)) {
+jobcard\update_jobcard.php:54:    $last_row = mysqli_fetch_assoc(mysqli_query($conn, "SELECT customerId FROM customer WHERE customerId LIKE 'C%' ORDER BY id DESC LIMIT 1"));
+jobcard\update_jobcard.php:63:    mysqli_query($conn, $addrSql);
+jobcard\update_jobcard.php:64:    $addrId = mysqli_insert_id($conn);
+jobcard\update_jobcard.php:67:    mysqli_query($conn, $custSql);
+jobcard\update_jobcard.php:68:    $customerId = (int)mysqli_insert_id($conn);
+jobcard\update_jobcard.php:74:mysqli_begin_transaction($conn);
+jobcard\update_jobcard.php:78:    $oldSparesRes = mysqli_query($conn, "
+jobcard\update_jobcard.php:85:        while ($oldSp = mysqli_fetch_assoc($oldSparesRes)) {
+jobcard\update_jobcard.php:86:            $stId = mysqli_real_escape_string($conn, $oldSp['stock']);
+jobcard\update_jobcard.php:89:                mysqli_query($conn, "UPDATE stock SET availableQty = availableQty + $qty WHERE id = '$stId'");
+jobcard\update_jobcard.php:94:    // 2. VALIDATE stock for newly submitted spares
+jobcard\update_jobcard.php:102:            $sName = mysqli_real_escape_string($conn, $_POST['spare_name'][$idx] ?? 'Spare Part');
+jobcard\update_jobcard.php:105:                $checkStock = mysqli_query($conn, "SELECT availableQty, itemName FROM stock WHERE id = '$stId' LIMIT 1");
+jobcard\update_jobcard.php:106:                if ($checkStock && $sRow = mysqli_fetch_assoc($checkStock)) {
+jobcard\update_jobcard.php:109:                        throw new Exception("Insufficient Stock for spare: '" . $sRow['itemName'] . "'. Available: $currAvailable, Requested: $qty");
+jobcard\update_jobcard.php:118:                $createdOnVal = mysqli_real_escape_string($conn, $createdOnVal);
+jobcard\update_jobcard.php:125:                'barcode' => mysqli_real_escape_string($conn, $_POST['spare_barcode'][$idx] ?? ''),
+jobcard\update_jobcard.php:126:                'rack' => mysqli_real_escape_string($conn, $_POST['spare_rack'][$idx] ?? ''),
+jobcard\update_jobcard.php:127:                'partno' => mysqli_real_escape_string($conn, $_POST['spare_partno'][$idx] ?? ''),
+jobcard\update_jobcard.php:137:    $e_jobStatus = mysqli_real_escape_string($conn, $_POST['jobStatus'] ?? 'New');
+jobcard\update_jobcard.php:138:    $e_jobCategory = mysqli_real_escape_string($conn, $_POST['jobCategory'] ?? 'Service');
+jobcard\update_jobcard.php:147:    } elseif (count($sparesToDeduct) > 0 && ($e_jobStatus === 'New' || $e_jobStatus === 'New Job' || $e_jobStatus === '')) {
+jobcard\update_jobcard.php:160:    $empName = mysqli_real_escape_string($conn, trim($_POST['employeeName'] ?? $_POST['employee'] ?? ''));
+jobcard\update_jobcard.php:163:        $empRes = mysqli_query($conn, "SELECT id FROM employee WHERE name = '$empName' LIMIT 1");
+jobcard\update_jobcard.php:164:        if ($empRes && $empRow = mysqli_fetch_assoc($empRes)) {
+jobcard\update_jobcard.php:168:            mysqli_query($conn, "INSERT INTO employee (name, active, createdOn, modifiedOn) VALUES ('$empName', 1, '$nowEmp', '$nowEmp')");
+jobcard\update_jobcard.php:169:            $empIdVal = (int)mysqli_insert_id($conn);
+jobcard\update_jobcard.php:174:    $oldJcRes = mysqli_query($conn, "SELECT completedDate, deliveryDate FROM jobcard WHERE id = $jobcardId LIMIT 1");
+jobcard\update_jobcard.php:175:    $oldJc = $oldJcRes ? mysqli_fetch_assoc($oldJcRes) : [];
+jobcard\update_jobcard.php:210:    if (!mysqli_query($conn, $updateJcSql)) {
+jobcard\update_jobcard.php:211:        throw new Exception("Error updating jobcard: " . mysqli_error($conn));
+jobcard\update_jobcard.php:257:                    $newPhotoName = $cardNo . '_' . (count($uploadedPhotos) + 1) . '.' . $ext;
+jobcard\update_jobcard.php:258:                    if (move_uploaded_file($fileTmpNames[$fIdx], $uploadDir . $newPhotoName)) {
+jobcard\update_jobcard.php:259:                        $uploadedPhotos[] = 'uploads/jobcards/' . $newPhotoName;
+jobcard\update_jobcard.php:266:    $pictureVal = !empty($uploadedPhotos) ? mysqli_real_escape_string($conn, json_encode(array_values(array_unique($uploadedPhotos)))) : '';
+jobcard\update_jobcard.php:268:    $mName = mysqli_real_escape_string($conn, trim($_POST['machineName'] ?? $_POST['machine'] ?? ''));
+jobcard\update_jobcard.php:271:        $mRes = mysqli_query($conn, "SELECT machineName FROM machine WHERE id = $mId LIMIT 1");
+jobcard\update_jobcard.php:272:        if ($mRes && $mRow = mysqli_fetch_assoc($mRes)) {
+jobcard\update_jobcard.php:273:            $mName = mysqli_real_escape_string($conn, $mRow['machineName']);
+jobcard\update_jobcard.php:276:    $serial = mysqli_real_escape_string($conn, $_POST['serial'] ?? '');
+jobcard\update_jobcard.php:277:    $wDetails = mysqli_real_escape_string($conn, $_POST['workDetails'] ?? 'Service');
+jobcard\update_jobcard.php:278:    $remarks = mysqli_real_escape_string($conn, $_POST['remarks'] ?? '');
+jobcard\update_jobcard.php:280:    $itemCheck = mysqli_query($conn, "SELECT id FROM jobcarditems WHERE jobCard = $jobcardId OR id = $jobcardId LIMIT 1");
+jobcard\update_jobcard.php:281:    if ($itemCheck && $itemRow = mysqli_fetch_assoc($itemCheck)) {
+jobcard\update_jobcard.php:294:        mysqli_query($conn, $updateItemSql);
+jobcard\update_jobcard.php:299:        mysqli_query($conn, $insertItemSql);
+jobcard\update_jobcard.php:302:    // 5. Delete old spares and insert new spares + DEDUCT stock
+jobcard\update_jobcard.php:303:    mysqli_query($conn, "DELETE FROM jobcarditemspares WHERE jobCardItem = $itemId OR jobCardItem = $jobcardId");
+jobcard\update_jobcard.php:312:        $stockIdEsc = mysqli_real_escape_string($conn, $sItem['stock_id']);
+jobcard\update_jobcard.php:317:        if (!mysqli_query($conn, $insSpareSql)) {
+jobcard\update_jobcard.php:318:            throw new Exception("Error inserting spare item: " . mysqli_error($conn));
+jobcard\update_jobcard.php:323:            mysqli_query($conn, $deductSql);
+jobcard\update_jobcard.php:327:    mysqli_commit($conn);
+jobcard\update_jobcard.php:332:    mysqli_rollback($conn);
+login\dashboard.php:6:$stockCount = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM stock"))['c'];
+login\dashboard.php:7:$spareCount = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM spares"))['c'];
+login\dashboard.php:9:$lowStockRes = mysqli_query($conn, "SELECT st.*, s.spareName FROM stock st LEFT JOIN spares s ON st.spare = s.id WHERE st.availableQty <= 10 ORDER BY st.availableQty ASC LIMIT 10");
+login\dashboard.php:10:$lowStockCount = $lowStockRes ? mysqli_num_rows($lowStockRes) : 0;
+login\dashboard.php:71:                <?php while ($r = mysqli_fetch_assoc($lowStockRes)): ?>
+machine\add_machine.php:9:    $machineName = mysqli_real_escape_string($conn, $_POST['machineName']);
+machine\add_machine.php:10:    $machineType = mysqli_real_escape_string($conn, $_POST['machineType']);
+machine\add_machine.php:48:    mysqli_query($conn, $query);
+machine\add_machine.php:171:        const reader = new FileReader();
+machine\edit_machine.php:14:$res = mysqli_query($conn, $query);
+machine\edit_machine.php:15:$data = mysqli_fetch_assoc($res);
+machine\edit_machine.php:24:    $name = mysqli_real_escape_string($conn, $_POST['machineName']);
+machine\edit_machine.php:59:    mysqli_query($conn, $update);
+machine\edit_machine.php:182:        const reader = new FileReader();
+machine\list_machine.php:18:    $safe = mysqli_real_escape_string($conn, $name);
+machine\list_machine.php:23:$countRes = mysqli_query($conn, "SELECT COUNT(*) AS total FROM machine $where");
+machine\list_machine.php:24:$totalRows = (int)mysqli_fetch_assoc($countRes)['total'];
+machine\list_machine.php:33:$res = mysqli_query($conn, $query);
+machine\list_machine.php:47:            <a href="add_machine.php" class="btn-erp btn-erp-new">+ New</a>
+machine\list_machine.php:69:                    while ($row = mysqli_fetch_assoc($res)) {
+model\list.php:10:        $modelName = mysqli_real_escape_string($conn, $_POST['modelName']);
+model\list.php:16:            $check = mysqli_query($conn, "SELECT id FROM model WHERE model = '$modelName'");
+model\list.php:17:            if (mysqli_num_rows($check) > 0) {
+model\list.php:22:            mysqli_query($conn, $sql);
+model\list.php:26:            $check = mysqli_query($conn, "SELECT id FROM model WHERE model = '$modelName' AND id != $id");
+model\list.php:27:            if (mysqli_num_rows($check) > 0) {
+model\list.php:32:            mysqli_query($conn, $sql);
+model\list.php:41:$models = mysqli_query($conn, "SELECT * FROM model ORDER BY id ASC");
+model\list.php:48:            <button type="button" onclick="openAddModal()" class="btn-erp btn-erp-new">+ New Model</button>
+model\list.php:63:                while ($row = mysqli_fetch_assoc($models)): ?>
+model\list.php:86:                <input type="text" name="modelName" placeholder="New Model Name" required
+purchase\api_search_items.php:11:$termEsc = mysqli_real_escape_string($conn, $term);
+purchase\api_search_items.php:37:$res = mysqli_query($conn, $query);
+purchase\api_search_items.php:41:    while ($r = mysqli_fetch_assoc($res)) {
+purchase\create.php:12:$poRes = mysqli_query($conn, $poQuery);
+purchase\create.php:15:if ($poRes && $poRow = mysqli_fetch_assoc($poRes)) {
+purchase\create.php:21:        $cntRes = mysqli_query($conn, "SELECT COUNT(*) as cnt FROM purchase WHERE orderNo LIKE '{$poPrefix}%'");
+purchase\create.php:22:        if ($cntRow = mysqli_fetch_assoc($cntRes)) {
+purchase\create.php:27:    $cntRes = mysqli_query($conn, "SELECT COUNT(*) as cnt FROM purchase WHERE orderNo LIKE '{$poPrefix}%'");
+purchase\create.php:28:    if ($cntRes && $cntRow = mysqli_fetch_assoc($cntRes)) {
+purchase\create.php:35:// Fetch suppliers for dropdown
+purchase\create.php:36:$suppliersRes = mysqli_query($conn, "
+purchase\create.php:44:while ($s = mysqli_fetch_assoc($suppliersRes)) {
+purchase\create.php:48:// Fetch spares/items for dropdown
+purchase\create.php:49:$sparesRes = mysqli_query($conn, "
+purchase\create.php:65:while ($sp = mysqli_fetch_assoc($sparesRes)) {
+purchase\create.php:69:// Fetch brands & models for dropdown fallback
+purchase\create.php:70:$brandsRes = mysqli_query($conn, "SELECT id, brandName FROM brand ORDER BY brandName ASC");
+purchase\create.php:72:while ($b = mysqli_fetch_assoc($brandsRes)) { $brandsList[] = $b; }
+purchase\create.php:74:$modelsRes = mysqli_query($conn, "SELECT id, model FROM model ORDER BY model ASC");
+purchase\create.php:76:while ($m = mysqli_fetch_assoc($modelsRes)) { $modelsList[] = $m; }
+purchase\create.php:127:  .btn-new-top {
+purchase\create.php:475:            <option value="New" selected>New</option>
+purchase\delete_purchase.php:13:mysqli_begin_transaction($conn);
+purchase\delete_purchase.php:17:    $stmtItems = mysqli_prepare($conn, "SELECT spare, orderedQuantity, receivedQuantity FROM purchaseitems WHERE purchase = ? AND (deleted = 0 OR deleted IS NULL)");
+purchase\delete_purchase.php:18:    mysqli_stmt_bind_param($stmtItems, "i", $purchaseId);
+purchase\delete_purchase.php:19:    mysqli_stmt_execute($stmtItems);
+purchase\delete_purchase.php:20:    $resItems = mysqli_stmt_get_result($stmtItems);
+purchase\delete_purchase.php:22:    while ($row = mysqli_fetch_assoc($resItems)) {
+purchase\delete_purchase.php:27:            $revStk = mysqli_prepare($conn, "
+purchase\delete_purchase.php:34:                mysqli_stmt_bind_param($revStk, "iii", $purchasedQty, $purchasedQty, $spId);
+purchase\delete_purchase.php:35:                mysqli_stmt_execute($revStk);
+purchase\delete_purchase.php:41:    $stmtDelItems = mysqli_prepare($conn, "UPDATE purchaseitems SET deleted = 1 WHERE purchase = ?");
+purchase\delete_purchase.php:42:    mysqli_stmt_bind_param($stmtDelItems, "i", $purchaseId);
+purchase\delete_purchase.php:43:    mysqli_stmt_execute($stmtDelItems);
+purchase\delete_purchase.php:46:    $stmtDelP = mysqli_prepare($conn, "DELETE FROM purchase WHERE id = ?");
+purchase\delete_purchase.php:47:    mysqli_stmt_bind_param($stmtDelP, "i", $purchaseId);
+purchase\delete_purchase.php:48:    mysqli_stmt_execute($stmtDelP);
+purchase\delete_purchase.php:59:    mysqli_commit($conn);
+purchase\delete_purchase.php:65:    mysqli_rollback($conn);
+purchase\edit_purchase.php:13:$stmtP = mysqli_prepare($conn, "
+purchase\edit_purchase.php:22:mysqli_stmt_bind_param($stmtP, "i", $purchaseId);
+purchase\edit_purchase.php:23:mysqli_stmt_execute($stmtP);
+purchase\edit_purchase.php:24:$resP = mysqli_stmt_get_result($stmtP);
+purchase\edit_purchase.php:25:$purchaseData = mysqli_fetch_assoc($resP);
+purchase\edit_purchase.php:33:$stmtItems = mysqli_prepare($conn, "
+purchase\edit_purchase.php:42:mysqli_stmt_bind_param($stmtItems, "i", $purchaseId);
+purchase\edit_purchase.php:43:mysqli_stmt_execute($stmtItems);
+purchase\edit_purchase.php:44:$resItems = mysqli_stmt_get_result($stmtItems);
+purchase\edit_purchase.php:46:while ($row = mysqli_fetch_assoc($resItems)) {
+purchase\edit_purchase.php:51:$stmtPay = mysqli_prepare($conn, "SELECT * FROM payment WHERE purchase = ? ORDER BY id DESC LIMIT 1");
+purchase\edit_purchase.php:52:mysqli_stmt_bind_param($stmtPay, "i", $purchaseId);
+purchase\edit_purchase.php:53:mysqli_stmt_execute($stmtPay);
+purchase\edit_purchase.php:54:$resPay = mysqli_stmt_get_result($stmtPay);
+purchase\edit_purchase.php:55:$paymentData = mysqli_fetch_assoc($resPay);
+purchase\edit_purchase.php:57:// Fetch Suppliers Dropdown
+purchase\edit_purchase.php:58:$suppliersRes = mysqli_query($conn, "
+purchase\edit_purchase.php:66:while ($s = mysqli_fetch_assoc($suppliersRes)) {
+purchase\edit_purchase.php:70:// Fetch Spares Dropdown
+purchase\edit_purchase.php:71:$sparesRes = mysqli_query($conn, "
+purchase\edit_purchase.php:85:while ($sp = mysqli_fetch_assoc($sparesRes)) {
+purchase\edit_purchase.php:89:// Fetch Brands & Models Dropdown
+purchase\edit_purchase.php:90:$brandsRes = mysqli_query($conn, "SELECT id, brandName FROM brand ORDER BY brandName ASC");
+purchase\edit_purchase.php:92:while ($b = mysqli_fetch_assoc($brandsRes)) { $brandsList[] = $b; }
+purchase\edit_purchase.php:94:$modelsRes = mysqli_query($conn, "SELECT id, model FROM model ORDER BY model ASC");
+purchase\edit_purchase.php:96:while ($m = mysqli_fetch_assoc($modelsRes)) { $modelsList[] = $m; }
+purchase\edit_purchase.php:446:            <option value="New" <?= $purchaseData['orderStatus'] === 'New' ? 'selected' : '' ?>>New</option>
+purchase\insert.php:14:$orderStatus = trim($_POST['orderStatus'] ?? 'New');
+purchase\insert.php:46:mysqli_begin_transaction($conn);
+purchase\insert.php:50:    $stmtP = mysqli_prepare($conn, "
+purchase\insert.php:59:        throw new Exception("Failed to prepare purchase insert query: " . mysqli_error($conn));
+purchase\insert.php:62:    mysqli_stmt_bind_param(
+purchase\insert.php:76:    if (!mysqli_stmt_execute($stmtP)) {
+purchase\insert.php:77:        throw new Exception("Failed to insert purchase record: " . mysqli_stmt_error($stmtP));
+purchase\insert.php:80:    $purchaseId = mysqli_insert_id($conn);
+purchase\insert.php:83:    $stmtItem = mysqli_prepare($conn, "
+purchase\insert.php:94:        throw new Exception("Failed to prepare purchaseitems query: " . mysqli_error($conn));
+purchase\insert.php:119:        mysqli_stmt_bind_param(
+purchase\insert.php:138:        if (!mysqli_stmt_execute($stmtItem)) {
+purchase\insert.php:139:            throw new Exception("Failed to insert purchase item '$itemName': " . mysqli_stmt_error($stmtItem));
+purchase\insert.php:145:        $chkStk = mysqli_prepare($conn, "SELECT id, quantity, availableQty FROM stock WHERE spare = ? LIMIT 1");
+purchase\insert.php:147:            mysqli_stmt_bind_param($chkStk, "i", $spareId);
+purchase\insert.php:148:            mysqli_stmt_execute($chkStk);
+purchase\insert.php:149:            $resStk = mysqli_stmt_get_result($chkStk);
+purchase\insert.php:151:            if ($resStk && $stkRow = mysqli_fetch_assoc($resStk)) {
+purchase\insert.php:154:                $updStk = mysqli_prepare($conn, "
+purchase\insert.php:164:                    mysqli_stmt_bind_param($updStk, "iiddds", $purchasedQty, $purchasedQty, $priceWOGst, $sellingPrice, $gstPct, $stkId);
+purchase\insert.php:165:                    mysqli_stmt_execute($updStk);
+purchase\insert.php:168:                // Create new stock inventory record automatically
+purchase\insert.php:169:                $newStkId = uniqid("STK");
+purchase\insert.php:170:                $newBarcode = (string)rand(10000000, 99999999);
+purchase\insert.php:171:                $insStk = mysqli_prepare($conn, "
+purchase\insert.php:185:                    mysqli_stmt_bind_param(
+purchase\insert.php:188:                        $newStkId,
+purchase\insert.php:191:                        $newBarcode,
+purchase\insert.php:203:                    mysqli_stmt_execute($insStk);
+purchase\insert.php:211:        $stmtPay = mysqli_prepare($conn, "
+purchase\insert.php:220:            throw new Exception("Failed to prepare payment query: " . mysqli_error($conn));
+purchase\insert.php:224:        mysqli_stmt_bind_param(
+purchase\insert.php:237:        if (!mysqli_stmt_execute($stmtPay)) {
+purchase\insert.php:238:            throw new Exception("Failed to insert payment record: " . mysqli_stmt_error($stmtPay));
+purchase\insert.php:243:    mysqli_commit($conn);
+purchase\insert.php:249:    mysqli_rollback($conn);
+purchase\purchase_list.php:16:    $safeSearch = mysqli_real_escape_string($conn, $search);
+purchase\purchase_list.php:21:    $safeStatus = mysqli_real_escape_string($conn, $statusFilter);
+purchase\purchase_list.php:25:$countRes = mysqli_query($conn, "SELECT COUNT(*) AS total FROM purchase p LEFT JOIN supplier s ON p.supplier = s.id $where");
+purchase\purchase_list.php:26:$totalRows = (int)mysqli_fetch_assoc($countRes)['total'];
+purchase\purchase_list.php:33:$res = mysqli_query($conn, "SELECT p.*, s.name as supplierName FROM purchase p LEFT JOIN supplier s ON p.supplier = s.id $where ORDER BY p.id DESC LIMIT $limit OFFSET $offset");
+purchase\purchase_list.php:46:            <a href="create.php" class="btn-erp btn-erp-new">
+purchase\purchase_list.php:47:                <span style="background: #ffffff; color: #1e293b; padding: 1px 6px; border-radius: 4px; font-size: 11px;">+</span> New Purchase
+purchase\purchase_list.php:69:                    <option value="New" <?= $statusFilter === 'New' ? 'selected' : '' ?>>New</option>
+purchase\purchase_list.php:101:                    while ($row = mysqli_fetch_assoc($res)):
+purchase\purchase_list.php:102:                        $st = htmlspecialchars($row['orderStatus'] ?? 'New');
+purchase\purchase_list.php:106:                        else if ($st === 'New') $badgeClass = 'erp-badge-new';
+purchase\update_purchase.php:19:$orderStatus = trim($_POST['orderStatus'] ?? 'New');
+purchase\update_purchase.php:46:mysqli_begin_transaction($conn);
+purchase\update_purchase.php:50:    $stmtOldItems = mysqli_prepare($conn, "SELECT spare, orderedQuantity, receivedQuantity FROM purchaseitems WHERE purchase = ? AND (deleted = 0 OR deleted IS NULL)");
+purchase\update_purchase.php:51:    mysqli_stmt_bind_param($stmtOldItems, "i", $purchaseId);
+purchase\update_purchase.php:52:    mysqli_stmt_execute($stmtOldItems);
+purchase\update_purchase.php:53:    $resOldItems = mysqli_stmt_get_result($stmtOldItems);
+purchase\update_purchase.php:56:    while ($oldRow = mysqli_fetch_assoc($resOldItems)) {
+purchase\update_purchase.php:63:    $stmtP = mysqli_prepare($conn, "
+purchase\update_purchase.php:77:        throw new Exception("Failed to prepare purchase update query: " . mysqli_error($conn));
+purchase\update_purchase.php:80:    mysqli_stmt_bind_param(
+purchase\update_purchase.php:93:    if (!mysqli_stmt_execute($stmtP)) {
+purchase\update_purchase.php:94:        throw new Exception("Failed to update purchase record: " . mysqli_stmt_error($stmtP));
+purchase\update_purchase.php:98:    $stmtDelOld = mysqli_prepare($conn, "UPDATE purchaseitems SET deleted = 1 WHERE purchase = ?");
+purchase\update_purchase.php:99:    mysqli_stmt_bind_param($stmtDelOld, "i", $purchaseId);
+purchase\update_purchase.php:100:    mysqli_stmt_execute($stmtDelOld);
+purchase\update_purchase.php:102:    // 4. Insert Updated Purchase Items & Track New Quantities
+purchase\update_purchase.php:103:    $stmtItem = mysqli_prepare($conn, "
+purchase\update_purchase.php:114:        throw new Exception("Failed to prepare purchaseitems query: " . mysqli_error($conn));
+purchase\update_purchase.php:117:    $newQuantities = [];
+purchase\update_purchase.php:141:        mysqli_stmt_bind_param(
+purchase\update_purchase.php:160:        if (!mysqli_stmt_execute($stmtItem)) {
+purchase\update_purchase.php:161:            throw new Exception("Failed to insert purchase item '$itemName': " . mysqli_stmt_error($stmtItem));
+purchase\update_purchase.php:165:        $newQuantities[$spareId] = ($newQuantities[$spareId] ?? 0) + $purchasedQty;
+purchase\update_purchase.php:169:    $allSpares = array_unique(array_merge(array_keys($oldQuantities), array_keys($newQuantities)));
+purchase\update_purchase.php:173:        $newQ = $newQuantities[$spId] ?? 0;
+purchase\update_purchase.php:174:        $deltaQty = $newQ - $oldQ;
+purchase\update_purchase.php:177:            $updStk = mysqli_prepare($conn, "
+purchase\update_purchase.php:184:                mysqli_stmt_bind_param($updStk, "iii", $deltaQty, $deltaQty, $spId);
+purchase\update_purchase.php:185:                mysqli_stmt_execute($updStk);
+purchase\update_purchase.php:192:        $chkPay = mysqli_prepare($conn, "SELECT id FROM payment WHERE purchase = ? ORDER BY id DESC LIMIT 1");
+purchase\update_purchase.php:193:        mysqli_stmt_bind_param($chkPay, "i", $purchaseId);
+purchase\update_purchase.php:194:        mysqli_stmt_execute($chkPay);
+purchase\update_purchase.php:195:        $resPay = mysqli_stmt_get_result($chkPay);
+purchase\update_purchase.php:197:        if ($resPay && $payRow = mysqli_fetch_assoc($resPay)) {
+purchase\update_purchase.php:199:            $updPay = mysqli_prepare($conn, "
+purchase\update_purchase.php:210:                mysqli_stmt_bind_param($updPay, "dsssss", $paymentAmount, $paymentMode, $paymentRefNo, $paymentDate, $user, $existingPayId);
+purchase\update_purchase.php:211:                mysqli_stmt_execute($updPay);
+purchase\update_purchase.php:214:            $insPay = mysqli_prepare($conn, "
+purchase\update_purchase.php:223:                mysqli_stmt_bind_param($insPay, "sidsssss", $payId, $purchaseId, $paymentAmount, $paymentMode, $paymentRefNo, $paymentDate, $user, $user);
+purchase\update_purchase.php:224:                mysqli_stmt_execute($insPay);
+purchase\update_purchase.php:230:    mysqli_commit($conn);
+purchase\update_purchase.php:236:    mysqli_rollback($conn);
+report\daily_sales.php:37:$result = mysqli_query($conn, $query);
+report\daily_sales.php:48:$total_res = mysqli_query($conn, $total_query);
+report\daily_sales.php:49:$totals = mysqli_fetch_assoc($total_res);
+report\daily_sales.php:128:                    <?php if ($result && mysqli_num_rows($result) > 0): ?>
+report\daily_sales.php:130:                        <?php while ($row = mysqli_fetch_assoc($result)): ?>
+report\daily_sales.php:137:                            $status = !empty($row['orderStatus']) ? $row['orderStatus'] : 'New';
+report\monthly_sales.php:42:$result = mysqli_query($conn, $query);
+report\monthly_sales.php:54:$total_res = mysqli_query($conn, $total_query);
+report\monthly_sales.php:55:$totals = mysqli_fetch_assoc($total_res);
+report\monthly_sales.php:149:                    <?php if ($result && mysqli_num_rows($result) > 0): ?>
+report\monthly_sales.php:151:                        <?php while ($row = mysqli_fetch_assoc($result)): ?>
+report\monthly_sales.php:158:                            $status = !empty($row['orderStatus']) ? $row['orderStatus'] : 'New';
+sales\api_add_payment.php:67:mysqli_begin_transaction($conn);
+sales\api_add_payment.php:71:    $chkSale = mysqli_prepare($conn, "SELECT id, actualAmountSum, paidAmountSum, orderStatus FROM sales WHERE id = ? FOR UPDATE");
+sales\api_add_payment.php:72:    mysqli_stmt_bind_param($chkSale, "i", $salesId);
+sales\api_add_payment.php:73:    mysqli_stmt_execute($chkSale);
+sales\api_add_payment.php:74:    $sRes = mysqli_stmt_get_result($chkSale);
+sales\api_add_payment.php:75:    $sale = mysqli_fetch_assoc($sRes);
+sales\api_add_payment.php:78:        throw new Exception("Sales Order #$salesId not found.");
+sales\api_add_payment.php:84:    $chkPmt = mysqli_prepare($conn, "SELECT id, amount, transactionDate, mode, refNo FROM payment WHERE sales = ? LIMIT 1");
+sales\api_add_payment.php:85:    mysqli_stmt_bind_param($chkPmt, "i", $salesId);
+sales\api_add_payment.php:86:    mysqli_stmt_execute($chkPmt);
+sales\api_add_payment.php:87:    $pRes = mysqli_stmt_get_result($chkPmt);
+sales\api_add_payment.php:88:    $existingPmt = mysqli_fetch_assoc($pRes);
+sales\api_add_payment.php:91:        throw new Exception("Payment has already been added for this sales order.");
+sales\api_add_payment.php:96:        throw new Exception("Payment amount (Γé╣" . number_format($amount, 2) . ") cannot exceed total sales order amount (Γé╣" . number_format($actualTotal, 2) . ").");
+sales\api_add_payment.php:100:    $insPmt = mysqli_prepare($conn, "
+sales\api_add_payment.php:110:    mysqli_stmt_bind_param(
+sales\api_add_payment.php:125:    if (!mysqli_stmt_execute($insPmt)) {
+sales\api_add_payment.php:126:        throw new Exception("Failed to save payment: " . mysqli_stmt_error($insPmt));
+sales\api_add_payment.php:130:    $updSale = mysqli_prepare($conn, "
+sales\api_add_payment.php:138:    mysqli_stmt_bind_param($updSale, "dssi", $amount, $userEmail, $now, $salesId);
+sales\api_add_payment.php:140:    if (!mysqli_stmt_execute($updSale)) {
+sales\api_add_payment.php:141:        throw new Exception("Failed to update sales order status: " . mysqli_stmt_error($updSale));
+sales\api_add_payment.php:144:    mysqli_commit($conn);
+sales\api_add_payment.php:167:    mysqli_rollback($conn);
+sales\create.php:15:$maxRes = mysqli_query($conn, "SELECT orderNo FROM sales WHERE orderNo LIKE '$year%' ORDER BY id DESC LIMIT 1");
+sales\create.php:17:if ($maxRes && $row = mysqli_fetch_assoc($maxRes)) {
+sales\create.php:26:$cRes = mysqli_query($conn, "SELECT customerId FROM customer WHERE customerId LIKE 'C%' ORDER BY id DESC LIMIT 1");
+sales\create.php:28:if ($cRes && $cRow = mysqli_fetch_assoc($cRes)) {
+sales\create.php:373:            <option value="New" selected>New</option>
+sales\create.php:545:        <a onclick="openCreateCustModal()" style="color:var(--green); font-weight:700;">+ New Customer</a>
+sales\create.php:903:    let formData = new FormData(form);
+sales\delete.php:15:$chk = mysqli_query($conn, "SELECT orderNo FROM sales WHERE id = $id");
+sales\delete.php:16:if (!$chk || mysqli_num_rows($chk) == 0) {
+sales\delete.php:20:$saleData = mysqli_fetch_assoc($chk);
+sales\delete.php:23:mysqli_begin_transaction($conn);
+sales\delete.php:27:    $itemsQuery = mysqli_query($conn, "SELECT stock, quantity FROM salesitems WHERE sales = $id AND deleted = 0");
+sales\delete.php:29:        while ($item = mysqli_fetch_assoc($itemsQuery)) {
+sales\delete.php:32:                $restoreStmt = mysqli_prepare($conn, "UPDATE stock SET availableQty = availableQty + ? WHERE id = ?");
+sales\delete.php:35:                mysqli_stmt_bind_param($restoreStmt, "is", $qty, $stockId);
+sales\delete.php:36:                mysqli_stmt_execute($restoreStmt);
+sales\delete.php:42:    mysqli_query($conn, "DELETE FROM salesitems WHERE sales = $id");
+sales\delete.php:45:    $hasPmtTable = mysqli_query($conn, "SHOW TABLES LIKE 'sales_payments'");
+sales\delete.php:46:    if ($hasPmtTable && mysqli_num_rows($hasPmtTable) > 0) {
+sales\delete.php:47:        mysqli_query($conn, "DELETE FROM sales_payments WHERE salesId = $id");
+sales\delete.php:51:    $delSale = mysqli_prepare($conn, "DELETE FROM sales WHERE id = ?");
+sales\delete.php:52:    mysqli_stmt_bind_param($delSale, "i", $id);
+sales\delete.php:53:    if (!mysqli_stmt_execute($delSale)) {
+sales\delete.php:54:        throw new Exception("Error deleting the sales order wrapper.");
+sales\delete.php:66:    mysqli_commit($conn);
+sales\delete.php:70:    mysqli_rollback($conn);
+sales\download_sales_report.php:44:    $safeFrom = mysqli_real_escape_string($conn, $fromDate);
+sales\download_sales_report.php:45:    $safeTo = mysqli_real_escape_string($conn, $toDate);
+sales\download_sales_report.php:49:    $s = mysqli_real_escape_string($conn, $search);
+sales\download_sales_report.php:53:    $st = mysqli_real_escape_string($conn, $statusFilter);
+sales\download_sales_report.php:64:$res = mysqli_query($conn, $query);
+sales\download_sales_report.php:67:    while ($r = mysqli_fetch_assoc($res)) {
+sales\download_sales_report.php:111:            $row['orderStatus'] ?: 'New',
+sales\download_sales_report.php:246:                    <td class="center"><?= htmlspecialchars($row['orderStatus'] ?: 'New') ?></td>
+sales\edit.php:18:$res = mysqli_query($conn, $query);
+sales\edit.php:19:if (!$res || mysqli_num_rows($res) == 0) {
+sales\edit.php:23:$sale = mysqli_fetch_assoc($res);
+sales\edit.php:27:$iRes = mysqli_query($conn, $iQuery);
+sales\edit.php:29:while ($row = mysqli_fetch_assoc($iRes)) {
+sales\edit.php:37:$pRes = mysqli_query($conn, $pQuery);
+sales\edit.php:38:if ($pRes && $pRow = mysqli_fetch_assoc($pRes)) {
+sales\edit.php:44:$orderStatus = $hasPayment ? 'Invoiced' : ($sale['orderStatus'] ?: 'New');
+sales\insert_sales.php:28:$orderStatus = trim($_POST['orderStatus'] ?? 'New');
+sales\insert_sales.php:44:    $maxRes = mysqli_query($conn, "SELECT orderNo FROM sales WHERE orderNo LIKE '$year%' ORDER BY id DESC LIMIT 1");
+sales\insert_sales.php:46:    if ($maxRes && $row = mysqli_fetch_assoc($maxRes)) {
+sales\insert_sales.php:75:    $chk = mysqli_prepare($conn, "SELECT id FROM customer WHERE id = ? LIMIT 1");
+sales\insert_sales.php:76:    mysqli_stmt_bind_param($chk, "i", $existingCustId);
+sales\insert_sales.php:77:    mysqli_stmt_execute($chk);
+sales\insert_sales.php:78:    $chkRes = mysqli_stmt_get_result($chk);
+sales\insert_sales.php:79:    if ($chkRes && mysqli_num_rows($chkRes) > 0) {
+sales\insert_sales.php:82:        $upd = mysqli_prepare($conn, "UPDATE customer SET name=?, whatsAppNo=?, phoneNo1=? WHERE id=?");
+sales\insert_sales.php:83:        mysqli_stmt_bind_param($upd, "sssi", $customerName, $whatsApp, $customerPhone, $customerId);
+sales\insert_sales.php:84:        mysqli_stmt_execute($upd);
+sales\insert_sales.php:90:    $stmt = mysqli_prepare($conn, "SELECT id FROM customer WHERE phoneNo1 = ? LIMIT 1");
+sales\insert_sales.php:91:    mysqli_stmt_bind_param($stmt, "s", $customerPhone);
+sales\insert_sales.php:92:    mysqli_stmt_execute($stmt);
+sales\insert_sales.php:93:    $res = mysqli_stmt_get_result($stmt);
+sales\insert_sales.php:94:    if ($row = mysqli_fetch_assoc($res)) {
+sales\insert_sales.php:96:        $upd = mysqli_prepare($conn, "UPDATE customer SET name=?, whatsAppNo=? WHERE id=?");
+sales\insert_sales.php:97:        mysqli_stmt_bind_param($upd, "ssi", $customerName, $whatsApp, $customerId);
+sales\insert_sales.php:98:        mysqli_stmt_execute($upd);
+sales\insert_sales.php:100:        // Create new customer
+sales\insert_sales.php:101:        $ins = mysqli_prepare($conn, "INSERT INTO customer (active, name, phoneNo1, whatsAppNo) VALUES (1,?,?,?)");
+sales\insert_sales.php:102:        mysqli_stmt_bind_param($ins, "sss", $customerName, $customerPhone, $whatsApp);
+sales\insert_sales.php:103:        mysqli_stmt_execute($ins);
+sales\insert_sales.php:104:        $customerId = mysqli_insert_id($conn);
+sales\insert_sales.php:115:mysqli_begin_transaction($conn);
+sales\insert_sales.php:120:    $stmt = mysqli_prepare($conn, "
+sales\insert_sales.php:127:    mysqli_stmt_bind_param($stmt, "ssisssss",
+sales\insert_sales.php:131:    if (!mysqli_stmt_execute($stmt)) {
+sales\insert_sales.php:132:        throw new Exception("Sales insert failed: " . mysqli_stmt_error($stmt));
+sales\insert_sales.php:134:    $salesId = mysqli_insert_id($conn);
+sales\insert_sales.php:135:    if (!$salesId) throw new Exception("Could not get sales ID");
+sales\insert_sales.php:140:    $iStmt = mysqli_prepare($conn, "
+sales\insert_sales.php:173:        mysqli_stmt_bind_param($iStmt, "ssssddsdisdssi",
+sales\insert_sales.php:180:        if (!mysqli_stmt_execute($iStmt)) {
+sales\insert_sales.php:181:            throw new Exception("Item insert failed: " . mysqli_stmt_error($iStmt));
+sales\insert_sales.php:188:            $dq = mysqli_prepare($conn, "UPDATE stock SET availableQty = GREATEST(0, availableQty - ?) WHERE id = ?");
+sales\insert_sales.php:189:            mysqli_stmt_bind_param($dq, "is", $qty, $stockId);
+sales\insert_sales.php:190:            mysqli_stmt_execute($dq);
+sales\insert_sales.php:201:            throw new Exception("Payment amount (Γé╣" . number_format($paymentAmount, 2) . ") cannot exceed total sales order amount (Γé╣" . number_format($actualSum, 2) . ").");
+sales\insert_sales.php:205:            throw new Exception("Payment date cannot be in the future.");
+sales\insert_sales.php:219:        $pIns = mysqli_prepare($conn, "
+sales\insert_sales.php:229:        mysqli_stmt_bind_param(
+sales\insert_sales.php:244:        if (!mysqli_stmt_execute($pIns)) {
+sales\insert_sales.php:245:            throw new Exception("Payment insertion failed: " . mysqli_stmt_error($pIns));
+sales\insert_sales.php:253:    $upd = mysqli_prepare($conn, "UPDATE sales SET actualAmountSum = ?, paidAmountSum = ?, orderStatus = ? WHERE id = ?");
+sales\insert_sales.php:254:    mysqli_stmt_bind_param($upd, "ddsi", $actualSum, $paidSum, $orderStatus, $salesId);
+sales\insert_sales.php:255:    if (!mysqli_stmt_execute($upd)) {
+sales\insert_sales.php:256:        throw new Exception("Sales total update failed: " . mysqli_stmt_error($upd));
+sales\insert_sales.php:259:    mysqli_commit($conn);
+sales\insert_sales.php:263:    mysqli_rollback($conn);
+sales\list.php:24:    $safeSearch = mysqli_real_escape_string($conn, $search);
+sales\list.php:29:    $safeStatus = mysqli_real_escape_string($conn, $statusFilter);
+sales\list.php:35:$countResult = mysqli_query($conn, $countQuery);
+sales\list.php:36:$totalRows = (int)mysqli_fetch_assoc($countResult)['total'];
+sales\list.php:51:$result = mysqli_query($conn, $query);
+sales\list.php:54:while ($r = mysqli_fetch_assoc($result)) {
+sales\list.php:208:            <a href="create.php" class="btn-erp btn-erp-new">
+sales\list.php:209:                <span style="background: #ffffff; color: #1e293b; padding: 1px 6px; border-radius: 4px; font-size: 11px;">+</span> New
+sales\list.php:228:                    <option value="New" <?= $statusFilter === 'New' ? 'selected' : '' ?>>New</option>
+sales\list.php:276:                                $st = htmlspecialchars($row['orderStatus'] ?: 'New');
+sales\print_receipt.php:27:$sRes = mysqli_query($conn, $sQuery);
+sales\print_receipt.php:28:if (!$sRes || mysqli_num_rows($sRes) == 0) {
+sales\print_receipt.php:32:$sale = mysqli_fetch_assoc($sRes);
+sales\print_receipt.php:36:$iRes = mysqli_query($conn, $iQuery);
+sales\print_receipt.php:38:while ($row = mysqli_fetch_assoc($iRes)) {
+sales\print_receipt.php:53:            font-family: 'Courier New', Courier, monospace, sans-serif;
+sales\search_customer.php:13:$p = mysqli_real_escape_string($conn, $phone);
+sales\search_customer.php:27:$res = mysqli_query($conn, $query);
+sales\search_customer.php:30:    echo json_encode(['error' => mysqli_error($conn)]);
+sales\search_customer.php:35:while ($row = mysqli_fetch_assoc($res)) {
+sales\search_stock.php:13:$t = mysqli_real_escape_string($conn, $term);
+sales\search_stock.php:44:$res = mysqli_query($conn, $query);
+sales\search_stock.php:47:    echo json_encode(['error' => mysqli_error($conn)]);
+sales\search_stock.php:52:while ($row = mysqli_fetch_assoc($res)) {
+sales\update_sales.php:27:$orderStatus = trim($_POST['orderStatus'] ?? 'New');
+sales\update_sales.php:56:    $upd = mysqli_prepare($conn, "UPDATE customer SET name=?, whatsAppNo=?, phoneNo1=? WHERE id=?");
+sales\update_sales.php:57:    mysqli_stmt_bind_param($upd, "sssi", $customerName, $whatsApp, $customerPhone, $customerId);
+sales\update_sales.php:58:    mysqli_stmt_execute($upd);
+sales\update_sales.php:61:    $stmt = mysqli_prepare($conn, "SELECT id FROM customer WHERE phoneNo1 = ? LIMIT 1");
+sales\update_sales.php:62:    mysqli_stmt_bind_param($stmt, "s", $customerPhone);
+sales\update_sales.php:63:    mysqli_stmt_execute($stmt);
+sales\update_sales.php:64:    $res = mysqli_stmt_get_result($stmt);
+sales\update_sales.php:65:    if ($row = mysqli_fetch_assoc($res)) {
+sales\update_sales.php:67:        $upd = mysqli_prepare($conn, "UPDATE customer SET name=?, whatsAppNo=? WHERE id=?");
+sales\update_sales.php:68:        mysqli_stmt_bind_param($upd, "ssi", $customerName, $whatsApp, $customerId);
+sales\update_sales.php:69:        mysqli_stmt_execute($upd);
+sales\update_sales.php:71:        $ins = mysqli_prepare($conn, "INSERT INTO customer (active, name, phoneNo1, whatsAppNo) VALUES (1,?,?,?)");
+sales\update_sales.php:72:        mysqli_stmt_bind_param($ins, "sss", $customerName, $customerPhone, $whatsApp);
+sales\update_sales.php:73:        mysqli_stmt_execute($ins);
+sales\update_sales.php:74:        $customerId = mysqli_insert_id($conn);
+sales\update_sales.php:82:mysqli_begin_transaction($conn);
+sales\update_sales.php:87:    $oItems = mysqli_query($conn, "SELECT id, stock, quantity FROM salesitems WHERE sales = $salesId AND deleted = 0");
+sales\update_sales.php:88:    while ($old = mysqli_fetch_assoc($oItems)) {
+sales\update_sales.php:90:            $restock = mysqli_prepare($conn, "UPDATE stock SET availableQty = availableQty + ? WHERE id = ?");
+sales\update_sales.php:93:            mysqli_stmt_bind_param($restock, "is", $oldQ, $oldSid);
+sales\update_sales.php:94:            mysqli_stmt_execute($restock);
+sales\update_sales.php:99:    mysqli_query($conn, "DELETE FROM salesitems WHERE sales = $salesId");
+sales\update_sales.php:101:    // 3. Insert new items and deduct stock
+sales\update_sales.php:104:    $iStmt = mysqli_prepare($conn, "
+sales\update_sales.php:135:        mysqli_stmt_bind_param($iStmt, "ssssddsdisdssi",
+sales\update_sales.php:142:        if (!mysqli_stmt_execute($iStmt)) {
+sales\update_sales.php:143:            throw new Exception("Item insert failed: " . mysqli_stmt_error($iStmt));
+sales\update_sales.php:150:            $dq = mysqli_prepare($conn, "UPDATE stock SET availableQty = GREATEST(0, availableQty - ?) WHERE id = ?");
+sales\update_sales.php:151:            mysqli_stmt_bind_param($dq, "is", $qty, $stockIdVal);
+sales\update_sales.php:152:            mysqli_stmt_execute($dq);
+sales\update_sales.php:158:    $chkP = mysqli_prepare($conn, "SELECT amount FROM payment WHERE sales = ? LIMIT 1");
+sales\update_sales.php:159:    mysqli_stmt_bind_param($chkP, "i", $salesId);
+sales\update_sales.php:160:    mysqli_stmt_execute($chkP);
+sales\update_sales.php:161:    $pRes = mysqli_stmt_get_result($chkP);
+sales\update_sales.php:162:    if ($pRow = mysqli_fetch_assoc($pRes)) {
+sales\update_sales.php:168:    $upd = mysqli_prepare($conn, "
+sales\update_sales.php:175:    mysqli_stmt_bind_param($upd, "ssidsssi",
+sales\update_sales.php:181:    if (!mysqli_stmt_execute($upd)) {
+sales\update_sales.php:182:        throw new Exception("Sales total update failed: " . mysqli_stmt_error($upd));
+sales\update_sales.php:185:    mysqli_commit($conn);
+sales\update_sales.php:189:    mysqli_rollback($conn);
+sales\view.php:19:$sRes = mysqli_query($conn, $sQuery);
+sales\view.php:20:if (!$sRes || mysqli_num_rows($sRes) == 0) {
+sales\view.php:24:$sale = mysqli_fetch_assoc($sRes);
+sales\view.php:28:$iRes = mysqli_query($conn, $iQuery);
+sales\view.php:30:while ($row = mysqli_fetch_assoc($iRes)) {
+scratch_create_purchase.php:5:$result = mysqli_query($conn, "SHOW TABLES");
+scratch_create_purchase.php:6:while ($row = mysqli_fetch_array($result)) {
+scratch_create_purchase.php:40:    if (mysqli_query($conn, $sql)) {
+scratch_create_purchase.php:43:        echo "Error creating table: " . mysqli_error($conn) . "\n";
+setup_users.php:26:if (mysqli_query($conn_login, $createTable)) {
+setup_users.php:29:    echo "<p style='color: #ef4444;'>Γ¥î Error creating table: " . mysqli_error($conn_login) . "</p>";
+setup_users.php:37:$check = mysqli_query($conn_login, "SELECT id FROM user WHERE username = '$username'");
+setup_users.php:38:if (mysqli_num_rows($check) == 0) {
+setup_users.php:40:    if (mysqli_query($conn_login, $insert)) {
+spares\add_spare.php:129:                    let c = new DataTransfer();
+spares\add_spare.php:147:        let reader = new FileReader();
+spares\api_search_spares.php:8:$termEsc = mysqli_real_escape_string($conn, $term);
+spares\api_search_spares.php:39:$res = mysqli_query($conn, $sql);
+spares\api_search_spares.php:43:    while ($row = mysqli_fetch_assoc($res)) {
+spares\edit_spare.php:14:$result = mysqli_query($conn, $query);
+spares\edit_spare.php:15:$data = mysqli_fetch_assoc($result);
+spares\edit_spare.php:40:    $name = mysqli_real_escape_string($conn, $_POST['spareName']);
+spares\edit_spare.php:41:    $part = mysqli_real_escape_string($conn, $_POST['partNo']);
+spares\edit_spare.php:42:    $rack = mysqli_real_escape_string($conn, $_POST['rackNumber']);
+spares\edit_spare.php:75:    mysqli_query($conn, $update);
+spares\insert_spare.php:7:$spareName = mysqli_real_escape_string($conn, $_POST['spareName']);
+spares\insert_spare.php:8:$partNo = mysqli_real_escape_string($conn, $_POST['partNo']);
+spares\insert_spare.php:9:$rack = mysqli_real_escape_string($conn, $_POST['rackNumber']);
+spares\insert_spare.php:58:if (mysqli_query($conn, $query)) {
+spares\insert_spare.php:64:    echo mysqli_error($conn);
+spares\list_spare.php:14:    $safeSearch = mysqli_real_escape_string($conn, $search);
+spares\list_spare.php:18:$countRes = mysqli_query($conn, "SELECT COUNT(*) AS total FROM spares $where");
+spares\list_spare.php:19:$totalRows = (int)mysqli_fetch_assoc($countRes)['total'];
+spares\list_spare.php:26:$res = mysqli_query($conn, "SELECT * FROM spares $where ORDER BY id DESC LIMIT $limit OFFSET $offset");
+spares\list_spare.php:40:                <a href="add_spare.php" class="btn-erp btn-erp-new">
+spares\list_spare.php:41:                    <span style="background: #ffffff; color: #1e293b; padding: 1px 6px; border-radius: 4px; font-size: 11px;">+</span> New
+spares\list_spare.php:81:                    while ($row = mysqli_fetch_assoc($res)) {
+spares\list_spare.php:97:                        <span class="erp-badge <?= $isActive ? 'erp-badge-completed' : 'erp-badge-new' ?>">
+stock\add_stock.php:71:  .btn-new-top {
+stock\add_stock.php:308:  /* ΓöÇΓöÇ Search Dropdown ΓöÇΓöÇ */
+stock\add_stock.php:544:    .btn-new-top, .btn-back {
+stock\add_stock.php:563:      <a href="javascript:void(0)" onclick="openModal('itemModal')" class="btn-new-top">+ New</a>
+stock\add_stock.php:644:                $resB = mysqli_query($conn, "SELECT id, brandName FROM brand ORDER BY brandName ASC");
+stock\add_stock.php:646:                  while ($r = mysqli_fetch_assoc($resB)) {
+stock\add_stock.php:658:                $resM = mysqli_query($conn, "SELECT id, model FROM model ORDER BY model ASC");
+stock\add_stock.php:660:                  while ($r = mysqli_fetch_assoc($resM)) {
+stock\add_stock.php:766:    <h3>Add New Brand <button type="button" class="modal-close" onclick="closeModal('brandModal')">Γ£ò</button></h3>
+stock\add_stock.php:781:    <h3>Add New Model <button type="button" class="modal-close" onclick="closeModal('modelModal')">Γ£ò</button></h3>
+stock\add_stock.php:797:    <form id="newItemForm" onsubmit="saveNewItem(event)" enctype="multipart/form-data">
+stock\add_stock.php:812:            <button type="button" onclick="openErpCamera(function(dataUrl, file){ if(dataUrl){ let img = document.getElementById('modalImgPreview'); let svg = document.getElementById('modalImgSvg'); if(img){ img.src = dataUrl; img.style.display = 'block'; } if(svg) svg.style.display = 'none'; if(file){ try { let c = new DataTransfer(); c.items.add(file); document.getElementById('modalGalleryInput').files = c.files; } catch(e){} } } })" style="background: #2563eb; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+stock\add_stock.php:871:      let reader = new FileReader();
+stock\add_stock.php:885:      let reader = new FileReader();
+stock\add_stock.php:956:    document.getElementById("newStock").value = val;
+stock\add_stock.php:1073:          let newQty = +document.getElementById("qtyInput").value || 1;
+stock\add_stock.php:1074:          document.getElementById("availableQty").value = newQty + oldQty;
+stock\add_stock.php:1127:      body: new URLSearchParams({ name: name })
+stock\add_stock.php:1135:        reloadBrandDropdown(data.id);
+stock\add_stock.php:1143:  function reloadBrandDropdown(selectId) {
+stock\add_stock.php:1167:      body: new URLSearchParams({ name: name })
+stock\add_stock.php:1175:        reloadModelDropdown(data.id);
+stock\add_stock.php:1183:  function reloadModelDropdown(selectId) {
+stock\add_stock.php:1199:  function saveNewItem(e) {
+stock\add_stock.php:1201:    let form = document.getElementById("newItemForm");
+stock\add_stock.php:1202:    let formData = new FormData(form);
+stock\add_stock.php:1222:        showToast(data.message || "Failed to add new spare.", false);
+stock\add_stock.php:1225:    .catch(() => showToast("Error creating new spare.", false));
+stock\add_stock.php:1266:    document.getElementById("newStock").value = 1;
+stock\add_stock.php:1300:          let container = new DataTransfer();
+stock\add_stock.php:1321:      let reader = new FileReader();
+stock\api_get_by_barcode.php:17:$stmt = mysqli_prepare($conn, "
+stock\api_get_by_barcode.php:43:mysqli_stmt_bind_param($stmt, "sss", $barcode, $barcode, $barcode);
+stock\api_get_by_barcode.php:44:mysqli_stmt_execute($stmt);
+stock\api_get_by_barcode.php:45:$result = mysqli_stmt_get_result($stmt);
+stock\api_get_by_barcode.php:46:$row = mysqli_fetch_assoc($result);
+stock\api_get_by_barcode.php:51:    $stmtLike = mysqli_prepare($conn, "
+stock\api_get_by_barcode.php:72:        mysqli_stmt_bind_param($stmtLike, "sss", $likeBarcode, $likeBarcode, $likeBarcode);
+stock\api_get_by_barcode.php:73:        mysqli_stmt_execute($stmtLike);
+stock\api_get_by_barcode.php:74:        $resLike = mysqli_stmt_get_result($stmtLike);
+stock\api_get_by_barcode.php:75:        $row = mysqli_fetch_assoc($resLike);
+stock\download_stock_report.php:27:$mcRes = mysqli_query($conn, $mcQuery);
+stock\download_stock_report.php:30:    while ($r = mysqli_fetch_assoc($mcRes)) {
+stock\download_stock_report.php:52:$spRes = mysqli_query($conn, $spQuery);
+stock\download_stock_report.php:55:    while ($r = mysqli_fetch_assoc($spRes)) {
+stock\edit_stock.php:18:$id = mysqli_real_escape_string($conn, trim($_GET['id']));
+stock\edit_stock.php:36:$result = mysqli_query($conn, $query);
+stock\edit_stock.php:38:if (!$result || mysqli_num_rows($result) == 0) {
+stock\edit_stock.php:42:$data = mysqli_fetch_assoc($result);
+stock\edit_stock.php:48:  $addedStock = intval($_POST['newStock'] ?? 0);
+stock\edit_stock.php:49:  $newQty = $oldQty + max(0, $addedStock);
+stock\edit_stock.php:88:                  $stmtPic = mysqli_prepare($conn, "UPDATE spares SET picture = ? WHERE id = ?");
+stock\edit_stock.php:89:                  mysqli_stmt_bind_param($stmtPic, "si", $relPath, $spareIdToUpdate);
+stock\edit_stock.php:90:                  mysqli_stmt_execute($stmtPic);
+stock\edit_stock.php:99:  $actualQty = round($actualUnit * $newQty, 4);
+stock\edit_stock.php:100:  $sellingQty = round($sellingUnit * $newQty, 4);
+stock\edit_stock.php:106:  $stmt = mysqli_prepare($conn, "
+stock\edit_stock.php:127:    die("Prepare failed: " . mysqli_error($conn));
+stock\edit_stock.php:131:  mysqli_stmt_bind_param(
+stock\edit_stock.php:134:    $newQty,
+stock\edit_stock.php:151:  if (mysqli_stmt_execute($stmt)) {
+stock\edit_stock.php:155:    die("Update Failed: " . mysqli_stmt_error($stmt));
+stock\edit_stock.php:238:  .btn-nav.new {
+stock\edit_stock.php:244:  .btn-nav.new:hover {
+stock\edit_stock.php:525:      <a href="add_stock.php" class="btn-nav new">+ New</a>
+stock\edit_stock.php:580:            <button type="button" onclick="openErpCamera(function(dataUrl, file){ const img = document.getElementById('editSpareImg'); const noImg = document.getElementById('noImgBox'); if (img) { img.src = dataUrl; img.style.display = 'block'; } if (noImg) noImg.style.display = 'none'; if (file) { try { let c = new DataTransfer(); c.items.add(file); document.getElementById('editStockCamera').files = c.files; } catch(e){} } })" style="background: #2563eb; color: #ffffff; border: none; padding: 9px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+stock\edit_stock.php:611:          <!-- Brand dropdown (editable) -->
+stock\edit_stock.php:618:                $bRes = mysqli_query($conn, "SELECT * FROM brand ORDER BY brandName");
+stock\edit_stock.php:619:                while ($b = mysqli_fetch_assoc($bRes)) {
+stock\edit_stock.php:631:                $mRes = mysqli_query($conn, "SELECT * FROM model ORDER BY model");
+stock\edit_stock.php:632:                while ($m = mysqli_fetch_assoc($mRes)) {
+stock\edit_stock.php:650:                <button type="button" onclick="regenerateBarcode()" title="Generate New Barcode" style="padding:6px 12px; background:#e2e8f0; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:700;">Γƒ│</button>
+stock\edit_stock.php:675:              <small style="display:block; font-size:10px; color:var(--label); margin-bottom:4px;">New Stock (+ Add)</small>
+stock\edit_stock.php:676:              <input type="number" name="newStock" id="newStock" value="0" min="0" oninput="calculateEditTotalStock()" style="font-weight:700; color:#2563eb;">
+stock\edit_stock.php:768:  // ΓöÇΓöÇ Sync new stock ΓåÆ qty ΓöÇΓöÇ
+stock\edit_stock.php:769:  function syncNewStock(el) {
+stock\edit_stock.php:785:    // calculate totals cleanly without overriding newStock
+stock\edit_stock.php:790:    const addedStock = parseInt(document.getElementById('addNewStockInput').value) || 0;
+stock\edit_stock.php:798:    const addedStock = parseInt(document.getElementById('newStock').value) || 0;
+stock\edit_stock.php:812:    document.getElementById('newStock').value = 0;
+stock\edit_stock.php:852:            body { font-family: 'Courier New', monospace, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #fff; }
+stock\edit_stock.php:886:      const reader = new FileReader();
+stock\generate_barcode.php:26:    $stmt = mysqli_prepare($conn, "SELECT id FROM stock WHERE LOWER(barCode) = LOWER(?)");
+stock\generate_barcode.php:28:        mysqli_stmt_bind_param($stmt, "s", $barcode);
+stock\generate_barcode.php:29:        mysqli_stmt_execute($stmt);
+stock\generate_barcode.php:30:        $res = mysqli_stmt_get_result($stmt);
+stock\generate_barcode.php:31:        $exists = (mysqli_num_rows($res) > 0);
+stock\get_brands.php:17:$res = mysqli_query($conn, $query);
+stock\get_brands.php:21:    while ($row = mysqli_fetch_assoc($res)) {
+stock\get_by_barcode.php:17:$stmt = mysqli_prepare($conn, "
+stock\get_by_barcode.php:43:mysqli_stmt_bind_param($stmt, "sss", $barcode, $barcode, $barcode);
+stock\get_by_barcode.php:44:mysqli_stmt_execute($stmt);
+stock\get_by_barcode.php:45:$result = mysqli_stmt_get_result($stmt);
+stock\get_by_barcode.php:46:$row = mysqli_fetch_assoc($result);
+stock\get_by_barcode.php:51:    $stmtLike = mysqli_prepare($conn, "
+stock\get_by_barcode.php:72:        mysqli_stmt_bind_param($stmtLike, "sss", $likeBarcode, $likeBarcode, $likeBarcode);
+stock\get_by_barcode.php:73:        mysqli_stmt_execute($stmtLike);
+stock\get_by_barcode.php:74:        $resLike = mysqli_stmt_get_result($stmtLike);
+stock\get_by_barcode.php:75:        $row = mysqli_fetch_assoc($resLike);
+stock\get_models.php:17:$res = mysqli_query($conn, $query);
+stock\get_models.php:21:    while ($row = mysqli_fetch_assoc($res)) {
+stock\get_stock_qty.php:43:    $stmtB = mysqli_prepare($conn, "SELECT spare, itemName, brand, model, machine, unit, actualPricePerUnit, sellingPricePerUnit, gstPercentage, warrantyInMonths, purchaseItem FROM stock WHERE barCode = ? ORDER BY id DESC LIMIT 1");
+stock\get_stock_qty.php:45:        mysqli_stmt_bind_param($stmtB, "s", $barcode);
+stock\get_stock_qty.php:46:        mysqli_stmt_execute($stmtB);
+stock\get_stock_qty.php:47:        $resB = mysqli_stmt_get_result($stmtB);
+stock\get_stock_qty.php:48:        if ($rowB = mysqli_fetch_assoc($resB)) {
+stock\get_stock_qty.php:65:    $stmtQty = mysqli_prepare($conn, "SELECT COALESCE(SUM(availableQty), 0) AS totalQty FROM stock WHERE spare = ?");
+stock\get_stock_qty.php:67:        mysqli_stmt_bind_param($stmtQty, "i", $spareId);
+stock\get_stock_qty.php:68:        mysqli_stmt_execute($stmtQty);
+stock\get_stock_qty.php:69:        $resQty = mysqli_stmt_get_result($stmtQty);
+stock\get_stock_qty.php:70:        if ($rowQty = mysqli_fetch_assoc($resQty)) {
+stock\get_stock_qty.php:76:    $stmtS = mysqli_prepare($conn, "SELECT brand, model, machine, unit, actualPricePerUnit, sellingPricePerUnit, gstPercentage, warrantyInMonths, purchaseItem FROM stock WHERE spare = ? ORDER BY id DESC LIMIT 1");
+stock\get_stock_qty.php:78:        mysqli_stmt_bind_param($stmtS, "i", $spareId);
+stock\get_stock_qty.php:79:        mysqli_stmt_execute($stmtS);
+stock\get_stock_qty.php:80:        $resS = mysqli_stmt_get_result($stmtS);
+stock\get_stock_qty.php:81:        if ($rowS = mysqli_fetch_assoc($resS)) {
+stock\get_stock_qty.php:95:    $stmtSp = mysqli_prepare($conn, "SELECT id, spareName, partNo, picture, rackNumber FROM spares WHERE id = ?");
+stock\get_stock_qty.php:97:        mysqli_stmt_bind_param($stmtSp, "i", $spareId);
+stock\get_stock_qty.php:98:        mysqli_stmt_execute($stmtSp);
+stock\get_stock_qty.php:99:        $resSp = mysqli_stmt_get_result($stmtSp);
+stock\get_stock_qty.php:100:        if ($rowSp = mysqli_fetch_assoc($resSp)) {
+stock\insert_stock.php:74:                $chk = mysqli_prepare($conn, "SELECT id FROM stock WHERE barCode = ?");
+stock\insert_stock.php:76:                    mysqli_stmt_bind_param($chk, "s", $barcode);
+stock\insert_stock.php:77:                    mysqli_stmt_execute($chk);
+stock\insert_stock.php:78:                    $chkRes = mysqli_stmt_get_result($chk);
+stock\insert_stock.php:79:                    $exists = ($chkRes && mysqli_num_rows($chkRes) > 0);
+stock\insert_stock.php:92:            $chkPI = mysqli_prepare($conn, "SELECT id FROM purchaseitems WHERE id = ?");
+stock\insert_stock.php:94:                mysqli_stmt_bind_param($chkPI, "i", $purchaseItem);
+stock\insert_stock.php:95:                mysqli_stmt_execute($chkPI);
+stock\insert_stock.php:96:                $resPI = mysqli_stmt_get_result($chkPI);
+stock\insert_stock.php:97:                if ($resPI && mysqli_num_rows($resPI) > 0) {
+stock\insert_stock.php:105:        $stmt = mysqli_prepare($conn, $sql);
+stock\insert_stock.php:107:            mysqli_stmt_bind_param($stmt, "sissiiddddddiiiiisii", $id, $spare, $itemName, $barcode, $quantity, $quantity, $actualQty, $actualUnit, $sellingQty, $sellingUnit, $selledUnit, $gstPercentage, $selled, $brandVal, $modelVal, $machineVal, $unit, $serialVal, $warrantyInMonths, $purchaseVal);
+stock\insert_stock.php:108:            if (mysqli_stmt_execute($stmt)) {
+stock\insert_stock.php:167:$stmtSp = mysqli_prepare($conn, "SELECT id FROM spares WHERE id = ?");
+stock\insert_stock.php:168:mysqli_stmt_bind_param($stmtSp, "i", $spareVal);
+stock\insert_stock.php:169:mysqli_stmt_execute($stmtSp);
+stock\insert_stock.php:170:$resSp = mysqli_stmt_get_result($stmtSp);
+stock\insert_stock.php:171:if (mysqli_num_rows($resSp) == 0) {
+stock\insert_stock.php:177:    $chkB = mysqli_prepare($conn, "SELECT id FROM stock WHERE barCode = ?");
+stock\insert_stock.php:178:    mysqli_stmt_bind_param($chkB, "s", $barcodeInput);
+stock\insert_stock.php:179:    mysqli_stmt_execute($chkB);
+stock\insert_stock.php:180:    $resB = mysqli_stmt_get_result($chkB);
+stock\insert_stock.php:181:    if (mysqli_num_rows($resB) > 0) {
+stock\insert_stock.php:190:        $chk = mysqli_prepare($conn, "SELECT id FROM stock WHERE barCode = ?");
+stock\insert_stock.php:192:            mysqli_stmt_bind_param($chk, "s", $barcode);
+stock\insert_stock.php:193:            mysqli_stmt_execute($chk);
+stock\insert_stock.php:194:            $chkRes = mysqli_stmt_get_result($chk);
+stock\insert_stock.php:195:            $exists = ($chkRes && mysqli_num_rows($chkRes) > 0);
+stock\insert_stock.php:204:    $chkS = mysqli_prepare($conn, "SELECT id FROM stock WHERE serialNo = ?");
+stock\insert_stock.php:205:    mysqli_stmt_bind_param($chkS, "s", $serialNo);
+stock\insert_stock.php:206:    mysqli_stmt_execute($chkS);
+stock\insert_stock.php:207:    $resS = mysqli_stmt_get_result($chkS);
+stock\insert_stock.php:208:    if (mysqli_num_rows($resS) > 0) {
+stock\insert_stock.php:225:        $newFileName = $safeCode . '_1.' . $ext;
+stock\insert_stock.php:226:        $relPath = 'uploads/stock/' . $newFileName;
+stock\insert_stock.php:227:        if (move_uploaded_file($tmpName, $uploadDir . $newFileName)) {
+stock\insert_stock.php:228:            $stmtPic = mysqli_prepare($conn, "UPDATE spares SET picture = ? WHERE id = ?");
+stock\insert_stock.php:230:                mysqli_stmt_bind_param($stmtPic, "si", $relPath, $spareVal);
+stock\insert_stock.php:231:                mysqli_stmt_execute($stmtPic);
+stock\insert_stock.php:243:    $chkPI = mysqli_prepare($conn, "SELECT id FROM purchaseitems WHERE id = ?");
+stock\insert_stock.php:245:        mysqli_stmt_bind_param($chkPI, "i", $purchaseItem);
+stock\insert_stock.php:246:        mysqli_stmt_execute($chkPI);
+stock\insert_stock.php:247:        $resPI = mysqli_stmt_get_result($chkPI);
+stock\insert_stock.php:248:        if ($resPI && mysqli_num_rows($resPI) > 0) {
+stock\insert_stock.php:256:$stmt = mysqli_prepare($conn, $sql);
+stock\insert_stock.php:259:    respondError("Γ¥î Prepare failed: " . mysqli_error($conn), $isAjax);
+stock\insert_stock.php:262:mysqli_stmt_bind_param(
+stock\insert_stock.php:287:if (mysqli_stmt_execute($stmt)) {
+stock\insert_stock.php:300:    respondError("Γ¥î Database Error: " . mysqli_stmt_error($stmt), $isAjax);
+stock\list.php:24:    $item = mysqli_real_escape_string($conn, $_GET['item']);
+stock\list.php:29:    $part = mysqli_real_escape_string($conn, $_GET['part']);
+stock\list.php:34:    $barcode = mysqli_real_escape_string($conn, $_GET['barcode']);
+stock\list.php:44:$countResult = mysqli_query($conn, $countQuery);
+stock\list.php:45:$totalRows = (int)mysqli_fetch_assoc($countResult)['total'];
+stock\list.php:66:$result = mysqli_query($conn, $query);
+stock\list.php:69:while ($r = mysqli_fetch_assoc($result)) {
+stock\list.php:218:            <a href="add_stock.php" class="btn-erp btn-erp-new">
+stock\list.php:219:                <span style="background: #ffffff; color: #1e293b; padding: 1px 6px; border-radius: 4px; font-size: 11px;">+</span> New
+stock\list.php:727:                body { font-family: 'Courier New', monospace, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #fff; }
+stock\save_brand.php:23:$stmtChk = mysqli_prepare($conn, "SELECT id, brandName FROM brand WHERE LOWER(brandName) = LOWER(?)");
+stock\save_brand.php:24:mysqli_stmt_bind_param($stmtChk, "s", $name);
+stock\save_brand.php:25:mysqli_stmt_execute($stmtChk);
+stock\save_brand.php:26:$resChk = mysqli_stmt_get_result($stmtChk);
+stock\save_brand.php:28:if ($row = mysqli_fetch_assoc($resChk)) {
+stock\save_brand.php:39:$stmt = mysqli_prepare($conn, "INSERT INTO brand (brandName, createdBy, createdOn) VALUES (?, ?, NOW())");
+stock\save_brand.php:41:mysqli_stmt_bind_param($stmt, "ss", $name, $user);
+stock\save_brand.php:43:if (mysqli_stmt_execute($stmt)) {
+stock\save_brand.php:44:    $newId = mysqli_insert_id($conn);
+stock\save_brand.php:47:        'id' => $newId,
+stock\save_brand.php:52:    echo json_encode(['success' => false, 'message' => 'Failed to save brand: ' . mysqli_error($conn)]);
+stock\save_item.php:36:    $stmtChk = mysqli_prepare($conn, "SELECT id FROM spares WHERE LOWER(spareName) = LOWER(?) AND LOWER(partNo) = LOWER(?)");
+stock\save_item.php:37:    mysqli_stmt_bind_param($stmtChk, "ss", $spareName, $partNo);
+stock\save_item.php:39:    $stmtChk = mysqli_prepare($conn, "SELECT id FROM spares WHERE LOWER(spareName) = LOWER(?)");
+stock\save_item.php:40:    mysqli_stmt_bind_param($stmtChk, "s", $spareName);
+stock\save_item.php:42:mysqli_stmt_execute($stmtChk);
+stock\save_item.php:43:$resChk = mysqli_stmt_get_result($stmtChk);
+stock\save_item.php:45:if ($row = mysqli_fetch_assoc($resChk)) {
+stock\save_item.php:69:        $newFileName = $safePart . '_' . time() . '_1.' . $fileExt;
+stock\save_item.php:70:        $destination = $uploadDir . $newFileName;
+stock\save_item.php:73:            $picture = 'uploads/stock/' . $newFileName;
+stock\save_item.php:79:$stmt = mysqli_prepare($conn, "INSERT INTO spares (spareName, partNo, rackNumber, picture, active, createdBy, createdOn) VALUES (?, ?, ?, ?, ?, ?, NOW())");
+stock\save_item.php:80:mysqli_stmt_bind_param($stmt, "ssssis", $spareName, $partNo, $rackNumber, $picture, $active, $user);
+stock\save_item.php:82:if (mysqli_stmt_execute($stmt)) {
+stock\save_item.php:83:    $newId = mysqli_insert_id($conn);
+stock\save_item.php:89:            'id' => $newId,
+stock\save_item.php:105:    echo json_encode(['success' => false, 'message' => 'Database error: ' . mysqli_error($conn)]);
+stock\save_model.php:23:$stmtChk = mysqli_prepare($conn, "SELECT id, model FROM model WHERE LOWER(model) = LOWER(?)");
+stock\save_model.php:24:mysqli_stmt_bind_param($stmtChk, "s", $name);
+stock\save_model.php:25:mysqli_stmt_execute($stmtChk);
+stock\save_model.php:26:$resChk = mysqli_stmt_get_result($stmtChk);
+stock\save_model.php:28:if ($row = mysqli_fetch_assoc($resChk)) {
+stock\save_model.php:39:$stmt = mysqli_prepare($conn, "INSERT INTO model (model, createdBy, createdOn) VALUES (?, ?, NOW())");
+stock\save_model.php:41:mysqli_stmt_bind_param($stmt, "ss", $name, $user);
+stock\save_model.php:43:if (mysqli_stmt_execute($stmt)) {
+stock\save_model.php:44:    $newId = mysqli_insert_id($conn);
+stock\save_model.php:47:        'id' => $newId,
+stock\save_model.php:52:    echo json_encode(['success' => false, 'message' => 'Failed to save model: ' . mysqli_error($conn)]);
+stock\search_spare.php:27:    $safeBarcode = mysqli_real_escape_string($conn, $barcode);
+stock\search_spare.php:49:    $res = mysqli_query($conn, $query);
+stock\search_spare.php:50:    if ($res && $row = mysqli_fetch_assoc($res)) {
+stock\search_spare.php:58:$safeTerm = mysqli_real_escape_string($conn, $term);
+stock\search_spare.php:84:$res = mysqli_query($conn, $query);
+stock\search_spare.php:89:    while ($row = mysqli_fetch_assoc($res)) {
+supplier\api_get_suppliers.php:28:$res = mysqli_query($conn, $query);
+supplier\api_get_suppliers.php:32:    while ($r = mysqli_fetch_assoc($res)) {
+supplier\insert.php:7:    $line1 = mysqli_real_escape_string($conn, $_POST['line1']);
+supplier\insert.php:8:    $line2 = mysqli_real_escape_string($conn, $_POST['line2']);
+supplier\insert.php:9:    $city = mysqli_real_escape_string($conn, $_POST['city']);
+supplier\insert.php:10:    $zipCode = mysqli_real_escape_string($conn, $_POST['zipCode']);
+supplier\insert.php:17:    if (mysqli_query($conn, $addressQuery)) {
+supplier\insert.php:18:        $addressId = mysqli_insert_id($conn);
+supplier\insert.php:20:        $name = mysqli_real_escape_string($conn, $_POST['name']);
+supplier\insert.php:21:        $phoneNo1 = mysqli_real_escape_string($conn, $_POST['phoneNo1']);
+supplier\insert.php:22:        $whatsAppNo = mysqli_real_escape_string($conn, $_POST['whatsAppNo']);
+supplier\insert.php:23:        $emailId = mysqli_real_escape_string($conn, $_POST['emailId']);
+supplier\insert.php:29:        if (mysqli_query($conn, $supplierQuery)) {
+supplier\insert.php:32:            echo "Error adding supplier: " . mysqli_error($conn);
+supplier\insert.php:35:        echo "Error adding address: " . mysqli_error($conn);
+supplier\list.php:14:    $safeSearch = mysqli_real_escape_string($conn, $search);
+supplier\list.php:19:$countRes = mysqli_query($conn, $countQuery);
+supplier\list.php:20:$totalRows = (int)mysqli_fetch_assoc($countRes)['total'];
+supplier\list.php:28:$result = mysqli_query($conn, $query);
+supplier\list.php:41:                + New Supplier
+supplier\list.php:79:                        while ($row = mysqli_fetch_assoc($result)): ?>
+supplier\manage_supplier.php:690:        <button type="button" class="btn-erp btn-erp-new" onclick="openNewSupplier()">
+supplier\manage_supplier.php:691:          <span style="background: #ffffff; color: #1e293b; padding: 1px 6px; border-radius: 4px; font-size: 11px;">+</span> New
+supplier\manage_supplier.php:860:  <!-- ΓòÉΓòÉ EDIT / NEW SUPPLIER MODAL ΓòÉΓòÉ -->
+supplier\manage_supplier.php:1121:      var fd = new FormData();
+supplier\manage_supplier.php:1181:       NEW SUPPLIER
+supplier\manage_supplier.php:1183:    function openNewSupplier() {
+supplier\manage_supplier.php:1184:      document.getElementById('editModalTitle').innerHTML = '<i class="fa fa-plus" style="margin-right:8px"></i>New Supplier';
+supplier\supplier_save.php:2:// supplier_save.php ΓÇô Insert or Update supplier + address (plain mysqli queries)
+supplier\supplier_save.php:48:    // Insert new address
+supplier\supplier_save.php:74:    // Insert new supplier
+tools\check_admin_user.php:3:// Usage: http://localhost/sanruth_billing_new/tools/check_admin_user.php?username=admin
+tools\check_admin_user.php:20:$safe = mysqli_real_escape_string($conn_login, $username);
+tools\check_admin_user.php:24:$res = @mysqli_query($conn_login, "SELECT id, username, password, role FROM `user` WHERE username = '$safe' LIMIT 1");
+tools\check_admin_user.php:26:    echo "Query failed: " . mysqli_error($conn_login) . "\n";
+tools\check_admin_user.php:30:if (mysqli_num_rows($res) === 0) {
+tools\check_admin_user.php:35:$row = mysqli_fetch_assoc($res);
+tools\create_employee.php:38:        if (!mysqli_query($conn, $create_auth)) {
+tools\create_employee.php:39:            $msg = 'Failed to create employee_auth table: ' . mysqli_error($conn);
+tools\create_employee.php:40:        } elseif (!mysqli_query($conn, $create_cred)) {
+tools\create_employee.php:41:            $msg = 'Failed to create credential table: ' . mysqli_error($conn);
+tools\create_employee.php:45:            $stmt = mysqli_prepare($conn, "INSERT INTO employee_auth (username, password, role, createdBy, createdOn) VALUES (?, ?, ?, 'SYSTEM', NOW())");
+tools\create_employee.php:47:                mysqli_stmt_bind_param($stmt, 'sss', $username, $hash, $role);
+tools\create_employee.php:48:                if (mysqli_stmt_execute($stmt)) {
+tools\create_employee.php:50:                    $stmt2 = mysqli_prepare($conn, "INSERT INTO credential (username, password, role, createdBy, createdOn) VALUES (?, ?, ?, 'SYSTEM', NOW())");
+tools\create_employee.php:52:                        mysqli_stmt_bind_param($stmt2, 'sss', $username, $hash, $role);
+tools\create_employee.php:53:                        mysqli_stmt_execute($stmt2);
+tools\create_employee.php:57:                    $msg = 'Insert failed (employee_auth): ' . mysqli_stmt_error($stmt);
+tools\create_employee.php:60:                $msg = 'Prepare failed: ' . mysqli_error($conn);
+users\manage_users.php:616:        <button type="button" class="btn-erp btn-erp-new" onclick="openNewUser()">
+users\manage_users.php:617:          <span style="background: #ffffff; color: #1e293b; padding: 1px 6px; border-radius: 4px; font-size: 11px;">+</span> New User
+users\manage_users.php:736:  <!-- EDIT / NEW USER MODAL -->
+users\manage_users.php:740:        <h2 id="editModalTitle"><i class="fa fa-user-plus" style="margin-right:8px"></i>Add New User</h2>
+users\manage_users.php:886:      var reader = new FileReader();
+users\manage_users.php:902:    function openNewUser() {
+users\manage_users.php:918:      document.getElementById('editModalTitle').innerHTML = '<i class="fa fa-user-plus" style="margin-right:8px"></i>Add New User';
+users\manage_users.php:982:        setError('edit_password', 'Password is required for new users');
+users\manage_users.php:998:      var fd = new FormData();
+users\user_save.php:95:// Validate password required for new users
+users\user_save.php:97:    echo json_encode(['success' => false, 'message' => 'Password is required for new users.']);
+users\user_save.php:130:    // INSERT new user ΓÇô check for duplicate username
+
+C:\servers\billing_sanruth-main>\
