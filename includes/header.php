@@ -388,6 +388,29 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 font-size: 16px !important;
             }
         }
+
+        /* Global light orange tone input focus & autofill styling across all pages */
+        .erp-input:focus, .erp-select:focus, .erp-textarea:focus, 
+        .form-control:focus, .form-select:focus, 
+        input:focus, select:focus, textarea:focus,
+        input:active, select:active, textarea:active {
+            outline: none !important;
+            background-color: #fff7ed !important;
+            border-color: #f59e0b !important;
+            box-shadow: 0 0 0 3.5px rgba(245, 158, 11, 0.22) !important;
+        }
+
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active,
+        select:-webkit-autofill,
+        textarea:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0 30px #fff7ed inset !important;
+            -webkit-text-fill-color: #1e293b !important;
+            border-color: #f59e0b !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
     </style>
 </head>
 

@@ -258,9 +258,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         .input-field:focus {
             outline: none;
-            border: 2px solid #d97706;
-            background: #fff;
-            box-shadow: 0 1px 4px rgba(217, 119, 6, 0.15);
+            border: 2px solid #f59e0b !important;
+            background: #fff7ed !important;
+            box-shadow: 0 0 0 3.5px rgba(245, 158, 11, 0.22) !important;
+        }
+
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px #fff7ed inset !important;
+            -webkit-text-fill-color: #1e293b !important;
+            border-color: #f59e0b !important;
+            transition: background-color 5000s ease-in-out 0s;
         }
 
         .input-icon {
@@ -323,8 +333,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .footer-text {
             text-align: center;
             margin-top: 25px;
-            font-size: 13px;
-            color: #9ca3af;
+            font-size: 15px;
+            font-weight: 600;
+            color: #64748b;
         }
     </style>
 </head>

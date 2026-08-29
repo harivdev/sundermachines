@@ -116,9 +116,10 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus {
-    outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.15);
+    outline: none !important;
+    background-color: #fff7ed !important;
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 3.5px rgba(245, 158, 11, 0.22) !important;
 }
 
 /* FORM GRID  */
