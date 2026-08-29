@@ -33,7 +33,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
         /* TOP BAR */
         .topbar {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             padding: 0 24px;
             display: flex;
             justify-content: space-between;
@@ -53,11 +53,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
             letter-spacing: 0.5px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .brand .brand-accent {
-            color: #4ade80;
+            color: #34d399;
         }
 
         .topbar-right {
@@ -396,7 +396,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <!-- TOP BAR -->
     <div class="topbar">
         <div class="brand">
-            &#9881; <span class="brand-accent">Sunder</span>&nbsp;Billing
+            <img src="../img/logo.png" alt="Logo" style="height: 30px; width: 30px; object-fit: contain; background: #ffffff; padding: 3px; border-radius: 7px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));"> <span class="brand-accent">Sunder</span>&nbsp;Billing
         </div>
         <div class="topbar-right">
             <button id="menuToggle" title="Toggle Menu">&#9776;</button>

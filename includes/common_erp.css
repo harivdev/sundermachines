@@ -6,11 +6,13 @@
    ========================================================================== */
 
 :root {
-    /* Color Palette */
-    --erp-primary: #2563eb;
-    --erp-primary-hover: #1d4ed8;
+    /* Color Palette derived from 3D Hexagonal Logo */
+    --erp-primary: #0f172a;
+    --erp-primary-hover: #1e293b;
     --erp-secondary: #64748b;
     --erp-secondary-hover: #475569;
+    --erp-accent: #10b981;
+    --erp-accent-hover: #059669;
     --erp-success: #16a34a;
     --erp-success-hover: #15803d;
     --erp-warning: #f59e0b;

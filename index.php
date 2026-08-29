@@ -96,10 +96,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #1e7e34;
-            --primary-hover: #155d25;
-            --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            --glass-bg: rgba(255, 255, 255, 0.95);
+            --primary-color: #0f172a;
+            --primary-hover: #1e293b;
+            --brand-accent: #059669;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            --glass-bg: rgba(255, 255, 255, 0.96);
             --text-main: #1f2937;
             --text-muted: #6b7280;
         }
@@ -125,7 +126,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             position: absolute;
             width: 500px;
             height: 500px;
-            background: rgba(30, 126, 52, 0.2);
+            background: rgba(16, 185, 129, 0.15);
             filter: blur(80px);
             border-radius: 50%;
             z-index: -1;
@@ -176,18 +177,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         .logo-container {
-            width: 70px;
-            height: 70px;
-            background: var(--primary-color);
-            border-radius: 15px;
+            width: 84px;
+            height: 84px;
+            background: #ffffff;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 15px;
-            box-shadow: 0 10px 15px -3px rgba(30, 126, 52, 0.3);
-            color: white;
-            font-size: 32px;
-            font-weight: bold;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2);
+            border: 1px solid #e2e8f0;
+            padding: 10px;
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .brand-name {
@@ -198,7 +204,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         .brand-accent {
-            color: var(--primary-color);
+            color: var(--brand-accent);
         }
 
         .subtitle {
@@ -314,7 +320,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
         <div class="login-card">
             <div class="logo-section">
-                <div class="logo-container">⚙️</div>
+                <div class="logo-container"><img src="img/logo.png" alt="Sunder Machines Logo"></div>
                 <h1 class="brand-name"><span class="brand-accent">Sunder</span> Billing</h1>
                 <p class="subtitle">Please enter your credentials</p>
             </div>
