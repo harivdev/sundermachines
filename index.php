@@ -98,7 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         :root {
             --primary-color: #FDD017;
             --primary-hover: #eab308;
-            --brand-accent: #FDD017;
+            --brand-accent: #d97706;
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             --glass-bg: rgba(255, 255, 255, 0.96);
             --text-main: #1f2937;
@@ -126,7 +126,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             position: absolute;
             width: 500px;
             height: 500px;
-            background: rgba(253, 208, 23, 0.15);
+            background: rgba(253, 208, 23, 0.12);
             filter: blur(80px);
             border-radius: 50%;
             z-index: -1;
@@ -180,15 +180,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             width: 80px;
             height: 80px;
             background: transparent;
-            border-radius: 20px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
             border: none;
             padding: 0;
             overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .logo-container:hover {
+            transform: scale(1.12);
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.35);
         }
 
         .logo-container img {
@@ -196,7 +203,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             height: 100%;
             object-fit: cover;
             transform: scale(1.15);
-            border-radius: 20px;
+            border-radius: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-container:hover img {
+            transform: scale(1.25);
         }
 
         .brand-name {
@@ -241,14 +253,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border-radius: 12px;
             font-size: 15px;
             color: var(--text-main);
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
 
         .input-field:focus {
             outline: none;
             border: 2px solid #d97706;
             background: #fff;
-            box-shadow: none;
+            box-shadow: 0 1px 4px rgba(217, 119, 6, 0.15);
         }
 
         .input-icon {
