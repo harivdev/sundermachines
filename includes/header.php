@@ -57,7 +57,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         }
 
         .brand .brand-accent {
-            color: #34d399;
+            color: #FDD017;
         }
 
         .topbar-right {
@@ -145,13 +145,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
         .menu-item>a:hover,
         .menu-item>.menu-link:hover {
             color: #111827;
-            border-bottom-color: #4ade80;
+            border-bottom-color: #FDD017;
             background: #f9fafb;
         }
 
         .menu-item>a.active-link {
-            color: #16a34a;
-            border-bottom-color: #22c55e;
+            color: #b45309;
+            border-bottom-color: #FDD017;
             font-weight: 600;
         }
 
@@ -210,15 +210,15 @@ $current_page = basename($_SERVER['PHP_SELF']);
         }
 
         .dropdown>a:hover {
-            background: #f0fdf4;
-            color: #16a34a;
-            border-left-color: #4ade80;
+            background: #fefce8;
+            color: #b45309;
+            border-left-color: #FDD017;
         }
 
         .dropdown>a.active-link {
-            background: #f0fdf4;
-            color: #16a34a;
-            border-left-color: #22c55e;
+            background: #fefce8;
+            color: #b45309;
+            border-left-color: #FDD017;
             font-weight: 600;
         }
 
@@ -250,9 +250,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
         .submenu:hover > .submenu-link,
         .submenu-link:hover,
         .submenu.active > .submenu-link {
-            background: #f0fdf4;
-            color: #16a34a;
-            border-left-color: #4ade80;
+            background: #fefce8;
+            color: #b45309;
+            border-left-color: #FDD017;
         }
 
         .submenu-dropdown {
@@ -283,9 +283,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
         }
 
         .submenu-dropdown a:hover {
-            background: #f0fdf4;
-            color: #16a34a;
-            border-left-color: #4ade80;
+            background: #fefce8;
+            color: #b45309;
+            border-left-color: #FDD017;
         }
 
         /* MOBILE TOGGLE */
@@ -396,7 +396,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <!-- TOP BAR -->
     <div class="topbar">
         <div class="brand">
-            <img src="../img/logo.png" alt="Logo" style="height: 30px; width: 30px; object-fit: contain; background: #ffffff; padding: 3px; border-radius: 7px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));"> <span class="brand-accent">Sunder</span>&nbsp;Billing
+            <span class="brand-accent">Sunder</span>&nbsp;Billing
         </div>
         <div class="topbar-right">
             <button id="menuToggle" title="Toggle Menu">&#9776;</button>

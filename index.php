@@ -96,9 +96,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #0f172a;
-            --primary-hover: #1e293b;
-            --brand-accent: #059669;
+            --primary-color: #FDD017;
+            --primary-hover: #eab308;
+            --brand-accent: #FDD017;
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             --glass-bg: rgba(255, 255, 255, 0.96);
             --text-main: #1f2937;
@@ -126,7 +126,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             position: absolute;
             width: 500px;
             height: 500px;
-            background: rgba(16, 185, 129, 0.15);
+            background: rgba(253, 208, 23, 0.15);
             filter: blur(80px);
             border-radius: 50%;
             z-index: -1;
@@ -177,23 +177,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         .logo-container {
-            width: 84px;
-            height: 84px;
-            background: #ffffff;
-            border-radius: 20px;
+            width: 76px;
+            height: 76px;
+            background: #FDD017;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 15px;
-            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2);
-            border: 1px solid #e2e8f0;
-            padding: 10px;
+            box-shadow: 0 10px 25px -5px rgba(253, 208, 23, 0.5);
+            border: 2px solid #eab308;
+            padding: 6px;
+            overflow: hidden;
         }
 
         .logo-container img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover;
+            border-radius: 12px;
         }
 
         .brand-name {
@@ -243,9 +245,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         .input-field:focus {
             outline: none;
-            border-color: var(--primary-color);
+            border-color: #FDD017;
             background: #fff;
-            box-shadow: 0 0 0 4px rgba(30, 126, 52, 0.1);
+            box-shadow: 0 0 0 4px rgba(253, 208, 23, 0.25);
         }
 
         .input-icon {
@@ -274,20 +276,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .login-btn {
             width: 100%;
             padding: 14px;
-            background: var(--primary-color);
-            color: white;
+            background: #FDD017;
+            color: #0f172a;
             border: none;
             border-radius: 12px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 10px;
+            box-shadow: 0 4px 14px rgba(253, 208, 23, 0.4);
         }
 
         .login-btn:hover {
-            background: var(--primary-hover);
+            background: #eab308;
             transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(253, 208, 23, 0.5);
         }
 
         .show-pass-container {
