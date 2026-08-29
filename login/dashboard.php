@@ -10,13 +10,23 @@ $lowStockRes = mysqli_query($conn, "SELECT st.*, s.spareName FROM stock st LEFT 
 $lowStockCount = $lowStockRes ? mysqli_num_rows($lowStockRes) : 0;
 ?>
 
+<style>
+    .kpi-card {
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+    }
+    .kpi-card:hover {
+        transform: scaleX(1.025);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    }
+</style>
+
 <div class="erp-container">
 
     <!-- KPI CARDS -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 24px;">
 
         <!-- CARD 1 -->
-        <div class="erp-card" style="margin-bottom: 0; border-left: 5px solid #2563eb;">
+        <div class="erp-card kpi-card" style="margin-bottom: 0; border-left: 5px solid #2563eb;">
             <h4 style="color:#64748b; font-size:12px; text-transform:uppercase; margin-bottom: 5px; font-weight:700;">Total Stock Entries</h4>
             <div style="font-size:32px; font-weight:800; color:#1e293b;"><?= number_format($stockCount) ?></div>
             <div style="margin-top: 15px;">
@@ -27,7 +37,7 @@ $lowStockCount = $lowStockRes ? mysqli_num_rows($lowStockRes) : 0;
         </div>
 
         <!-- CARD 2 -->
-        <div class="erp-card" style="margin-bottom: 0; border-left: 5px solid #16a34a;">
+        <div class="erp-card kpi-card" style="margin-bottom: 0; border-left: 5px solid #16a34a;">
             <h4 style="color:#64748b; font-size:12px; text-transform:uppercase; margin-bottom: 5px; font-weight:700;">Spare Part Types</h4>
             <div style="font-size:32px; font-weight:800; color:#1e293b;"><?= number_format($spareCount) ?></div>
             <div style="margin-top: 15px;">
@@ -40,7 +50,7 @@ $lowStockCount = $lowStockRes ? mysqli_num_rows($lowStockRes) : 0;
         </div>
 
         <!-- CARD 3 -->
-        <div class="erp-card" style="margin-bottom: 0; border-left: 5px solid #8b5cf6;">
+        <div class="erp-card kpi-card" style="margin-bottom: 0; border-left: 5px solid #8b5cf6;">
             <h4 style="color:#64748b; font-size:12px; text-transform:uppercase; margin-bottom: 5px; font-weight:700;">Daily Action</h4>
             <div style="font-size:18px; font-weight:700; color:#1e293b; margin-top:5px;">Ready to Bill</div>
             <div style="margin-top: 15px;">
