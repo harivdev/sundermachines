@@ -323,7 +323,7 @@ $givenDate = !empty($jobcard['givenDate']) ? $jobcard['givenDate'] : date('Y-m-d
                                         </div>
                                     <?php endforeach; ?>
                                 <?php else: ?>
-                                    <div id="noPhotoPlaceholder" style="width: 90px; height: 90px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 11px; font-weight: 600; text-align: center; padding: 4px;">
+                                    <div id="noPhotoPlaceholder" style="width: 180px; height: 110px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 11px; font-weight: 600; text-align: center; padding: 4px; box-sizing: border-box;">
                                         <span style="font-size: 24px;">🖼️</span>
                                         <span>No Photo</span>
                                     </div>

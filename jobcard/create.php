@@ -127,19 +127,19 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
 
                     <div style="display: flex; gap: 20px; margin-bottom: 25px; align-items: flex-start; flex-wrap: wrap;">
                         <!-- Photo Upload & Preview Section -->
-                        <div style="display: flex; flex-direction: column; gap: 10px; min-width: 130px;">
-                            <div id="photoPreviewContainer" style="display: flex; gap: 8px; flex-wrap: wrap; max-width: 220px; align-items: center;">
-                                <div style="width: 90px; height: 90px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 11px; font-weight: 600; text-align: center; padding: 4px;">
+                        <div style="display: flex; flex-direction: column; gap: 10px; width: 180px; min-width: 180px;">
+                            <div id="photoPreviewContainer" style="display: flex; gap: 8px; flex-wrap: wrap; width: 100%; align-items: center;">
+                                <div id="noPhotoPlaceholder" style="width: 100%; height: 110px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 11px; font-weight: 600; text-align: center; padding: 4px; box-sizing: border-box;">
                                     <span style="font-size: 24px;">🖼️</span>
                                     <span>No Photo</span>
                                 </div>
                             </div>
                             
-                            <div style="display: flex; gap: 6px; flex-direction: column;">
-                                <button type="button" onclick="openErpCamera(function(dataUrl, file){ if(file){ try { let c = new DataTransfer(); c.items.add(file); const inp = document.getElementById('createCameraInput'); inp.files = c.files; previewPhotos(inp); } catch(e){} } })" style="background: #2563eb; color: #fff; border: none; padding: 7px 12px; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                            <div style="display: flex; gap: 6px; flex-direction: column; width: 100%;">
+                                <button type="button" onclick="openErpCamera(function(dataUrl, file){ if(file){ try { let c = new DataTransfer(); c.items.add(file); const inp = document.getElementById('createCameraInput'); inp.files = c.files; previewPhotos(inp); } catch(e){} } })" style="width: 100%; background: #2563eb; color: #fff; border: none; padding: 9px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box;">
                                     📷 Take Photo
                                 </button>
-                                <button type="button" onclick="document.getElementById('createGalleryInput').click()" style="background: #475569; color: #fff; border: none; padding: 7px 12px; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                                <button type="button" onclick="document.getElementById('createGalleryInput').click()" style="width: 100%; background: #475569; color: #fff; border: none; padding: 9px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box;">
                                     📁 Choose From Device
                                 </button>
                             </div>
