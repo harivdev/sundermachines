@@ -141,6 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             }
             $e_jobCategory = mysqli_real_escape_string($conn, $_POST['jobCategory'] ?? 'Onsite');
+            $custVal = ($customerId > 0) ? intval($customerId) : "NULL";
 
             $jcSql = "INSERT INTO jobcard (cardNo, givenDate, customer, employee, jobStatus, jobCategory, completed, delivered, actualAmountSum, quoteAmountSum, receivedAmountSum, laborCharge, createdBy, createdOn, modifiedBy, modifiedOn) 
                       VALUES ('$e_cardNo', '$givenDate', $custVal, $empIdVal, 'New', '$e_jobCategory', 0, 0, 0, 0, 0, 0, '$user', '$now', '$user', '$now')";
