@@ -516,7 +516,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <a href="../supplier/manage_supplier.php" <?php echo ($current_page == 'manage_suppliers.php' && strpos($_SERVER['PHP_SELF'], 'supplier') !== false) ? 'class="active-link"' : ''; ?>>
                             Supplier List
                         </a>
-                        <a href="../supplier/manage_supplier.php" <?php echo ($current_page == 'manage_suppliers.php' && strpos($_SERVER['PHP_SELF'], 'supplier') !== false) ? 'class="active-link"' : ''; ?>>
+                        <a href="../supplier/add.php" <?php echo ($current_page == 'add.php' && strpos($_SERVER['PHP_SELF'], 'supplier') !== false) ? 'class="active-link"' : ''; ?>>
                             + Add Supplier
                         </a>
                     </div>
