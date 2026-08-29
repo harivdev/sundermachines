@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
     .machine-grid {
         display: grid;
-        grid-template-columns: 280px 1fr;
+        grid-template-columns: 240px 1fr;
         gap: 30px;
         align-items: start;
     }
@@ -98,84 +98,85 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         }
     }
 
-    /* IMAGE UPLOAD BOX STYLING */
-    .image-upload-wrapper {
+    /* JOB CARD STYLE PHOTO UPLOADER */
+    .jobcard-photo-wrapper {
         display: flex;
         flex-direction: column;
-        align-items: center;
+        gap: 12px;
     }
 
-    .image-preview-box {
+    .jobcard-photo-preview {
         width: 100%;
-        height: 220px;
+        height: 180px;
+        background: #f8fafc;
         border: 2px dashed #cbd5e1;
         border-radius: 12px;
-        background: #f8fafc;
         display: flex;
         flex-direction: column;
-        justify-content: center;
         align-items: center;
+        justify-content: center;
         overflow: hidden;
         position: relative;
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
+        transition: border-color 0.2s;
     }
 
-    .image-preview-box:hover {
+    .jobcard-photo-preview:hover {
         border-color: #d97706;
-        background: #fffdf5;
     }
 
-    .image-preview-box img {
+    .jobcard-photo-preview img {
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
 
-    .placeholder-content {
+    .no-photo-box {
         text-align: center;
-        padding: 20px;
+        color: #94a3b8;
+    }
+
+    .no-photo-icon {
+        font-size: 36px;
+        margin-bottom: 4px;
+    }
+
+    .no-photo-text {
+        font-size: 12px;
+        font-weight: 700;
         color: #64748b;
     }
 
-    .placeholder-icon {
-        font-size: 38px;
-        margin-bottom: 8px;
-        color: #94a3b8;
-    }
-
-    .placeholder-text {
-        font-size: 13px;
-        font-weight: 600;
-        color: #475569;
-    }
-
-    .placeholder-subtext {
-        font-size: 11px;
-        color: #94a3b8;
-        margin-top: 4px;
-    }
-
-    .file-input-btn {
-        margin-top: 15px;
+    .btn-photo-action {
         width: 100%;
-        padding: 10px 16px;
-        background: #0f172a;
-        color: #ffffff;
+        padding: 9px 14px;
         border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        text-align: center;
+        font-size: 12.5px;
+        font-weight: 700;
         cursor: pointer;
-        transition: background 0.2s;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 6px;
+        border: none;
+        transition: all 0.2s ease;
     }
 
-    .file-input-btn:hover {
-        background: #1e293b;
+    .btn-take-photo {
+        background: #2563eb;
+        color: #ffffff;
+    }
+
+    .btn-take-photo:hover {
+        background: #1d4ed8;
+    }
+
+    .btn-choose-device {
+        background: #475569;
+        color: #ffffff;
+    }
+
+    .btn-choose-device:hover {
+        background: #334155;
     }
 
     .form-group-custom {
@@ -284,9 +285,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         <form method="POST" enctype="multipart/form-data">
             <div class="machine-grid">
 
-                <!-- IMAGE UPLOAD SECTION -->
-                <div class="image-upload-wrapper">
-                    <label style="font-weight: 700; color: #1e293b; font-size: 14px; margin-bottom: 8px; width: 100%;">
+                <!-- JOB CARD STYLE PHOTO UPLOADER -->
+                <div class="jobcard-photo-wrapper">
+                    <label style="font-weight: 700; color: #1e293b; font-size: 14px;">
                         Machine Photo / Image
                     </label>
 
@@ -295,21 +296,27 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                     $imgSrc = $hasImg ? "../uploads/machine/" . htmlspecialchars($data['picture']) : "";
                     ?>
 
-                    <div class="image-preview-box" onclick="document.getElementById('machineImageInput').click();">
+                    <div class="jobcard-photo-preview">
                         <img id="previewImg" src="<?= $imgSrc ?>" style="<?= $hasImg ? 'display: block;' : 'display: none;' ?>">
-                        <div id="placeholderBox" class="placeholder-content" style="<?= $hasImg ? 'display: none;' : 'display: block;' ?>">
-                            <div class="placeholder-icon">📷</div>
-                            <div class="placeholder-text">Upload Machine Photo</div>
-                            <div class="placeholder-subtext">Click to select (JPG, PNG, WEBP)</div>
+                        <div id="noPhotoBox" class="no-photo-box" style="<?= $hasImg ? 'display: none;' : 'display: block;' ?>">
+                            <div class="no-photo-icon">🖼️</div>
+                            <div class="no-photo-text">No Photo Selected</div>
                         </div>
                     </div>
 
-                    <input type="file" id="machineImageInput" name="image" accept="image/*" onchange="previewImage(event)" hidden>
+                    <!-- Hidden Inputs for Camera and Gallery -->
+                    <input type="file" id="machineGalleryInput" name="image" accept="image/*" style="display: none;" onchange="handleFileSelect(this)">
 
-                    <label for="machineImageInput" class="file-input-btn">
-                        <span>📁 Change Photo</span>
-                    </label>
-                    <span id="fileNameDisplay" style="font-size: 12px; color: #64748b; margin-top: 6px; word-break: break-all;"></span>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <button type="button" class="btn-photo-action btn-take-photo" onclick="triggerCameraCapture()">
+                            📷 Take Photo
+                        </button>
+                        <button type="button" class="btn-photo-action btn-choose-device" onclick="document.getElementById('machineGalleryInput').click()">
+                            📁 Choose From Device
+                        </button>
+                    </div>
+
+                    <span id="fileNameDisplay" style="font-size: 11.5px; color: #64748b; text-align: center; word-break: break-all;"></span>
                 </div>
 
                 <!-- FORM FIELDS SECTION -->
@@ -346,10 +353,35 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 </div>
 
 <script>
-    function previewImage(event) {
-        const file = event.target.files[0];
+    function triggerCameraCapture() {
+        if (typeof openErpCamera === 'function') {
+            openErpCamera(function(dataUrl, file) {
+                if (dataUrl) {
+                    const previewImg = document.getElementById('previewImg');
+                    const noPhotoBox = document.getElementById('noPhotoBox');
+                    previewImg.src = dataUrl;
+                    previewImg.style.display = 'block';
+                    noPhotoBox.style.display = 'none';
+                }
+                if (file) {
+                    try {
+                        let container = new DataTransfer();
+                        container.items.add(file);
+                        const inp = document.getElementById('machineGalleryInput');
+                        inp.files = container.files;
+                        document.getElementById('fileNameDisplay').textContent = file.name || 'Captured Photo';
+                    } catch(e) {}
+                }
+            });
+        } else {
+            document.getElementById('machineGalleryInput').click();
+        }
+    }
+
+    function handleFileSelect(input) {
+        const file = input.files[0];
         const previewImg = document.getElementById('previewImg');
-        const placeholderBox = document.getElementById('placeholderBox');
+        const noPhotoBox = document.getElementById('noPhotoBox');
         const fileNameDisplay = document.getElementById('fileNameDisplay');
 
         if (file) {
@@ -357,7 +389,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             reader.onload = function (e) {
                 previewImg.src = e.target.result;
                 previewImg.style.display = 'block';
-                placeholderBox.style.display = 'none';
+                noPhotoBox.style.display = 'none';
             }
             reader.readAsDataURL(file);
             fileNameDisplay.textContent = file.name;
