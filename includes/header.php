@@ -954,34 +954,35 @@ if (strpos($current_path, '/jobcard/') !== false) {
         }
 
         .bc-brand {
-            background: rgba(0, 0, 0, 0.25);
-            padding: 2px 8px;
-            border-radius: 4px;
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
             font-weight: 800;
-            font-size: 11.5px;
+            font-size: 15.5px;
             letter-spacing: 0.5px;
             color: #ffffff;
             display: inline-flex;
             align-items: center;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+            box-shadow: none;
         }
 
         .bc-sep {
-            opacity: 0.6;
-            font-size: 11px;
+            opacity: 0.7;
+            font-size: 12.5px;
             color: #ffffff;
+            margin: 0 2px;
         }
 
         .bc-module {
             color: #a7f3d0;
             font-weight: 600;
-            font-size: 12.5px;
+            font-size: 14.5px;
         }
 
         .bc-page {
             color: #ffffff;
             font-weight: 700;
-            font-size: 14.5px;
+            font-size: 15.5px;
             text-decoration: underline;
             text-underline-offset: 3px;
         }
