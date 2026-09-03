@@ -24,7 +24,17 @@ if ($statusFilter !== '') {
     $whereClauses[] = "active = $statusInt";
 }
 
-$whereSql = implode(" AND ", $whereClauses);
+// Fetch distinct roles for filter dropdown
+$distinctRolesRes = mysqli_query($conn, "SELECT DISTINCT UPPER(role) as roleName FROM employee WHERE role IS NOT NULL AND role != '' ORDER BY roleName ASC");
+$allRoles = ['ADMIN', 'TECHNICIAN', 'MANAGER', 'STAFF'];
+if ($distinctRolesRes) {
+    while ($rRow = mysqli_fetch_assoc($distinctRolesRes)) {
+        $rName = strtoupper(trim($rRow['roleName']));
+        if (!empty($rName) && !in_array($rName, $allRoles)) {
+            $allRoles[] = $rName;
+        }
+    }
+}
 
 // Pagination
 $page = max(1, intval($_GET['page'] ?? 1));
@@ -75,10 +85,9 @@ include("../includes/header.php");
                 <label class="erp-label" style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px;">Role</label>
                 <select name="role" class="erp-select" style="width:140px; border: 1px solid #cbd5e1; border-radius: 6px; height: 38px;">
                     <option value="">-- All Roles --</option>
-                    <option value="ADMIN" <?= $roleFilter === 'ADMIN' ? 'selected' : '' ?>>ADMIN</option>
-                    <option value="TECHNICIAN" <?= $roleFilter === 'TECHNICIAN' ? 'selected' : '' ?>>TECHNICIAN</option>
-                    <option value="MANAGER" <?= $roleFilter === 'MANAGER' ? 'selected' : '' ?>>MANAGER</option>
-                    <option value="STAFF" <?= $roleFilter === 'STAFF' ? 'selected' : '' ?>>STAFF</option>
+                    <?php foreach ($allRoles as $rOpt): ?>
+                        <option value="<?= $rOpt ?>" <?= strtoupper($roleFilter) === $rOpt ? 'selected' : '' ?>><?= $rOpt ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
 

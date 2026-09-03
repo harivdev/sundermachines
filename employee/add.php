@@ -151,12 +151,16 @@ include("../includes/header.php");
 
                 <div class="form-group">
                     <label class="erp-label">System Role</label>
-                    <select name="role" class="erp-select" style="border: 1px solid #cbd5e1; border-radius: 6px; height: 38px;">
+                    <select name="role" id="roleSelect" class="erp-select" style="border: 1px solid #cbd5e1; border-radius: 6px; height: 38px;" onchange="toggleCustomRole(this)">
                         <option value="STAFF">STAFF</option>
                         <option value="TECHNICIAN">TECHNICIAN</option>
                         <option value="MANAGER">MANAGER</option>
                         <option value="ADMIN">ADMIN</option>
+                        <option value="Other">Other</option>
                     </select>
+                    <div id="customRoleBox" style="display: none; margin-top: 8px;">
+                        <input type="text" name="customRole" id="customRoleInput" placeholder="Enter custom role name..." class="erp-input" style="border: 1.5px solid #2563eb; border-radius: 6px; padding: 0 12px; height: 38px; background: #f0f9ff; font-weight: 600;">
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -181,6 +185,22 @@ include("../includes/header.php");
 
     </form>
 </div>
+
+<script>
+function toggleCustomRole(selectElem) {
+    const box = document.getElementById('customRoleBox');
+    const input = document.getElementById('customRoleInput');
+    if (selectElem.value === 'Other') {
+        box.style.display = 'block';
+        input.required = true;
+        input.focus();
+    } else {
+        box.style.display = 'none';
+        input.required = false;
+        input.value = '';
+    }
+}
+</script>
 
 <style>
 @media (max-width: 768px) {

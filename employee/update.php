@@ -30,6 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = mysqli_real_escape_string($conn, trim($_POST['username'] ?? ''));
     $rawPassword = $_POST['password'] ?? '';
     $role = mysqli_real_escape_string($conn, trim($_POST['role'] ?? 'STAFF'));
+    if ($role === 'Other' || !empty($_POST['customRole'])) {
+        $customRoleVal = mysqli_real_escape_string($conn, trim($_POST['customRole'] ?? ''));
+        if (!empty($customRoleVal)) {
+            $role = strtoupper($customRoleVal);
+        }
+    }
     $active = isset($_POST['active']) ? intval($_POST['active']) : 1;
     
     $modifiedBy = $_SESSION['username'] ?? 'SYSTEM';

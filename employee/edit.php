@@ -162,14 +162,23 @@ include("../includes/header.php");
                     <input type="password" name="password" placeholder="Leave blank to keep unchanged" class="erp-input" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 12px; height: 38px;">
                 </div>
 
+                <?php 
+                $stdRoles = ['STAFF', 'TECHNICIAN', 'MANAGER', 'ADMIN'];
+                $currRole = strtoupper($employee['role'] ?? 'STAFF');
+                $isCustomRole = !empty($currRole) && !in_array($currRole, $stdRoles);
+                ?>
                 <div class="form-group">
                     <label class="erp-label">System Role</label>
-                    <select name="role" class="erp-select" style="border: 1px solid #cbd5e1; border-radius: 6px; height: 38px;">
-                        <option value="STAFF" <?= strtoupper($employee['role'] ?? '') === 'STAFF' ? 'selected' : '' ?>>STAFF</option>
-                        <option value="TECHNICIAN" <?= strtoupper($employee['role'] ?? '') === 'TECHNICIAN' ? 'selected' : '' ?>>TECHNICIAN</option>
-                        <option value="MANAGER" <?= strtoupper($employee['role'] ?? '') === 'MANAGER' ? 'selected' : '' ?>>MANAGER</option>
-                        <option value="ADMIN" <?= strtoupper($employee['role'] ?? '') === 'ADMIN' ? 'selected' : '' ?>>ADMIN</option>
+                    <select name="role" id="roleSelect" class="erp-select" style="border: 1px solid #cbd5e1; border-radius: 6px; height: 38px;" onchange="toggleCustomRole(this)">
+                        <option value="STAFF" <?= $currRole === 'STAFF' ? 'selected' : '' ?>>STAFF</option>
+                        <option value="TECHNICIAN" <?= $currRole === 'TECHNICIAN' ? 'selected' : '' ?>>TECHNICIAN</option>
+                        <option value="MANAGER" <?= $currRole === 'MANAGER' ? 'selected' : '' ?>>MANAGER</option>
+                        <option value="ADMIN" <?= $currRole === 'ADMIN' ? 'selected' : '' ?>>ADMIN</option>
+                        <option value="Other" <?= $isCustomRole ? 'selected' : '' ?>>Other</option>
                     </select>
+                    <div id="customRoleBox" style="display: <?= $isCustomRole ? 'block' : 'none' ?>; margin-top: 8px;">
+                        <input type="text" name="customRole" id="customRoleInput" value="<?= $isCustomRole ? htmlspecialchars($currRole) : '' ?>" placeholder="Enter custom role name..." class="erp-input" style="border: 1.5px solid #2563eb; border-radius: 6px; padding: 0 12px; height: 38px; background: #f0f9ff; font-weight: 600;">
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -194,6 +203,22 @@ include("../includes/header.php");
 
     </form>
 </div>
+
+<script>
+function toggleCustomRole(selectElem) {
+    const box = document.getElementById('customRoleBox');
+    const input = document.getElementById('customRoleInput');
+    if (selectElem.value === 'Other') {
+        box.style.display = 'block';
+        input.required = true;
+        input.focus();
+    } else {
+        box.style.display = 'none';
+        input.required = false;
+        input.value = '';
+    }
+}
+</script>
 
 <style>
 @media (max-width: 768px) {
