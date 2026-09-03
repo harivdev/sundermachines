@@ -111,24 +111,14 @@ if (strpos($current_path, '/jobcard/') !== false) {
         body {
             font-family: 'Inter', Arial, sans-serif;
             background: #f4f6f9;
-            padding-top: 125px;
-            /* Offset for fixed topbar (44px) + menu (41px) + breadcrumb (38px) + borders */
+            padding-top: 80px;
+            /* Offset for fixed menu (41px) + breadcrumb (38px) + borders */
             padding-bottom: 20px;
         }
 
-        /* TOP BAR */
+        /* TOP BAR REMOVED */
         .topbar {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 44px;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+            display: none !important;
         }
 
         .brand {
@@ -193,7 +183,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
             background: #fff;
             position: fixed;
             width: 100%;
-            top: 44px;
+            top: 0;
             z-index: 999;
             border-bottom: 1px solid #e5e7eb;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
@@ -834,7 +824,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
         /* LEFT SIDE QUICK ACCESS SIDEBAR (LIGHT ORANGE THEME) */
         .quick-access-sidebar {
             position: fixed;
-            top: 44px; /* Directly below dark topbar, aligning banner with menu-container */
+            top: 0; /* Align with menu-container at top 0 */
             left: 0;
             width: 220px;
             bottom: 0;
@@ -931,7 +921,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
         /* BREADCRUMB PAGE BANNER STRIP */
         .erp-breadcrumb-banner {
             position: fixed;
-            top: 85px; /* Fixed offset: topbar 44px + menu-container 41px = 85px */
+            top: 41px; /* Directly below menu-container at top 41px */
             left: 0;
             width: 100%;
             z-index: 998;
@@ -1075,21 +1065,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
 
 <body class="<?php echo $showQuickAccess ? 'has-quick-access' : ''; ?>">
 
-    <!-- TOP BAR -->
-    <div class="topbar">
-        <div class="brand">
-            <span class="brand-accent">Sunder</span>&nbsp;Billing
-        </div>
-        <div class="topbar-right">
-            <!-- Mobile Action Button (Placed BEFORE Hamburger) -->
-            <button type="button" id="mobileActionBtn" class="mobile-action-btn" onclick="toggleMobileActionPanel(event)" title="Actions">
-                <i class="fa-solid fa-sliders"></i> Action <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
-            </button>
-
-            <!-- Hamburger menu icon (LAST TO CORNER - Far Right) -->
-            <button id="menuToggle" type="button" onclick="toggleMobileMenu(event)" title="Toggle Menu">&#9776;</button>
-        </div>
-    </div>
+    <!-- TOP BAR REMOVED -->
 
     <!-- MOBILE ACTION PANEL DROPDOWN (Contains 3 options matching exact Action label width) -->
     <div id="mobileActionPanel" class="mobile-action-panel">
@@ -1395,8 +1371,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
     <!-- RECTANGULAR BREADCRUMB BANNER STRIP RIGHT BELOW THE HEADER -->
     <div class="erp-breadcrumb-banner">
         <div class="breadcrumb-inner">
-            <span class="bc-brand"><span style="color: #facc15; font-weight: 800;">Sunder</span>&nbsp;<span style="color: #ffffff; font-weight: 700;">Billing</span></span>
-            <span class="bc-sep">/</span>
             <span class="bc-module"><?= htmlspecialchars($current_module_title) ?></span>
             <span class="bc-sep">/</span>
             <span class="bc-page"><?= htmlspecialchars($current_page_title) ?></span>
