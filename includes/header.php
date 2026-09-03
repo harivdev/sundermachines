@@ -111,8 +111,8 @@ if (strpos($current_path, '/jobcard/') !== false) {
         body {
             font-family: 'Inter', Arial, sans-serif;
             background: #f4f6f9;
-            padding-top: 122px;
-            /* Offset for fixed header + breadcrumb banner */
+            padding-top: 125px;
+            /* Offset for fixed topbar (44px) + menu (41px) + breadcrumb (38px) + borders */
             padding-bottom: 20px;
         }
 
@@ -771,17 +771,30 @@ if (strpos($current_path, '/jobcard/') !== false) {
             transition: background-color 5000s ease-in-out 0s;
         }
 
-        /* MINI-SIZED QUICK ACCESS TOGGLE SWITCH ON TOP BAR */
+        /* MINI-SIZED QUICK ACCESS TOGGLE SWITCH ON NAV BAR */
         .quick-access-toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            user-select: none;
-            margin-right: 8px;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            white-space: nowrap !important;
+            color: #c2410c !important;
+            font-size: 12.5px !important;
+            font-weight: 700 !important;
+            cursor: pointer !important;
+            user-select: none !important;
+            margin: 0 !important;
+            padding: 4px 12px !important;
+            background: #fff7ed !important;
+            border: 1.5px solid #fed7aa !important;
+            border-radius: 20px !important;
+            flex-shrink: 0 !important;
+            height: 28px !important;
+            line-height: 1 !important;
+        }
+
+        .quick-access-toggle span {
+            white-space: nowrap !important;
+            display: inline-block !important;
         }
 
         .quick-access-toggle input {
@@ -791,9 +804,10 @@ if (strpos($current_path, '/jobcard/') !== false) {
         .quick-access-toggle .toggle-slider {
             width: 28px;
             height: 15px;
-            background-color: #475569;
+            background-color: #cbd5e1;
             border-radius: 15px;
             position: relative;
+            flex-shrink: 0;
             transition: background-color 0.2s ease;
         }
 
@@ -810,7 +824,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
         }
 
         .quick-access-toggle input:checked + .toggle-slider {
-            background-color: #f97316; /* Light orange theme color when toggled right */
+            background-color: #ea580c;
         }
 
         .quick-access-toggle input:checked + .toggle-slider::before {
@@ -841,7 +855,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
         .quick-access-banner {
             background: #f97316; /* Warm light orange header banner box */
             color: #ffffff;
-            padding: 0 14px;
+            padding: 0 16px;
             font-size: 14px;
             font-weight: 700;
             display: flex;
@@ -849,7 +863,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
             gap: 8px;
             letter-spacing: 0.3px;
             box-shadow: 0 2px 4px rgba(249, 115, 22, 0.15);
-            height: 40px; /* Matches menu-container height (40px) for smooth horizontal alignment */
+            height: 41px; /* Exact match to menu-container height (41px) */
             box-sizing: border-box;
         }
 
@@ -917,7 +931,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
         /* BREADCRUMB PAGE BANNER STRIP */
         .erp-breadcrumb-banner {
             position: fixed;
-            top: 84px;
+            top: 85px; /* Fixed offset: topbar 44px + menu-container 41px = 85px */
             left: 0;
             width: 100%;
             z-index: 998;
@@ -1365,8 +1379,8 @@ if (strpos($current_path, '/jobcard/') !== false) {
             <?php endif; ?>
 
             <!-- SHOW QUICK ACCESS TOGGLE IN HEADER RIGHT CORNER -->
-            <li class="menu-item quick-access-header-toggle" style="margin-left: auto; display: flex; align-items: center;">
-                <label class="quick-access-toggle" title="Toggle Left Quick Access Sidebar" style="margin: 0; padding: 4px 10px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 20px; color: #c2410c; font-weight: 600; font-size: 12.5px;">
+            <li class="menu-item quick-access-header-toggle" style="margin-left: auto; display: flex; align-items: center; padding-right: 16px; flex-shrink: 0; white-space: nowrap;">
+                <label class="quick-access-toggle" title="Toggle Left Quick Access Sidebar">
                     <input type="checkbox" id="toggleQuickAccessCheckbox" <?php echo $showQuickAccess ? 'checked' : ''; ?> onchange="toggleQuickAccessSidebar(this.checked)">
                     <span class="toggle-slider"></span>
                     <span>Show Quick Access</span>
