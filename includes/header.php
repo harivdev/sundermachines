@@ -968,8 +968,17 @@ if (strpos($current_path, '/jobcard/') !== false) {
         }
 
         .bc-brand {
+            background: transparent !important;
+            padding: 0 !important;
+            border-radius: 0 !important;
+            font-weight: 800;
+            font-size: 17.5px !important;
+            letter-spacing: 0.6px;
             color: #ffffff;
-            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: none !important;
+            margin-right: 10px !important;
         }
 
         .bc-sep {
@@ -1375,7 +1384,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
     <!-- RECTANGULAR BREADCRUMB BANNER STRIP RIGHT BELOW THE HEADER -->
     <div class="erp-breadcrumb-banner">
         <div class="breadcrumb-inner">
-            <span class="bc-pill bc-brand"><span style="color: #facc15;">SUNDER</span>&nbsp;<span style="color: #ffffff;">ERP</span></span>
+            <span class="bc-brand"><span style="color: #facc15;">SUNDER</span>&nbsp;<span style="color: #ffffff;">ERP</span></span>
             <span class="bc-sep">/</span>
             <span class="bc-pill bc-module"><?= htmlspecialchars($current_module_title) ?></span>
             <span class="bc-sep">/</span>
