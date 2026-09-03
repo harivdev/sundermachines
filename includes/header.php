@@ -978,7 +978,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
             display: inline-flex;
             align-items: center;
             box-shadow: none !important;
-            margin-right: 10px !important;
+            margin-right: 40px !important; /* Pushes page names further to the right as requested */
         }
 
         .bc-sep {
@@ -1385,10 +1385,12 @@ if (strpos($current_path, '/jobcard/') !== false) {
     <div class="erp-breadcrumb-banner">
         <div class="breadcrumb-inner">
             <span class="bc-brand"><span style="color: #facc15;">SUNDER</span>&nbsp;<span style="color: #ffffff;">ERP</span></span>
-            <span class="bc-sep">/</span>
-            <span class="bc-pill bc-module"><?= htmlspecialchars($current_module_title) ?></span>
-            <span class="bc-sep">/</span>
-            <span class="bc-pill bc-page"><?= htmlspecialchars($current_page_title) ?></span>
+            <div class="bc-path-container" style="display: flex; align-items: center; gap: 4px;">
+                <span class="bc-sep">/</span>
+                <span class="bc-pill bc-module"><?= htmlspecialchars($current_module_title) ?></span>
+                <span class="bc-sep">/</span>
+                <span class="bc-pill bc-page"><?= htmlspecialchars($current_page_title) ?></span>
+            </div>
         </div>
     </div>
 
