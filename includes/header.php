@@ -4,6 +4,75 @@ requireLogin();
 
 $current_page = basename($_SERVER['PHP_SELF']);
 $showQuickAccess = (isset($_COOKIE['showQuickAccess']) && $_COOKIE['showQuickAccess'] === 'true');
+
+// Dynamic Breadcrumb Calculation
+$current_path = strtolower($_SERVER['PHP_SELF']);
+$current_page_name = strtolower(basename($current_path));
+
+$current_module_title = 'Dashboard';
+$current_page_title = 'Overview';
+
+if (strpos($current_path, '/jobcard/') !== false) {
+    $current_module_title = 'Job Card';
+    if ($current_page_name === 'create.php') $current_page_title = 'Create Job Card';
+    elseif ($current_page_name === 'edit.php') $current_page_title = 'Edit Job Card';
+    elseif ($current_page_name === 'list.php') $current_page_title = 'Job Card List';
+    elseif ($current_page_name === 'spares_list.php') $current_page_title = 'Job Card Spares';
+    else $current_page_title = 'Job Card Management';
+} elseif (strpos($current_path, '/sales/') !== false) {
+    $current_module_title = 'Sales';
+    if ($current_page_name === 'create.php') $current_page_title = 'Create Sales Order';
+    elseif ($current_page_name === 'edit.php') $current_page_title = 'Edit Sales Order';
+    elseif ($current_page_name === 'view.php') $current_page_title = 'View Sales Invoice';
+    elseif ($current_page_name === 'list.php') $current_page_title = 'Sales List';
+    else $current_page_title = 'Sales Management';
+} elseif (strpos($current_path, '/purchase/') !== false) {
+    $current_module_title = 'Purchase';
+    if ($current_page_name === 'create.php') $current_page_title = 'Create Purchase Order';
+    elseif ($current_page_name === 'edit_purchase.php') $current_page_title = 'Edit Purchase Order';
+    elseif ($current_page_name === 'purchase_list.php') $current_page_title = 'Purchase List';
+    else $current_page_title = 'Purchase Management';
+} elseif (strpos($current_path, '/stock/') !== false) {
+    $current_module_title = 'Stock';
+    if ($current_page_name === 'add_stock.php') $current_page_title = 'Add Stock';
+    elseif ($current_page_name === 'list.php') $current_page_title = 'Stock Inventory List';
+    else $current_page_title = 'Stock Management';
+} elseif (strpos($current_path, '/brand/') !== false) {
+    $current_module_title = 'Master';
+    $current_page_title = 'Brand List';
+} elseif (strpos($current_path, '/model/') !== false) {
+    $current_module_title = 'Master';
+    $current_page_title = 'Model List';
+} elseif (strpos($current_path, '/machine/') !== false) {
+    $current_module_title = 'Master';
+    $current_page_title = 'Machine List';
+} elseif (strpos($current_path, '/spares/') !== false) {
+    $current_module_title = 'Master';
+    if ($current_page_name === 'add_spare.php') $current_page_title = 'Add Spare';
+    else $current_page_title = 'Spares List';
+} elseif (strpos($current_path, '/customers/') !== false) {
+    $current_module_title = 'Master';
+    $current_page_title = 'Customer List';
+} elseif (strpos($current_path, '/supplier/') !== false) {
+    $current_module_title = 'Master';
+    $current_page_title = 'Supplier List';
+} elseif (strpos($current_path, '/employee/') !== false) {
+    $current_module_title = 'Master';
+    if ($current_page_name === 'add.php') $current_page_title = 'Add Employee';
+    elseif ($current_page_name === 'edit.php') $current_page_title = 'Edit Employee';
+    else $current_page_title = 'Employee List';
+} elseif (strpos($current_path, '/users/') !== false) {
+    $current_module_title = 'Users';
+    $current_page_title = 'User Management';
+} elseif (strpos($current_path, '/report/') !== false) {
+    $current_module_title = 'Reports';
+    if ($current_page_name === 'daily_sales.php') $current_page_title = 'Daily Sales Report';
+    elseif ($current_page_name === 'monthly_sales.php') $current_page_title = 'Monthly Sales Report';
+    else $current_page_title = 'Reports Overview';
+} else {
+    $current_module_title = 'Dashboard';
+    $current_page_title = 'Main Dashboard';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -42,34 +111,34 @@ $showQuickAccess = (isset($_COOKIE['showQuickAccess']) && $_COOKIE['showQuickAcc
         body {
             font-family: 'Inter', Arial, sans-serif;
             background: #f4f6f9;
-            padding-top: 110px;
-            /* Offset for fixed header */
+            padding-top: 122px;
+            /* Offset for fixed header + breadcrumb banner */
             padding-bottom: 20px;
         }
 
         /* TOP BAR */
         .topbar {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            padding: 0 24px;
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 56px;
+            height: 44px;
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
         }
 
         .brand {
             font-weight: 700;
             color: #fff;
-            font-size: 18px;
-            letter-spacing: 0.5px;
+            font-size: 16px;
+            letter-spacing: 0.4px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .brand .brand-accent {
@@ -124,10 +193,10 @@ $showQuickAccess = (isset($_COOKIE['showQuickAccess']) && $_COOKIE['showQuickAcc
             background: #fff;
             position: fixed;
             width: 100%;
-            top: 56px;
+            top: 44px;
             z-index: 999;
             border-bottom: 1px solid #e5e7eb;
-            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
         }
 
         .menu-bar {
@@ -145,12 +214,12 @@ $showQuickAccess = (isset($_COOKIE['showQuickAccess']) && $_COOKIE['showQuickAcc
         .menu-item>.menu-link {
             display: flex;
             align-items: center;
-            gap: 6px;
-            padding: 14px 15px;
+            gap: 5px;
+            padding: 10px 14px;
             text-decoration: none;
             color: #374151;
-            font-weight: 500;
-            font-size: 16px; /* Increased from 14px by 2px */
+            font-weight: 600;
+            font-size: 13.5px;
             cursor: pointer;
             border-bottom: 3px solid transparent;
             transition: all 0.2s;
@@ -159,10 +228,10 @@ $showQuickAccess = (isset($_COOKIE['showQuickAccess']) && $_COOKIE['showQuickAcc
         }
 
         .nav-icon {
-            font-size: 16px;
-            color: inherit; /* Icon color matches header text color */
+            font-size: 13.5px;
+            color: inherit;
             transition: color 0.15s ease;
-            margin-right: 8px;
+            margin-right: 5px;
         }
 
         .nav-shortcut {
@@ -751,7 +820,7 @@ $showQuickAccess = (isset($_COOKIE['showQuickAccess']) && $_COOKIE['showQuickAcc
         /* LEFT SIDE QUICK ACCESS SIDEBAR (LIGHT ORANGE THEME) */
         .quick-access-sidebar {
             position: fixed;
-            top: 56px; /* Directly below dark topbar, aligning banner with menu-container */
+            top: 44px; /* Directly below dark topbar, aligning banner with menu-container */
             left: 0;
             width: 220px;
             bottom: 0;
@@ -845,9 +914,67 @@ $showQuickAccess = (isset($_COOKIE['showQuickAccess']) && $_COOKIE['showQuickAcc
             transition: background 0.15s ease, color 0.15s ease;
         }
 
-        .quick-access-task-link:hover {
-            background: #ffedd5; /* Soft light orange highlight */
-            color: #c2410c;
+        /* BREADCRUMB PAGE BANNER STRIP */
+        .erp-breadcrumb-banner {
+            position: fixed;
+            top: 84px;
+            left: 0;
+            width: 100%;
+            z-index: 998;
+            background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+            color: #ffffff;
+            height: 38px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1.5px solid #14532d;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            box-sizing: border-box;
+            transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        html.has-quick-access .erp-breadcrumb-banner,
+        body.has-quick-access .erp-breadcrumb-banner {
+            margin-left: 220px !important;
+            width: calc(100% - 220px) !important;
+        }
+
+        .breadcrumb-inner {
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .bc-brand {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 11.5px;
+            letter-spacing: 0.4px;
+            color: #ffffff;
+        }
+
+        .bc-sep {
+            opacity: 0.6;
+            font-size: 11px;
+            color: #ffffff;
+        }
+
+        .bc-module {
+            color: #a7f3d0;
+            font-weight: 600;
+        }
+
+        .bc-page {
+            color: #ffffff;
+            font-weight: 700;
+            text-decoration: underline;
+            text-underline-offset: 3px;
         }
 
         /* HEADER MENU BAR: left edge shifts, right edge stays fixed */
@@ -944,26 +1071,6 @@ $showQuickAccess = (isset($_COOKIE['showQuickAccess']) && $_COOKIE['showQuickAcc
                     <span class="toggle-slider"></span>
                     <span>Show Quick Access</span>
                 </label>
-
-                <?php if (isset($_SESSION['employee_name']) || isset($_SESSION['username'])): ?>
-                    <div class="user-pill">
-                        <?php if (isset($_SESSION['employee_name'])): ?>
-                            <span><?php echo htmlspecialchars($_SESSION['employee_name']); ?></span>
-                        <?php else: ?>
-                            <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
-                            <?php 
-                            $roleDisplay = $_SESSION['role'] ?? 'Admin';
-                            if (strcasecmp($_SESSION['username'], $roleDisplay) !== 0): 
-                            ?>
-                                <small><?php echo htmlspecialchars($roleDisplay); ?></small>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
-                <?php endif; ?>
-
-                <button class="btn-logout" onclick="window.location.href='../login/logout.php'">
-                    Logout &#x2192;
-                </button>
             </div>
 
             <!-- Mobile Action Button (Placed BEFORE Hamburger) -->
@@ -1268,6 +1375,17 @@ $showQuickAccess = (isset($_COOKIE['showQuickAccess']) && $_COOKIE['showQuickAcc
         </ul>
     </div>
 
+    <!-- RECTANGULAR BREADCRUMB BANNER STRIP RIGHT BELOW THE HEADER -->
+    <div class="erp-breadcrumb-banner">
+        <div class="breadcrumb-inner">
+            <span class="bc-brand">Sunder Billing</span>
+            <span class="bc-sep">/</span>
+            <span class="bc-module"><?= htmlspecialchars($current_module_title) ?></span>
+            <span class="bc-sep">/</span>
+            <span class="bc-page"><?= htmlspecialchars($current_page_title) ?></span>
+        </div>
+    </div>
+
     <!-- LEFT SIDE QUICK ACCESS SIDEBAR PANEL (EXACT MATCH FOR USER MONITOR PHOTO) -->
     <?php
     $quick_jobcards = [];
@@ -1300,6 +1418,21 @@ $showQuickAccess = (isset($_COOKIE['showQuickAccess']) && $_COOKIE['showQuickAcc
             <a href="../login/logout.php" class="quick-access-nav-link">
                 <i class="fa-solid fa-right-from-bracket nav-icon"></i> Exit
             </a>
+
+            <!-- ADMIN / USER PROFILE BELOW EXIT (Matches Red Box in Image 2) -->
+            <?php if (isset($_SESSION['employee_name']) || isset($_SESSION['username'])): ?>
+                <div style="margin: 8px 12px; padding: 8px 12px; background: rgba(249, 115, 22, 0.15); border: 1.5px solid #f97316; border-radius: 8px; font-weight: 700; color: #9a3412; font-size: 13px; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(249, 115, 22, 0.1);">
+                    <i class="fa-solid fa-user-circle" style="font-size: 18px; color: #ea580c;"></i>
+                    <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                        <?php if (isset($_SESSION['employee_name'])): ?>
+                            <span><?php echo htmlspecialchars($_SESSION['employee_name']); ?></span>
+                        <?php else: ?>
+                            <span><?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?></span>
+                        <?php endif; ?>
+                        <small style="font-size: 10.5px; color: #c2410c; font-weight: 700; text-transform: uppercase;"><?php echo htmlspecialchars($_SESSION['role'] ?? 'ADMIN'); ?></small>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
 
         <!-- Banner 2: Task -->
