@@ -954,11 +954,12 @@ if (strpos($current_path, '/jobcard/') !== false) {
         }
 
         .bc-pill {
-            background: rgba(0, 0, 0, 0.22);
+            background: transparent !important;
+            padding: 0 !important;
             border: none !important;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 14px;
+            border-radius: 0 !important;
+            font-size: 16px !important;
+            font-style: italic !important;
             font-weight: 700;
             display: inline-flex;
             align-items: center;
@@ -973,6 +974,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
             border-radius: 0 !important;
             font-weight: 800;
             font-size: 17.5px !important;
+            font-style: normal !important;
             letter-spacing: 0.6px;
             color: #ffffff;
             display: inline-flex;
@@ -983,9 +985,10 @@ if (strpos($current_path, '/jobcard/') !== false) {
 
         .bc-sep {
             opacity: 0.75;
-            font-size: 12px;
+            font-size: 13px;
             color: #ffffff;
-            margin: 0 1px;
+            margin: 0 4px;
+            font-style: normal !important;
         }
 
         .bc-module {
