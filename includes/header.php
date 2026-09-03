@@ -945,46 +945,47 @@ if (strpos($current_path, '/jobcard/') !== false) {
         }
 
         .breadcrumb-inner {
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
             font-family: 'Inter', sans-serif;
         }
 
-        .bc-brand {
-            background: transparent;
-            padding: 0;
-            border-radius: 0;
-            font-weight: 800;
-            font-size: 15.5px;
-            letter-spacing: 0.5px;
-            color: #ffffff;
+        .bc-pill {
+            background: rgba(0, 0, 0, 0.22);
+            border: none !important;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 700;
             display: inline-flex;
             align-items: center;
-            box-shadow: none;
+            white-space: nowrap;
+            line-height: 1.2;
+            box-shadow: none !important;
+        }
+
+        .bc-brand {
+            color: #ffffff;
+            letter-spacing: 0.5px;
         }
 
         .bc-sep {
-            opacity: 0.7;
-            font-size: 12.5px;
+            opacity: 0.75;
+            font-size: 12px;
             color: #ffffff;
-            margin: 0 2px;
+            margin: 0 1px;
         }
 
         .bc-module {
             color: #a7f3d0;
-            font-weight: 600;
-            font-size: 14.5px;
         }
 
         .bc-page {
             color: #ffffff;
-            font-weight: 700;
-            font-size: 15.5px;
-            text-decoration: underline;
-            text-underline-offset: 3px;
+            text-decoration: none !important;
         }
 
         /* HEADER MENU BAR: left edge shifts, right edge stays fixed */
@@ -1374,11 +1375,11 @@ if (strpos($current_path, '/jobcard/') !== false) {
     <!-- RECTANGULAR BREADCRUMB BANNER STRIP RIGHT BELOW THE HEADER -->
     <div class="erp-breadcrumb-banner">
         <div class="breadcrumb-inner">
-            <span class="bc-brand"><span style="color: #facc15; font-weight: 800;">SUNDER</span>&nbsp;<span style="color: #ffffff; font-weight: 700;">ERP</span></span>
+            <span class="bc-pill bc-brand"><span style="color: #facc15;">SUNDER</span>&nbsp;<span style="color: #ffffff;">ERP</span></span>
             <span class="bc-sep">/</span>
-            <span class="bc-module"><?= htmlspecialchars($current_module_title) ?></span>
+            <span class="bc-pill bc-module"><?= htmlspecialchars($current_module_title) ?></span>
             <span class="bc-sep">/</span>
-            <span class="bc-page"><?= htmlspecialchars($current_page_title) ?></span>
+            <span class="bc-pill bc-page"><?= htmlspecialchars($current_page_title) ?></span>
         </div>
     </div>
 
