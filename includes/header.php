@@ -192,8 +192,17 @@ if (strpos($current_path, '/jobcard/') !== false) {
         .menu-bar {
             display: flex;
             margin: 0;
-            padding: 0 16px;
+            padding: 0 12px;
             list-style: none;
+            align-items: center;
+            width: 100%;
+            height: 41px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .menu-bar::-webkit-scrollbar {
+            display: none;
         }
 
         .menu-item {
@@ -765,26 +774,32 @@ if (strpos($current_path, '/jobcard/') !== false) {
         .quick-access-toggle {
             display: inline-flex !important;
             align-items: center !important;
-            gap: 8px !important;
+            gap: 6px !important;
             white-space: nowrap !important;
             color: #c2410c !important;
-            font-size: 12.5px !important;
+            font-size: 11px !important;
             font-weight: 700 !important;
             cursor: pointer !important;
             user-select: none !important;
             margin: 0 !important;
-            padding: 4px 12px !important;
+            padding: 3px 8px !important;
             background: #fff7ed !important;
             border: 1.5px solid #fed7aa !important;
             border-radius: 20px !important;
             flex-shrink: 0 !important;
-            height: 28px !important;
+            height: 26px !important;
             line-height: 1 !important;
         }
 
         .quick-access-toggle span {
             white-space: nowrap !important;
             display: inline-block !important;
+        }
+
+        /* Show button ONLY when Quick Access sidebar is OPEN so it fits 100% inside screen view */
+        html.has-quick-access .quick-access-toggle .toggle-label-text,
+        body.has-quick-access .quick-access-toggle .toggle-label-text {
+            display: none !important;
         }
 
         .quick-access-toggle input {
@@ -1374,11 +1389,11 @@ if (strpos($current_path, '/jobcard/') !== false) {
             <?php endif; ?>
 
             <!-- SHOW QUICK ACCESS TOGGLE IN HEADER RIGHT CORNER -->
-            <li class="menu-item quick-access-header-toggle" style="margin-left: auto; display: flex; align-items: center; padding-right: 16px; flex-shrink: 0; white-space: nowrap;">
+            <li class="menu-item quick-access-header-toggle" style="margin-left: auto; display: flex; align-items: center; padding-right: 12px; flex-shrink: 0; white-space: nowrap;">
                 <label class="quick-access-toggle" title="Toggle Left Quick Access Sidebar">
                     <input type="checkbox" id="toggleQuickAccessCheckbox" <?php echo $showQuickAccess ? 'checked' : ''; ?> onchange="toggleQuickAccessSidebar(this.checked)">
                     <span class="toggle-slider"></span>
-                    <span>Show Quick Access</span>
+                    <span class="toggle-label-text">Quick Access</span>
                 </label>
             </li>
         </ul>
