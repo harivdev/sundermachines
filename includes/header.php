@@ -197,12 +197,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
             align-items: center;
             width: 100%;
             height: 41px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-
-        .menu-bar::-webkit-scrollbar {
-            display: none;
+            overflow: visible !important;
         }
 
         .menu-item {
