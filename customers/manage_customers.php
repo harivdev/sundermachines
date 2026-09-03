@@ -66,7 +66,7 @@ $next_customer_id = 'C' . str_pad($next_num, 7, '0', STR_PAD_LEFT);
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Customers – Sunder Machine</title>
+  <title>Manage Customers – Sunder Machines World</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
@@ -103,8 +103,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .filter-actions{display:flex;gap:8px;margin-top:4px;}
 
 /* TABLE */
-.table-wrap{padding:20px 28px;}
-table{width:100%;border-collapse:collapse;background:var(--white);border-radius:10px;box-shadow:var(--shadow);table-layout:fixed;}
+.table-wrap{padding:20px 28px; overflow-x: auto; -webkit-overflow-scrolling: touch;}
+table{width:100%; min-width: 1050px; border-collapse:collapse;background:var(--white);border-radius:10px;box-shadow:var(--shadow);table-layout:auto;}
 thead{background:var(--green);color:#fff;}
 thead th{padding:11px 8px;font-size:.76rem;font-weight:600;text-align:left;text-transform:uppercase;letter-spacing:.5px;overflow:hidden;white-space:nowrap;}
 thead th:nth-child(1){width:40px;}
@@ -334,7 +334,7 @@ tbody td{padding:10px 8px;font-size:.83rem;vertical-align:middle;overflow:hidden
       <div class="id-card-container">
         <div class="id-card" id="idCardPrint">
           <div class="id-card-top">
-            <div class="company-name">SUNDER MACHINES WORKS</div>
+            <div class="company-name">SUNDER MACHINES WORLD</div>
             <div class="company-addr">4, Sunder Building, Gobichettypalayam,<br>Erode - Dt TN - 638476.</div>
             <div class="id-card-logo"><div class="logo-placeholder">🧵</div></div>
             <div class="id-card-cust-name" id="ic_name">—</div>
@@ -857,6 +857,12 @@ function openNewCustomer(){
   document.getElementById('activeLabel').textContent='Active';
   openModal('editModal');
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (window.location.search.indexOf('action=add') !== -1 || window.location.search.indexOf('action=new') !== -1) {
+    openNewCustomer();
+  }
+});
 
 document.getElementById('edit_active').addEventListener('change',function(){
   document.getElementById('activeLabel').textContent=this.checked?'Active':'Inactive';

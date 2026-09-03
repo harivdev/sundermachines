@@ -205,10 +205,11 @@ input, select, textarea, button {
 
 /* ── 4. COMMON FILTER PANEL ── */
 .erp-filter-panel, .filter-panel, #jobcardFilter, #purchaseFilter, #salesFilter, #filterDrawer, #filterPanel {
-    background: #ffffff;
-    padding: 15px 20px;
-    border: 1px solid var(--erp-border);
-    border-bottom: none;
+    background: #f8fafc;
+    padding: 16px 20px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    margin-bottom: 15px;
     box-sizing: border-box;
 }
 
@@ -217,6 +218,34 @@ input, select, textarea, button {
     gap: 15px;
     align-items: flex-end;
     flex-wrap: wrap;
+}
+
+.erp-filter-actions-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-erp-apply {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 8px 18px !important;
+    border-radius: 6px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2) !important;
+}
+
+.btn-erp-clear {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 8px 18px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
 }
 
 /* ── 5. COMMON TABLE & RESPONSIVE SCROLL CONTAINER ── */
@@ -237,6 +266,21 @@ input, select, textarea, button {
     border-collapse: collapse;
     text-align: left;
     min-width: 800px;
+}
+
+.master-table {
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+@media (max-width: 768px) {
+    .master-table {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+    .master-table th, .master-table td {
+        padding: 10px 8px !important;
+    }
 }
 
 .erp-table th, table th {
@@ -340,9 +384,9 @@ input, select, textarea, button {
 
 .erp-input:focus, .erp-select:focus, .erp-textarea:focus, .form-control:focus, .form-select:focus, input:focus, select:focus, textarea:focus, input:active, select:active, textarea:active {
     outline: none !important;
-    background-color: #fff7ed !important;
-    border-color: #f59e0b !important;
-    box-shadow: 0 0 0 3.5px rgba(245, 158, 11, 0.22) !important;
+    background-color: #fffdf9 !important;
+    border-color: #c9a771 !important;
+    box-shadow: 0 0 0 3px rgba(201, 167, 113, 0.18) !important;
 }
 
 input:-webkit-autofill,
@@ -351,9 +395,9 @@ input:-webkit-autofill:focus,
 input:-webkit-autofill:active,
 select:-webkit-autofill,
 textarea:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 30px #fff7ed inset !important;
+    -webkit-box-shadow: 0 0 0 30px #fffdf9 inset !important;
     -webkit-text-fill-color: #1e293b !important;
-    border-color: #f59e0b !important;
+    border-color: #c9a771 !important;
     transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -494,6 +538,63 @@ textarea:-webkit-autofill {
 .erp-modal-body, .modal-body, .dl-modal-body {
     padding: 20px;
     box-sizing: border-box;
+    overflow-y: auto !important;
+    max-height: calc(85vh - 110px) !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+    flex: 1 !important;
+}
+
+.modal-content, .modal, .erp-modal-dialog, .dl-modal-box {
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: 90vh !important;
+    overflow: hidden !important;
+}
+
+.modal-content > form, .modal > form, .erp-modal-dialog > form {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+}
+
+/* ── Custom Ultra-Thin Sleek Scrollbars ── */
+.modal-body::-webkit-scrollbar,
+.modal-content::-webkit-scrollbar,
+.modal-overlay::-webkit-scrollbar,
+.cust-drawer::-webkit-scrollbar,
+.cust-table-wrap::-webkit-scrollbar,
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.modal-body::-webkit-scrollbar-track,
+.modal-content::-webkit-scrollbar-track,
+.modal-overlay::-webkit-scrollbar-track,
+.cust-drawer::-webkit-scrollbar-track,
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb,
+.modal-content::-webkit-scrollbar-thumb,
+.modal-overlay::-webkit-scrollbar-thumb,
+.cust-drawer::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover,
+.modal-content::-webkit-scrollbar-thumb:hover,
+.modal-overlay::-webkit-scrollbar-thumb:hover,
+.cust-drawer::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 
 .erp-modal-footer, .modal-footer, .dl-modal-footer {
@@ -532,6 +633,45 @@ textarea:-webkit-autofill {
     }
 }
 
+/* Responsive Grid Classes for Forms & Job Cards */
+.jobcard-overview-grid, .erp-form-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.jobcard-cust-grid, .erp-form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.jobcard-2col-grid, .erp-form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.jobcard-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    align-items: stretch;
+}
+
+.jobcard-labour-row {
+    grid-column: span 2;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
 /* Mobile Devices (<= 768px) */
 @media (max-width: 768px) {
     body {
@@ -542,30 +682,132 @@ textarea:-webkit-autofill {
         padding: 10px !important;
     }
 
-    .erp-form-grid, .erp-form-grid-3, .grid-2, .grid-3, .form-row, .form-row-3, .form-grid {
+    .erp-form-grid, .erp-form-grid-3, .erp-form-grid-4, .grid-2, .grid-3, .form-row, .form-row-3, .form-grid {
         grid-template-columns: 1fr !important;
         gap: 12px !important;
+    }
+
+    .jobcard-overview-grid,
+    .jobcard-cust-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+
+    .jobcard-2col-grid,
+    .erp-form-grid-2 {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    .jobcard-summary-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .jobcard-summary-box {
+        padding: 12px 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .jobcard-summary-box .summary-val {
+        font-size: 20px !important;
+    }
+
+    .jobcard-labour-row {
+        grid-column: span 2 !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 10px 14px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .jobcard-labour-row input {
+        max-width: 160px !important;
+        width: 100% !important;
+        text-align: right !important;
+    }
+
+    .paid-amount-header {
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 4px !important;
+        width: 100% !important;
+    }
+
+    .jobcard-bottom-actions {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .jobcard-bottom-actions .btn-bottom-act {
+        width: 100% !important;
+        padding: 10px 8px !important;
+        font-size: 12.5px !important;
+        box-sizing: border-box !important;
+        text-align: center !important;
+        justify-content: center !important;
     }
 
     .erp-header-bar, .header-bar, .page-header, .header, .po-title-bar {
         flex-direction: column !important;
         align-items: flex-start !important;
         padding: 12px 14px !important;
+        gap: 10px !important;
+    }
+
+    .erp-header-title, .header-title {
+        width: 100% !important;
+        font-size: 18px !important;
+        margin-bottom: 2px !important;
     }
 
     .erp-header-actions, .header-actions, .actions {
         width: 100% !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
         justify-content: flex-start !important;
     }
 
     .erp-filter-form, .filter-panel form {
         flex-direction: column !important;
         align-items: stretch !important;
-        gap: 10px !important;
+        gap: 12px !important;
     }
 
-    .erp-filter-form input, .erp-filter-form select, .erp-filter-form button, .erp-filter-form a {
+    .erp-filter-form input, .erp-filter-form select {
         width: 100% !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+    }
+
+    .erp-filter-actions-group {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 10px !important;
+        width: 100% !important;
+        margin-top: 4px !important;
+    }
+
+    .erp-filter-actions-group button,
+    .erp-filter-actions-group a,
+    .erp-filter-form button,
+    .erp-filter-form a {
+        flex: 1 !important;
+        width: 100% !important;
+        text-align: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        min-height: 40px !important;
     }
 
     .summary-grid {
@@ -587,6 +829,11 @@ textarea:-webkit-autofill {
 @media (max-width: 480px) {
     .erp-container, .page-wrapper, .container-box, .container {
         padding: 6px !important;
+    }
+
+    .jobcard-overview-grid,
+    .jobcard-cust-grid {
+        grid-template-columns: 1fr !important;
     }
     
     .erp-card, .card, .po-card {

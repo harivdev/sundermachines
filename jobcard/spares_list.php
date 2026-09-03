@@ -243,34 +243,36 @@ $queryString = http_build_query($queryParams);
     }
 </style>
 
-<div style="padding: 20px; background: #f8fafc; min-height: calc(100vh - 110px);">
+<div class="page-main-container erp-container" style="padding: 20px; background: #f8fafc; min-height: calc(100vh - 110px);">
 
     <!-- HEADER BAR -->
-    <div style="background: #ffffff; display: flex; align-items: center; justify-content: space-between; border-radius: 8px 8px 0 0; padding: 15px 20px; border: 1px solid #e2e8f0; border-bottom: none;">
-        <div style="color: #1e293b; font-weight: 700; font-size: 20px; display: flex; align-items: center; gap: 8px;">
+    <div class="list-header-bar" style="background: #ffffff; display: flex; align-items: center; justify-content: space-between; border-radius: 8px 8px 0 0; padding: 15px 20px; border: 1px solid #e2e8f0; border-bottom: none; flex-wrap: wrap; gap: 10px;">
+        <div class="list-header-title" style="color: #1e293b; font-weight: 700; font-size: 20px; display: flex; align-items: center; gap: 8px;">
             <span>⚙️</span> Job Card Spares
         </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <button type="button" onclick="openDownloadModal()" style="background: #16a34a; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div class="list-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button type="button" onclick="openDownloadModal()" style="background: #16a34a; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2);">
                 <span>📥</span> Download CSV
             </button>
-            <a href="javascript:void(0)" onclick="location.reload()" style="color: #1e293b; text-decoration: none; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+            <a href="javascript:void(0)" onclick="location.reload()" style="background: #475569; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(71, 85, 105, 0.2);">
                 <span>🔄</span> Refresh
             </a>
-            <a href="javascript:void(0)" onclick="document.getElementById('sparesFilter').style.display = document.getElementById('sparesFilter').style.display === 'none' ? 'block' : 'none'" style="color: #1e293b; text-decoration: none; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+            <a href="javascript:void(0)" onclick="document.getElementById('sparesFilter').style.display = document.getElementById('sparesFilter').style.display === 'none' ? 'block' : 'none'" style="background: #d97706; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);">
                 <span>🔽</span> Filter
             </a>
         </div>
     </div>
 
     <!-- PRESET BUTTONS BAR -->
-    <div style="background: #ffffff; padding: 10px 20px; border: 1px solid #e2e8f0; border-bottom: none; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-        <span style="font-size: 13px; font-weight: 600; color: #64748b; margin-right: 4px;">Quick Date:</span>
-        <a href="spares_list.php?preset=today<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $preset === 'today' ? 'active' : '' ?>">Today</a>
-        <a href="spares_list.php?preset=yesterday<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $preset === 'yesterday' ? 'active' : '' ?>">Yesterday</a>
-        <a href="spares_list.php?preset=week<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $preset === 'week' ? 'active' : '' ?>">Last Week</a>
-        <a href="spares_list.php?preset=15days<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $preset === '15days' ? 'active' : '' ?>">15 Days</a>
-        <a href="spares_list.php?preset=all<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $preset === 'all' ? 'active' : '' ?>">All Records</a>
+    <div style="background: #ffffff; padding: 10px 20px; border: 1px solid #e2e8f0; border-bottom: none; display: flex; gap: 10px; align-items: center;">
+        <span style="font-size: 13px; font-weight: 600; color: #64748b; white-space: nowrap;">Quick Date:</span>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; flex: 1; align-items: center;">
+            <a href="spares_list.php?preset=today<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $preset === 'today' ? 'active' : '' ?>">Today</a>
+            <a href="spares_list.php?preset=yesterday<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $preset === 'yesterday' ? 'active' : '' ?>">Yesterday</a>
+            <a href="spares_list.php?preset=week<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $preset === 'week' ? 'active' : '' ?>">Last Week</a>
+            <a href="spares_list.php?preset=15days<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $preset === '15days' ? 'active' : '' ?>">15 Days</a>
+            <a href="spares_list.php?preset=all<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $preset === 'all' ? 'active' : '' ?>">All Records</a>
+        </div>
     </div>
 
     <!-- FILTER PANEL -->
@@ -302,7 +304,7 @@ $queryString = http_build_query($queryParams);
 
     <!-- TABLE CONTAINER -->
     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px; overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; min-width: 1000px; white-space: nowrap;">
             <thead>
                 <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 600;">
                     <th style="padding: 12px 16px; text-align: center; width: 70px;">No</th>
@@ -365,11 +367,11 @@ $queryString = http_build_query($queryParams);
     </div>
 
     <!-- ENHANCED PAGINATION BAR -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding: 0 4px; flex-wrap: wrap; gap: 10px;">
-        <div style="color: #64748b; font-size: 14px; font-weight: 400;">
-            Showing <?= $totalRows > 0 ? ($offset + 1) : 0 ?>–<?= min($offset + $limit, $totalRows) ?> of <?= $totalRows ?> records. &nbsp;|&nbsp; Page <?= $page ?> of <?= $totalPages ?>
+    <div class="list-pagination-bar" style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding: 0 4px; flex-wrap: wrap; gap: 10px;">
+        <div class="pagination-info" style="color: #64748b; font-size: 14px; font-weight: 400;">
+            Showing <?= $totalRows > 0 ? ($offset + 1) : 0 ?>–<?= min($offset + $limit, $totalRows) ?> of <?= $totalRows ?> records &nbsp;|&nbsp; Page <?= $page ?> of <?= $totalPages ?>
         </div>
-        <div style="display: flex; gap: 6px; align-items: center;">
+        <div class="pagination-buttons" style="display: flex; gap: 6px; align-items: center;">
             <!-- FIRST BUTTON -->
             <a href="spares_list.php?page=1<?= !empty($queryString) ? '&' . $queryString : '' ?>" class="btn-pg <?= $page <= 1 ? 'disabled' : '' ?>">First</a>
 

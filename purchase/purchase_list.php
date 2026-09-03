@@ -60,11 +60,11 @@ $queryString = http_build_query($queryParams);
         <form method="GET" class="erp-filter-form">
             <div>
                 <label class="erp-label">Search Order# / Supplier</label>
-                <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Order # or supplier..." class="erp-input" style="width:220px;">
+                <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Order # or supplier..." class="erp-input" style="width:220px; border: 1px solid #cbd5e1; border-radius: 6px;">
             </div>
             <div>
                 <label class="erp-label">Status</label>
-                <select name="status" class="erp-select" style="width:160px;">
+                <select name="status" class="erp-select" style="width:160px; border: 1px solid #cbd5e1; border-radius: 6px;">
                     <option value="">-- All --</option>
                     <option value="New" <?= $statusFilter === 'New' ? 'selected' : '' ?>>New</option>
                     <option value="Ordered" <?= $statusFilter === 'Ordered' ? 'selected' : '' ?>>Ordered</option>
@@ -72,9 +72,9 @@ $queryString = http_build_query($queryParams);
                     <option value="Completed" <?= $statusFilter === 'Completed' ? 'selected' : '' ?>>Completed</option>
                 </select>
             </div>
-            <div>
-                <button type="submit" class="btn-erp btn-erp-primary">Apply</button>
-                <a href="purchase_list.php" class="btn-erp btn-erp-warning">Clear</a>
+            <div class="erp-filter-actions-group">
+                <button type="submit" class="btn-erp btn-erp-apply">Apply</button>
+                <a href="purchase_list.php" class="btn-erp btn-erp-clear">Clear</a>
             </div>
         </form>
     </div>

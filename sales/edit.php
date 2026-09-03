@@ -200,7 +200,7 @@ $today = date('Y-m-d');
             <tr>
               <th style="width:32px;">#</th>
               <th style="width:44px;">Image</th>
-              <th>Item</th>
+              <th style="min-width:220px; width:220px;">Item</th>
               <th style="width:120px;">Barcode</th>
               <th style="width:110px;">Part/Serial #</th>
               <th style="width:72px;">Rack #</th>
@@ -216,8 +216,8 @@ $today = date('Y-m-d');
             <tr>
               <td class="row-num" style="font-size:12px; color:#94a3b8; font-weight:700; text-align:center;"><?= $idx + 1 ?></td>
               <td><div class="row-img">📷</div></td>
-              <td style="min-width:140px;">
-                <input type="text" name="item[]" class="td-in item-inp" value="<?= htmlspecialchars($item['itemName']) ?>" readonly onclick="openModal(this)" style="cursor:pointer;">
+              <td style="min-width:220px;">
+                <input type="text" name="item[]" class="td-in item-inp" value="<?= htmlspecialchars($item['itemName']) ?>" readonly onclick="openModal(this)" style="cursor:pointer; min-width:200px;">
                 <input type="hidden" name="itemId[]" value="<?= $item['id'] ?>">
                 <input type="hidden" name="stockId[]" class="h-stock" value="<?= $item['stock'] ?>">
                 <input type="hidden" name="spareId[]" class="h-spare" value="<?= $item['spare'] ?>">

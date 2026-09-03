@@ -103,12 +103,30 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         gap: 20px;
     }
 
+    @media (max-width: 768px) {
+        .grid {
+            grid-template-columns: 1fr !important;
+            gap: 15px !important;
+        }
+
+        .row {
+            display: flex !important;
+            gap: 12px !important;
+        }
+
+        .col {
+            flex: 1 !important;
+            min-width: 0 !important;
+        }
+    }
+
     .input {
         width: 100%;
         padding: 10px;
         border: 1px solid #ddd;
         border-radius: 6px;
         margin-bottom: 10px;
+        box-sizing: border-box;
     }
 
     .row {
@@ -144,59 +162,57 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     }
 </style>
 
-<div class="container">
+<div class="page-main-container erp-container" style="padding: 20px;">
 
-    <h2>Spare Info</h2>
+    <h2 style="margin-bottom: 20px; color: #1e293b; font-weight: 700;">Spare Info</h2>
 
-    <div class="card">
+    <div class="card" style="background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
 
         <form method="POST" enctype="multipart/form-data">
 
             <div class="grid">
 
                 <!-- IMAGE -->
-                <div>
+                <div style="text-align: center;">
                     <?php if (!empty($picturePath)): ?>
-                        <img src="<?= htmlspecialchars($picturePath) ?>" style="max-height: 250px; object-fit: contain; border-radius: 8px; border: 1px solid #cbd5e1; width: 100%;">
+                        <img src="<?= htmlspecialchars($picturePath) ?>" style="max-height: 200px; object-fit: contain; border-radius: 8px; border: 1px solid #cbd5e1; width: 100%; margin-bottom: 12px;">
                     <?php else: ?>
-                        <div style="width: 100%; height: 200px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 13px;">
+                        <div style="width: 100%; height: 180px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 13px; margin-bottom: 12px;">
                             <span style="font-size: 32px; margin-bottom: 6px;">🖼️</span>
                             <span>No Image Available</span>
                         </div>
                     <?php endif; ?>
 
-                    <br><br>
-                    <input type="file" name="image">
+                    <input type="file" name="image" style="width: 100%; font-size: 13px;">
                 </div>
 
                 <!-- FORM -->
                 <div>
 
-                    <label>Spare Name *</label>
-                    <input type="text" name="spareName" class="input" value="<?= $data['spareName'] ?>" required>
+                    <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #334155;">Spare Name *</label>
+                    <input type="text" name="spareName" class="input" value="<?= htmlspecialchars($data['spareName']) ?>" required>
 
-                    <div class="row">
-                        <div class="col">
-                            <label>Part # *</label>
-                            <input type="text" name="partNo" class="input" value="<?= $data['partNo'] ?>" required>
+                    <div class="row" style="display: flex; gap: 12px; margin-bottom: 10px;">
+                        <div class="col" style="flex: 1;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #334155;">Part # *</label>
+                            <input type="text" name="partNo" class="input" value="<?= htmlspecialchars($data['partNo']) ?>" required>
                         </div>
 
-                        <div class="col">
-                            <label>Rack # *</label>
-                            <input type="text" name="rackNumber" class="input" value="<?= $data['rackNumber'] ?>"
-                                required>
+                        <div class="col" style="flex: 1;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #334155;">Rack # *</label>
+                            <input type="text" name="rackNumber" class="input" value="<?= htmlspecialchars($data['rackNumber']) ?>" required>
                         </div>
                     </div>
 
-                    <label>
-                        <input type="checkbox" name="active" <?= $data['active'] ? 'checked' : '' ?>>
+                    <label style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: #334155; margin-bottom: 15px;">
+                        <input type="checkbox" name="active" <?= $data['active'] ? 'checked' : '' ?> style="width: 18px; height: 18px;">
                         Active
                     </label>
 
-                    <br><br>
-
-                    <button class="btn primary">Submit</button>
-                    <button type="reset" class="btn gray">Reset</button>
+                    <div style="display: flex; gap: 12px; margin-top: 15px;">
+                        <button type="submit" class="btn primary" style="flex: 1; padding: 12px 0; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer;">Submit</button>
+                        <button type="reset" class="btn gray" style="flex: 1; padding: 12px 0; background: #64748b; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer;">Reset</button>
+                    </div>
 
                 </div>
 

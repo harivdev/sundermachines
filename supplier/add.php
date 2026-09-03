@@ -5,7 +5,7 @@ requireAdmin();
 include("../includes/header.php");
 ?>
 
-<div style="padding: 30px 20px; background: #f8fafc; min-height: calc(100vh - 110px); display: flex; justify-content: center;">
+<div class="page-main-container erp-container" style="padding: 30px 20px; background: #f8fafc; min-height: calc(100vh - 110px); display: flex; justify-content: center;">
 
     <div style="width: 100%; max-width: 820px;">
 

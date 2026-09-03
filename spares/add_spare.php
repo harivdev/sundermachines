@@ -72,9 +72,9 @@
                         </label>
                     </div>
 
-                    <div style="margin-top:24px; display:flex; gap:10px; flex-wrap:wrap;">
-                        <button type="submit" class="btn-erp btn-erp-primary">Submit Spare</button>
-                        <button type="reset" class="btn-erp btn-erp-secondary" onclick="resetFormImage()">Reset</button>
+                    <div style="margin-top:24px; display:flex; gap:12px;">
+                        <button type="submit" class="btn-erp btn-erp-primary" style="flex: 1; padding: 12px 0; text-align: center; justify-content: center;">Submit Spare</button>
+                        <button type="reset" class="btn-erp btn-erp-secondary" onclick="resetFormImage()" style="flex: 1; padding: 12px 0; text-align: center; justify-content: center;">Reset</button>
                     </div>
                 </div>
             </div>

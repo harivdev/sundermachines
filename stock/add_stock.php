@@ -247,8 +247,8 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
 
   input:focus, select:focus {
     outline: none;
-    border-color: #86b7fe;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    border-color: #c9a771;
+    box-shadow: 0 0 0 3px rgba(201, 167, 113, 0.18);
   }
 
   input[readonly] {
@@ -349,9 +349,15 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
   /* ── Action Buttons at Bottom Right ── */
   .action-bar {
     display: flex;
-    justify-content: flex-end;
     gap: 8px;
     margin-top: 24px;
+    width: 100%;
+  }
+
+  .action-bar .btn-sub,
+  .action-bar .btn-res {
+    flex: 1;
+    text-align: center;
   }
 
   .btn-sub {
@@ -359,9 +365,9 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     color: #fff;
     border: none;
     border-radius: 6px;
-    padding: 7px 22px;
+    padding: 11px 18px;
     font-weight: 600;
-    font-size: 13.5px;
+    font-size: 14.5px;
     cursor: pointer;
   }
 
@@ -370,9 +376,9 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     color: #fff;
     border: none;
     border-radius: 6px;
-    padding: 7px 18px;
+    padding: 11px 18px;
     font-weight: 600;
-    font-size: 13.5px;
+    font-size: 14.5px;
     cursor: pointer;
   }
 
@@ -819,14 +825,9 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
 
           <input type="file" name="picture" id="modalCameraInput" accept="image/*" capture="environment" style="display:none;" onchange="previewModalImage(this)">
           <input type="file" name="picture" id="modalGalleryInput" accept="image/*" style="display:none;" onchange="previewModalImage(this)">
-
-          <div style="margin-top:10px; display:flex; align-items:center; justify-content:center; gap:6px;">
-            <input type="checkbox" name="active" value="1" checked style="width:auto;">
-            <span style="background:#8b5cf6; color:#fff; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700;">✓ Active</span>
-          </div>
         </div>
 
-        <!-- Right: Spare Name, Part #, Rack # -->
+        <!-- Right: Spare Name, Part #, Rack #, Active -->
         <div style="flex:1;">
           <div class="form-group">
             <label>Spare Name <span style="color:#dc3545">*</span></label>
@@ -841,6 +842,13 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
               <label>Rack # <span style="color:#dc3545">*</span></label>
               <input type="text" id="ni_rack" name="rackNumber" placeholder="" required>
             </div>
+          </div>
+          <div class="grid-2 form-group" style="margin-top: 10px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input type="checkbox" name="active" value="1" checked style="width:auto; cursor:pointer;">
+              <span style="background:#8b5cf6; color:#fff; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700;">✓ Active</span>
+            </div>
+            <div></div>
           </div>
         </div>
 

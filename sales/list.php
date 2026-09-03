@@ -204,13 +204,13 @@ $fifteenDaysAgo = date('Y-m-d', strtotime('-15 days'));
     <!-- PAGE HEADER BAR -->
     <div class="erp-header-bar">
         <div class="erp-header-title">Manage Sales Orders</div>
-        <div class="erp-header-actions">
-            <a href="create.php" class="btn-erp btn-erp-new">
-                <span style="background: #ffffff; color: #1e293b; padding: 1px 6px; border-radius: 4px; font-size: 11px;">+</span> New
+        <div class="erp-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <a href="create.php" style="background: #2563eb; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
+                <span style="font-size: 13px;">➕</span> New
             </a>
-            <button type="button" onclick="openDownloadModal()" class="btn-erp btn-erp-secondary">📥 Download</button>
-            <button type="button" onclick="location.reload()" class="btn-erp btn-erp-secondary">🔄 Refresh</button>
-            <button type="button" onclick="document.getElementById('salesFilter').style.display = document.getElementById('salesFilter').style.display === 'none' ? 'block' : 'none'" class="btn-erp btn-erp-secondary">🔽 Filter</button>
+            <button type="button" onclick="openDownloadModal()" style="background: #16a34a; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2);">📥 Download</button>
+            <button type="button" onclick="location.reload()" style="background: #475569; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(71, 85, 105, 0.2);">🔄 Refresh</button>
+            <button type="button" onclick="document.getElementById('salesFilter').style.display = document.getElementById('salesFilter').style.display === 'none' ? 'block' : 'none'" style="background: #d97706; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);">🔽 Filter</button>
         </div>
     </div>
 
@@ -219,11 +219,11 @@ $fifteenDaysAgo = date('Y-m-d', strtotime('-15 days'));
         <form method="GET" class="erp-filter-form">
             <div>
                 <label class="erp-label">Search Order# / Customer</label>
-                <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Order # or customer..." class="erp-input" style="width:220px;">
+                <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Order # or customer..." class="erp-input" style="width:220px; border: 1px solid #cbd5e1; border-radius: 6px;">
             </div>
             <div>
                 <label class="erp-label">Status</label>
-                <select name="status" class="erp-select" style="width:160px;">
+                <select name="status" class="erp-select" style="width:160px; border: 1px solid #cbd5e1; border-radius: 6px;">
                     <option value="">-- All --</option>
                     <option value="New" <?= $statusFilter === 'New' ? 'selected' : '' ?>>New</option>
                     <option value="In Progress" <?= $statusFilter === 'In Progress' ? 'selected' : '' ?>>In Progress</option>
@@ -231,9 +231,9 @@ $fifteenDaysAgo = date('Y-m-d', strtotime('-15 days'));
                     <option value="Delivered" <?= $statusFilter === 'Delivered' ? 'selected' : '' ?>>Delivered</option>
                 </select>
             </div>
-            <div>
-                <button type="submit" class="btn-erp btn-erp-primary">Apply</button>
-                <a href="list.php" class="btn-erp btn-erp-warning">Clear</a>
+            <div class="erp-filter-actions-group">
+                <button type="submit" class="btn-erp btn-erp-apply">Apply</button>
+                <a href="list.php" class="btn-erp btn-erp-clear">Clear</a>
             </div>
         </form>
     </div>

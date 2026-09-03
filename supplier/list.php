@@ -32,7 +32,7 @@ unset($queryParams['page']);
 $queryString = http_build_query($queryParams);
 ?>
 
-<div style="padding: 20px; background: #f8fafc; min-height: calc(100vh - 110px);">
+<div class="page-main-container erp-container" style="padding: 20px; background: #f8fafc; min-height: calc(100vh - 110px);">
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap:wrap; gap:10px;">
         <h3 style="margin: 0; color: #1e293b; font-size: 20px; font-weight: 700;">Supplier List</h3>

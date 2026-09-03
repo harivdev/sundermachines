@@ -41,21 +41,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 $models = mysqli_query($conn, "SELECT * FROM model ORDER BY id ASC");
 ?>
 
-<div class="erp-container" style="max-width: 1000px; width: 100%; margin: 0 auto;">
+<div class="page-main-container erp-container" style="max-width: 1000px; width: 100%; margin: 0 auto; padding: 20px;">
     <div class="erp-header-bar">
         <div class="erp-header-title">Manage Models</div>
-        <div class="erp-header-actions">
-            <button type="button" onclick="openAddModal()" class="btn-erp btn-erp-new">+ New Model</button>
+        <div class="erp-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button type="button" onclick="focusAddModelField()" style="background: #2563eb; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">➕ New Model</button>
         </div>
     </div>
 
-    <div class="erp-table-box" style="overflow-x: auto;">
-        <table class="erp-table" style="width: 100%;">
+    <div class="erp-table-box" style="overflow-x: auto; width: 100%;">
+        <table class="erp-table master-table" style="width: 100%; min-width: 0;">
             <thead>
                 <tr>
-                    <th style="width: 60px; padding: 12px 15px;">#</th>
-                    <th style="padding: 12px 15px;">Model Name</th>
-                    <th style="text-align: right; width: 140px; padding: 12px 20px;">Actions</th>
+                    <th style="width: 45px; padding: 12px 10px; text-align: center;">#</th>
+                    <th style="padding: 12px 10px;">Model Name</th>
+                    <th style="text-align: right; width: 100px; padding: 12px 12px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -63,34 +63,59 @@ $models = mysqli_query($conn, "SELECT * FROM model ORDER BY id ASC");
                 while ($row = mysqli_fetch_assoc($models)): ?>
                     <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;"
                         onmouseover="this.style.background='#fbfcfe'" onmouseout="this.style.background='white'">
-                        <td style="padding: 12px 15px; color: #64748b; font-size: 14px; width: 60px;"><?= $i++ ?></td>
-                        <td colspan="2" style="padding: 12px 20px;">
+                        <td style="padding: 10px 10px; color: #64748b; font-size: 13.5px; font-weight: 600; width: 45px; text-align: center;"><?= $i++ ?></td>
+                        <td colspan="2" style="padding: 8px 12px;">
                             <form action="list.php" method="POST"
-                                style="display: flex; gap: 15px; width: 100%; align-items: center;">
+                                style="display: flex; gap: 8px; width: 100%; align-items: center;">
                                 <input type="hidden" name="id" value="<?= $row['id'] ?>">
                                 <input type="hidden" name="action" value="update">
                                 <input type="text" name="modelName" value="<?= htmlspecialchars($row['model']) ?>" required
-                                    style="flex: 1; min-width: 0; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; font-size: 14px; background: #fff;">
+                                    style="flex: 1; width: 100%; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; font-size: 13.5px; background: #fff; box-sizing: border-box;">
                                 <button type="submit"
-                                    style="background: #64748b; color: #fff; border: none; padding: 10px 22px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; flex-shrink: 0; white-space: nowrap;">Update</button>
+                                    style="background: #475569; color: #fff; border: none; padding: 7px 16px; border-radius: 6px; font-weight: 600; font-size: 12.5px; cursor: pointer; flex-shrink: 0; white-space: nowrap;">Update</button>
                             </form>
                         </td>
                     </tr>
                 <?php endwhile; ?>
             </tbody>
+            <tfoot>
+                <tr id="addModelSection" style="background: #f8fafc; border-top: 2px solid #e2e8f0;">
+                    <td style="padding: 10px 10px; color: #2563eb; font-size: 13px; font-weight: 700; width: 45px; text-align: center;">Add</td>
+                    <td colspan="2" style="padding: 8px 12px;">
+                        <form action="list.php" method="POST" style="display: flex; gap: 8px; width: 100%; align-items: center;">
+                            <input type="hidden" name="action" value="add">
+                            <input type="text" name="modelName" id="newModelInput" placeholder="New Model Name" required
+                                style="flex: 1; width: 100%; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; font-size: 13.5px; background: #fff; box-sizing: border-box; transition: all 0.3s ease;">
+                            <button type="submit"
+                                style="background: #2563eb; color: #fff; border: none; padding: 7px 18px; border-radius: 6px; font-weight: 700; font-size: 12.5px; cursor: pointer; flex-shrink: 0; white-space: nowrap; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">Add</button>
+                        </form>
+                    </td>
+                </tr>
+            </tfoot>
         </table>
-
-        <div style="background: #f8fafc; padding: 20px; border-top: 2px solid #e2e8f0;">
-            <form action="list.php" method="POST" style="display: flex; gap: 15px; width: 100%; align-items: center;">
-                <input type="hidden" name="action" value="add">
-                <input type="text" name="modelName" placeholder="New Model Name" required
-                    style="flex: 1; min-width: 0; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 12px 15px; font-size: 14px; background: #fff;">
-                <button type="submit"
-                    style="background: #2563eb; color: #fff; border: none; padding: 12px 35px; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; flex-shrink: 0; white-space: nowrap;">Add</button>
-            </form>
-        </div>
     </div>
 </div>
+
+<script>
+function focusAddModelField() {
+    const input = document.getElementById('newModelInput');
+    if (input) {
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+            input.focus();
+            input.style.borderColor = '#f97316';
+            input.style.boxShadow = '0 0 0 4px rgba(249, 115, 22, 0.25)';
+        }, 300);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('focus') === 'add' || window.location.hash === '#add') {
+        focusAddModelField();
+    }
+});
+</script>
 
 <style>
     input:focus {

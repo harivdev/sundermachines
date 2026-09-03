@@ -173,42 +173,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         .logo-section {
             text-align: center;
-            margin-bottom: 35px;
+            margin-bottom: 24px;
         }
 
         .logo-container {
-            width: 80px;
-            height: 80px;
+            width: 56px;
+            height: 56px;
             background: transparent;
-            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 15px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+            margin: 0 auto 12px;
+            box-shadow: none;
             border: none;
             padding: 0;
-            overflow: hidden;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+            transition: transform 0.25s ease, filter 0.25s ease;
             cursor: pointer;
         }
 
         .logo-container:hover {
-            transform: scale(1.12);
-            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.35);
+            transform: translateY(-2px) scale(1.05);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12));
         }
 
         .logo-container img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            transform: scale(1.15);
-            border-radius: 18px;
-            transition: transform 0.3s ease;
-        }
-
-        .logo-container:hover img {
-            transform: scale(1.25);
+            object-fit: contain;
+            mix-blend-mode: multiply;
+            transition: transform 0.25s ease;
         }
 
         .brand-name {
@@ -258,18 +251,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         .input-field:focus {
             outline: none;
-            border: 2px solid #f59e0b !important;
-            background: #fff7ed !important;
-            box-shadow: 0 0 0 3.5px rgba(245, 158, 11, 0.22) !important;
+            border: 1.5px solid #c9a771 !important;
+            background: #fffdf9 !important;
+            box-shadow: 0 0 0 3px rgba(201, 167, 113, 0.18) !important;
         }
 
         input:-webkit-autofill,
         input:-webkit-autofill:hover, 
         input:-webkit-autofill:focus, 
         input:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0 30px #fff7ed inset !important;
+            -webkit-box-shadow: 0 0 0 30px #fffdf9 inset !important;
             -webkit-text-fill-color: #1e293b !important;
-            border-color: #f59e0b !important;
+            border-color: #c9a771 !important;
             transition: background-color 5000s ease-in-out 0s;
         }
 
@@ -348,7 +341,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
         <div class="login-card">
             <div class="logo-section">
-                <div class="logo-container"><img src="img/logo.png" alt="Sunder Machines Logo"></div>
+                <div class="logo-container"><img src="img/logo.png" alt="Sunder Machines World Logo"></div>
                 <h1 class="brand-name"><span class="brand-accent">Sunder</span> Billing</h1>
                 <p class="subtitle">Please enter your credentials</p>
             </div>

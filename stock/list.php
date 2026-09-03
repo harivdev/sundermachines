@@ -214,13 +214,13 @@ $queryString = http_build_query($queryParams);
     <!-- PAGE HEADER BAR -->
     <div class="erp-header-bar">
         <div class="erp-header-title">Manage Stocks</div>
-        <div class="erp-header-actions">
-            <a href="add_stock.php" class="btn-erp btn-erp-new">
-                <span style="background: #ffffff; color: #1e293b; padding: 1px 6px; border-radius: 4px; font-size: 11px;">+</span> New
+        <div class="erp-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <a href="add_stock.php" style="background: #2563eb; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
+                <span style="font-size: 13px;">➕</span> New
             </a>
-            <button type="button" onclick="window.open('download_stock_report.php', '_blank')" class="btn-erp btn-erp-secondary">📥 Download</button>
-            <button type="button" onclick="location.reload()" class="btn-erp btn-erp-secondary">🔄 Refresh</button>
-            <button type="button" onclick="document.getElementById('filterDrawer').style.display = document.getElementById('filterDrawer').style.display === 'none' ? 'block' : 'none'" class="btn-erp btn-erp-secondary">🔽 Filter</button>
+            <button type="button" onclick="window.open('download_stock_report.php', '_blank')" style="background: #16a34a; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2);">📥 Download</button>
+            <button type="button" onclick="location.reload()" style="background: #475569; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(71, 85, 105, 0.2);">🔄 Refresh</button>
+            <button type="button" onclick="document.getElementById('filterDrawer').style.display = document.getElementById('filterDrawer').style.display === 'none' ? 'block' : 'none'" style="background: #d97706; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);">🔽 Filter</button>
         </div>
     </div>
 
@@ -229,19 +229,19 @@ $queryString = http_build_query($queryParams);
         <form method="GET" class="erp-filter-form">
             <div>
                 <label class="erp-label">Item Name</label>
-                <input type="text" name="item" value="<?= htmlspecialchars($_GET['item'] ?? '') ?>" class="erp-input" style="width:180px;">
+                <input type="text" name="item" value="<?= htmlspecialchars($_GET['item'] ?? '') ?>" class="erp-input" style="width:180px; border: 1px solid #cbd5e1; border-radius: 6px;">
             </div>
             <div>
                 <label class="erp-label">Part #</label>
-                <input type="text" name="part" value="<?= htmlspecialchars($_GET['part'] ?? '') ?>" class="erp-input" style="width:140px;">
+                <input type="text" name="part" value="<?= htmlspecialchars($_GET['part'] ?? '') ?>" class="erp-input" style="width:140px; border: 1px solid #cbd5e1; border-radius: 6px;">
             </div>
             <div>
                 <label class="erp-label">Barcode</label>
-                <input type="text" name="barcode" value="<?= htmlspecialchars($_GET['barcode'] ?? '') ?>" class="erp-input" style="width:140px;">
+                <input type="text" name="barcode" value="<?= htmlspecialchars($_GET['barcode'] ?? '') ?>" class="erp-input" style="width:140px; border: 1px solid #cbd5e1; border-radius: 6px;">
             </div>
-            <div>
-                <button type="submit" class="btn-erp btn-erp-primary">Apply</button>
-                <a href="list.php" class="btn-erp btn-erp-warning">Clear</a>
+            <div class="erp-filter-actions-group">
+                <button type="submit" class="btn-erp btn-erp-apply">Apply</button>
+                <a href="list.php" class="btn-erp btn-erp-clear">Clear</a>
             </div>
         </form>
     </div>

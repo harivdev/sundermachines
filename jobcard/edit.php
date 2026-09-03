@@ -70,46 +70,41 @@ if ($existingSparesRes) {
 $givenDate = !empty($jobcard['givenDate']) ? $jobcard['givenDate'] : date('Y-m-d');
 ?>
 
-<div style="padding: 20px; background: #f8fafc; min-height: calc(100vh - 110px);">
+<div class="page-main-container erp-container" style="padding: 20px; background: #f8fafc; min-height: calc(100vh - 110px);">
 
     <!-- HEADER BAR -->
-    <div style="background: #ffffff; display: flex; align-items: center; justify-content: space-between; border-radius: 12px 12px 0 0; padding: 16px 24px; border: 1px solid #e2e8f0; border-bottom: none; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-        <div style="display: flex; align-items: center; gap: 15px;">
+    <div class="jobcard-header-bar" style="background: #ffffff; display: flex; align-items: center; justify-content: space-between; border-radius: 12px 12px 0 0; padding: 16px 24px; border: 1px solid #e2e8f0; border-bottom: none; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
             <h2 style="margin: 0; color: #0f172a; font-weight: 700; font-size: 22px;">Edit Job Card</h2>
             <span style="background: #eff6ff; color: #2563eb; padding: 5px 14px; border-radius: 20px; font-weight: 700; font-size: 14px; border: 1px solid #bfdbfe;">
                 <?= htmlspecialchars($cleanCardNo) ?>
             </span>
         </div>
-        <div style="display: flex; gap: 12px; align-items: center;">
-            <button type="button" onclick="location.reload()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+        <div class="jobcard-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button type="button" onclick="location.reload()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
                 🔄 Reload
             </button>
-            <a href="list.php" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+            <a href="list.php" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                 📋 Back to List
             </a>
-            <a href="print_receipt.php?id=<?= $id ?>" target="_blank" style="background: #2563eb; color: #ffffff; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+            <a href="print_receipt.php?id=<?= $id ?>" target="_blank" style="background: #2563eb; color: #ffffff; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                 🖨️ Print
             </a>
         </div>
     </div>
 
     <!-- MAIN EDIT CONTAINER -->
-    <div style="background: #ffffff; border-radius: 0 0 12px 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 25px; border: 1px solid #e2e8f0; border-top: none;">
+    <div class="jobcard-main-card" style="background: #ffffff; border-radius: 0 0 12px 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 20px; border: 1px solid #e2e8f0; border-top: none;">
 
         <div id="alertContainer"></div>
 
         <form id="editJobCardForm" onsubmit="submitJobCardEdit(event)" enctype="multipart/form-data">
             <input type="hidden" name="id" value="<?= $id ?>">
-
-            <div style="display: grid; grid-template-columns: 1fr 340px; gap: 30px; align-items: start;">
-                
-                <!-- LEFT MAIN COLUMN -->
-                <div>
                     
                     <!-- SECTION 1: CARD GENERAL INFO -->
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin-bottom: 25px;">
                         <h4 style="margin: 0 0 15px 0; color: #334155; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Job Card Overview</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px;">
+                        <div class="jobcard-overview-grid">
                             <div class="form-group">
                                 <label style="font-size: 13px;">Card # (Readonly)</label>
                                 <input type="text" value="<?= htmlspecialchars($cleanCardNo) ?>" readonly style="background: #e2e8f0; font-weight: 700; color: #1e293b;">
@@ -149,7 +144,7 @@ $givenDate = !empty($jobcard['givenDate']) ? $jobcard['givenDate'] : date('Y-m-d
                             </button>
                         </div>
                         <input type="hidden" name="customerId" id="customerId" value="<?= htmlspecialchars($jobcard['cust_id'] ?? '') ?>">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                        <div class="jobcard-cust-grid">
                             <div class="form-group">
                                 <label style="font-size: 13px;">Phone # Primary <span class="required">*</span></label>
                                 <input type="text" name="customerPhone" id="customerPhone" value="<?= htmlspecialchars($jobcard['phoneNo1'] ?? '') ?>" required placeholder="Phone Number" onfocus="openCustomerLookupModal(this.value)">
@@ -227,6 +222,47 @@ $givenDate = !empty($jobcard['givenDate']) ? $jobcard['givenDate'] : date('Y-m-d
                                     <?php endif; ?>
                                 </tbody>
                             </table>
+                    <!-- SECTION 3.5: SUMMARY (2x2 Grid + 1 Below) -->
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin-bottom: 25px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);">
+                        <h4 style="margin: 0 0 15px 0; color: #0f172a; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Summary</h4>
+
+                        <div class="jobcard-summary-grid">
+                            
+                            <!-- ROW 1, COL 1: TOTAL AMOUNT (BLUE) -->
+                            <div class="jobcard-summary-box" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; justify-content: center;">
+                                <div style="font-size: 11.5px; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.5px;">Total Amount</div>
+                                <div class="summary-val" style="font-size: 24px; font-weight: 800; color: #1e3a8a; margin-top: 4px;" id="summaryTotal">₹0.00</div>
+                            </div>
+
+                            <!-- ROW 1, COL 2: PAID AMOUNT (GREEN WITH ADD PAYMENT BUTTON) -->
+                            <div class="jobcard-summary-box" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div class="paid-amount-header" style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
+                                    <span>Paid Amount</span>
+                                    <button type="button" onclick="autoFillPayment()" style="background: #16a34a; color: #ffffff; border: none; padding: 3px 8px; border-radius: 5px; font-size: 10.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                                        <span>➕</span> Add Payment
+                                    </button>
+                                </div>
+                                <input type="number" step="1" name="paidAmount" id="paidAmount" value="<?= floatval($jobcard['receivedAmountSum'] ?? 0) > 0 ? number_format(round((float)$jobcard['receivedAmountSum']), 0, '.', '') : '' ?>" placeholder="0" oninput="calculateSparesTotal()" style="height: 38px; font-size: 18px; font-weight: 800; color: #15803d; background: #ffffff; width: 100%; border: 1px solid #86efac; border-radius: 6px; padding: 0 10px; box-sizing: border-box;">
+                            </div>
+
+                            <!-- ROW 2, COL 1: BALANCE AMOUNT (RED) -->
+                            <div class="jobcard-summary-box" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; justify-content: center;">
+                                <div style="font-size: 11.5px; font-weight: 700; color: #991b1b; text-transform: uppercase; letter-spacing: 0.5px;">Balance Amount</div>
+                                <div class="summary-val" style="font-size: 24px; font-weight: 800; color: #991b1b; margin-top: 4px;" id="summaryBalance">₹0.00</div>
+                            </div>
+
+                            <!-- ROW 2, COL 2: SPARES SUBTOTAL (SLATE) -->
+                            <div class="jobcard-summary-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; justify-content: center;">
+                                <div style="font-size: 11.5px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Spares Subtotal</div>
+                                <div class="summary-val" style="font-size: 22px; font-weight: 800; color: #0f172a; margin-top: 4px;" id="summarySparesSub">₹0.00</div>
+                            </div>
+
+                            <!-- ROW 3 (SPANS 2 COLS BELOW): LABOUR CHARGE (SLATE WITH INPUT) -->
+                            <div class="jobcard-labour-row">
+                                <div style="font-size: 13px; font-weight: 700; color: #334155; text-transform: uppercase; letter-spacing: 0.5px;">Labour Charge (₹)</div>
+                                <input type="number" step="1" name="laborCharge" id="laborCharge" value="<?= floatval($jobcard['laborCharge'] ?? 0) > 0 ? number_format(round((float)$jobcard['laborCharge']), 0, '.', '') : '' ?>" placeholder="0" oninput="calculateSparesTotal()" style="height: 40px; font-size: 20px; font-weight: 800; color: #2563eb; background: #ffffff; max-width: 220px; width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 12px; box-sizing: border-box; text-align: right;">
+                            </div>
+
                         </div>
                     </div>
 
@@ -234,7 +270,7 @@ $givenDate = !empty($jobcard['givenDate']) ? $jobcard['givenDate'] : date('Y-m-d
                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px;">
                         <h4 style="margin: 0 0 15px 0; color: #334155; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Job Card Item Details</h4>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div class="jobcard-2col-grid" style="margin-bottom: 15px;">
                             <div class="form-group">
                                 <label style="font-size: 13px;">Machine <span class="required">*</span></label>
                                 <input type="text" name="machineName" value="<?= htmlspecialchars($jcItem['machineName'] ?? '') ?>" placeholder="Enter Machine Name" required style="height: 42px;">
@@ -245,9 +281,9 @@ $givenDate = !empty($jobcard['givenDate']) ? $jobcard['givenDate'] : date('Y-m-d
                             </div>
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                            <div class="form-group">
-                                <label style="font-size: 13px;">Work Details</label>
+                        <div class="jobcard-2col-grid" style="margin-bottom: 15px; align-items: end;">
+                            <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end;">
+                                <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600;">Work Details</label>
                                 <select name="workDetails" style="height: 42px;">
                                     <?php 
                                     $workOpts = ['Service', 'Repair', 'Replacement', 'Total Checkup'];
@@ -258,8 +294,8 @@ $givenDate = !empty($jobcard['givenDate']) ? $jobcard['givenDate'] : date('Y-m-d
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label style="font-size: 13px;">Technician / Employee Allocated</label>
+                            <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end;">
+                                <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600;" title="Technician / Employee Allocated">Technician / Employee</label>
                                 <input type="text" name="employeeName" value="<?= htmlspecialchars($jobcard['employeeName'] ?? '') ?>" placeholder="Enter Technician Name" style="height: 42px;">
                             </div>
                         </div>
@@ -267,11 +303,6 @@ $givenDate = !empty($jobcard['givenDate']) ? $jobcard['givenDate'] : date('Y-m-d
                         <div class="form-group" style="margin-bottom: 15px;">
                             <label style="font-size: 13px;">Service / Repair Remarks</label>
                             <textarea name="remarks" placeholder="Enter detailed service/repair remarks..." style="height: 80px; resize: none;"><?= htmlspecialchars($jcItem['remark'] ?? '') ?></textarea>
-                        </div>
-
-                        <div class="form-group" style="max-width: 250px;">
-                            <label style="font-size: 13px;">Labour Charge (₹)</label>
-                            <input type="number" step="1" name="laborCharge" id="laborCharge" value="<?= floatval($jobcard['laborCharge'] ?? 0) > 0 ? number_format(round((float)$jobcard['laborCharge']), 0, '.', '') : '' ?>" placeholder="0" oninput="calculateSparesTotal()" style="height: 42px; font-weight: 700; color: #2563eb;">
                         </div>
 
                         <!-- JOB CARD ITEM PHOTOS GALLERY & DUAL UPLOADER -->
@@ -323,19 +354,19 @@ $givenDate = !empty($jobcard['givenDate']) ? $jobcard['givenDate'] : date('Y-m-d
                                         </div>
                                     <?php endforeach; ?>
                                 <?php else: ?>
-                                    <div id="noPhotoPlaceholder" style="width: 180px; height: 110px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 11px; font-weight: 600; text-align: center; padding: 4px; box-sizing: border-box;">
-                                        <span style="font-size: 24px;">🖼️</span>
+                                    <div id="noPhotoPlaceholder" style="width: 100%; height: 130px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 12px; font-weight: 600; text-align: center; padding: 10px; box-sizing: border-box;">
+                                        <span style="font-size: 28px; margin-bottom: 4px;">🖼️</span>
                                         <span>No Photo</span>
                                     </div>
                                 <?php endif; ?>
                             </div>
 
                             <!-- DUAL UPLOAD BUTTONS: CAMERA & GALLERY -->
-                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                                <button type="button" onclick="openErpCamera(function(dataUrl, file){ if(file){ try { let c = new DataTransfer(); c.items.add(file); const inp = document.getElementById('editCameraInput'); inp.files = c.files; previewPhotos(inp); } catch(e){} } })" style="background: #2563eb; color: #ffffff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 12.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                            <div style="display: flex; gap: 10px; width: 100%; flex-wrap: wrap;">
+                                <button type="button" onclick="openErpCamera(function(dataUrl, file){ if(file){ try { let c = new DataTransfer(); c.items.add(file); const inp = document.getElementById('editCameraInput'); inp.files = c.files; previewPhotos(inp); } catch(e){} } })" style="flex: 1 1 calc(50% - 5px); min-width: 120px; background: #2563eb; color: #ffffff; border: none; padding: 10px 12px; border-radius: 8px; font-weight: 700; font-size: 12.5px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box;">
                                     📷 Take Photo (Camera)
                                 </button>
-                                <button type="button" onclick="document.getElementById('editGalleryInput').click()" style="background: #475569; color: #ffffff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 12.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                                <button type="button" onclick="document.getElementById('editGalleryInput').click()" style="flex: 1 1 calc(50% - 5px); min-width: 120px; background: #475569; color: #ffffff; border: none; padding: 10px 12px; border-radius: 8px; font-weight: 700; font-size: 12.5px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box;">
                                     📁 Choose File (Gallery)
                                 </button>
                             </div>
@@ -345,58 +376,12 @@ $givenDate = !empty($jobcard['givenDate']) ? $jobcard['givenDate'] : date('Y-m-d
                         </div>
                     </div>
 
-                </div>
-
-                <!-- RIGHT STICKY SUMMARY PANEL -->
-                <div style="position: sticky; top: 20px;">
-                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);">
-                        <h4 style="margin: 0 0 15px 0; color: #0f172a; font-size: 15px; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">Summary</h4>
-
-                        <!-- BLUE: TOTAL AMOUNT -->
-                        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 16px; margin-bottom: 15px;">
-                            <div style="font-size: 12px; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.5px;">Total Amount</div>
-                            <div style="font-size: 24px; font-weight: 800; color: #1e3a8a; margin-top: 4px;" id="summaryTotal">₹0.00</div>
-                        </div>
-
-                        <!-- GREEN: PAID AMOUNT -->
-                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px; margin-bottom: 15px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.5px;">
-                                <span>Paid Amount</span>
-                                <button type="button" onclick="autoFillPayment()" style="background: #16a34a; color: #ffffff; border: none; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
-                                    <span>➕</span> Add Payment
-                                </button>
-                            </div>
-                            <input type="number" step="1" name="paidAmount" id="paidAmount" value="<?= floatval($jobcard['receivedAmountSum'] ?? 0) > 0 ? number_format(round((float)$jobcard['receivedAmountSum']), 0, '.', '') : '' ?>" placeholder="0" oninput="calculateSparesTotal()" style="height: 38px; font-size: 18px; font-weight: 800; color: #15803d; background: #ffffff; margin-top: 6px;">
-                        </div>
-
-                        <!-- RED: BALANCE AMOUNT -->
-                        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 16px; margin-bottom: 20px;">
-                            <div style="font-size: 12px; font-weight: 700; color: #991b1b; text-transform: uppercase; letter-spacing: 0.5px;">Balance Amount</div>
-                            <div style="font-size: 24px; font-weight: 800; color: #991b1b; margin-top: 4px;" id="summaryBalance">₹0.00</div>
-                        </div>
-
-                        <!-- SUMMARY DETAILS BREAKDOWN -->
-                        <div style="font-size: 13px; color: #475569; border-top: 1px solid #f1f5f9; padding-top: 12px; display: flex; flex-direction: column; gap: 8px;">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span>Spares Subtotal:</span>
-                                <strong id="summarySparesSub">₹0.00</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between;">
-                                <span>Labour Charge:</span>
-                                <strong id="summaryLabour">₹0.00</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
             <!-- BOTTOM BUTTONS -->
-            <div style="margin-top: 30px; border-top: 1.5px solid #e2e8f0; padding-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
-                <a href="print_receipt.php?id=<?= $id ?>" target="_blank" style="background: #475569; color: #fff; padding: 11px 24px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 14px;">Print</a>
-                <button type="reset" onclick="setTimeout(calculateSparesTotal, 100)" style="background: #94a3b8; color: #fff; border: none; padding: 11px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">Reset</button>
-                <a href="list.php" style="background: #e2e8f0; color: #334155; padding: 11px 24px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 14px;">Cancel</a>
-                <button type="submit" id="saveJobCardBtn" style="background: #2563eb; color: #fff; border: none; padding: 11px 32px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">Save Changes</button>
+            <div class="jobcard-bottom-actions" style="margin-top: 30px; border-top: 1.5px solid #e2e8f0; padding-top: 20px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; width: 100%; box-sizing: border-box;">
+                <a href="print_receipt.php?id=<?= $id ?>" target="_blank" class="btn-bottom-act" style="background: #475569; color: #fff; padding: 11px 20px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 13.5px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">🖨️ Print</a>
+                <button type="reset" onclick="setTimeout(calculateSparesTotal, 100)" class="btn-bottom-act" style="background: #94a3b8; color: #fff; border: none; padding: 11px 20px; border-radius: 8px; font-weight: 700; font-size: 13.5px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">🔄 Reset</button>
+                <a href="list.php" class="btn-bottom-act" style="background: #e2e8f0; color: #334155; padding: 11px 20px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 13.5px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">❌ Cancel</a>
+                <button type="submit" id="saveJobCardBtn" class="btn-bottom-act" style="background: #2563eb; color: #fff; border: none; padding: 11px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); display: inline-flex; align-items: center; justify-content: center; gap: 6px;">💾 Save Changes</button>
             </div>
 
         </form>
@@ -441,13 +426,13 @@ $givenDate = !empty($jobcard['givenDate']) ? $jobcard['givenDate'] : date('Y-m-d
 <!-- ==================== CUSTOMER LOOKUP MODAL ==================== -->
 <div id="customerLookupModal" class="modal-overlay">
     <div class="modal-content" style="max-width: 1050px; width: 95%;">
-        <div class="modal-header">
-            <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
-                <h3 style="margin: 0; color: #0f172a; font-size: 18px; font-weight: 700;">Customer Lookup</h3>
-                <input type="text" id="modalSearchInput" placeholder="Search by Phone, Name, or Customer ID..." autocomplete="off" oninput="triggerCustomerModalSearch(this.value)" style="flex: 1; max-width: 450px; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 0 12px; font-size: 14px;">
+        <div class="modal-header" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px;">
+                <h3 style="margin: 0; color: #0f172a; font-size: 17px; font-weight: 700; white-space: nowrap;">Customer Lookup</h3>
+                <input type="text" id="modalSearchInput" placeholder="search..." autocomplete="off" oninput="triggerCustomerModalSearch(this.value)" style="flex: 1; min-width: 150px; max-width: 450px; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 0 12px; font-size: 13px;">
             </div>
             <div style="display: flex; align-items: center; gap: 10px;">
-                <button type="button" onclick="openNewCustomerModal()" style="background: #16a34a; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;">
+                <button type="button" onclick="openNewCustomerModal()" style="background: #16a34a; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; white-space: nowrap;">
                     + New Customer
                 </button>
                 <button type="button" onclick="closeCustomerLookupModal()" style="background: transparent; border: none; font-size: 24px; color: #64748b; cursor: pointer; line-height: 1;">&times;</button>
@@ -478,14 +463,14 @@ $givenDate = !empty($jobcard['givenDate']) ? $jobcard['givenDate'] : date('Y-m-d
 </div>
 
 <!-- ==================== CUSTOMER EDIT / NEW MODAL ==================== -->
-<div id="customerEditModal" class="modal-overlay" style="z-index: 10000;">
-    <div class="modal-content" style="max-width: 650px; width: 90%;">
+<div id="customerEditModal" class="modal-overlay" style="z-index: 10000; overflow-y: auto;">
+    <div class="modal-content" style="max-width: 650px; width: 90%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;">
         <div class="modal-header">
             <h3 id="editModalTitle" style="margin: 0; color: #0f172a; font-size: 18px; font-weight: 700;">Edit Customer</h3>
             <button type="button" onclick="closeCustomerEditModal()" style="background: transparent; border: none; font-size: 24px; color: #64748b; cursor: pointer; line-height: 1;">&times;</button>
         </div>
-        <form id="customerEditForm" onsubmit="saveCustomerAjax(event)">
-            <div class="modal-body" style="padding: 20px;">
+        <form id="customerEditForm" onsubmit="saveCustomerAjax(event)" style="display: flex; flex-direction: column; overflow: hidden; flex: 1; margin: 0;">
+            <div class="modal-body" style="padding: 20px; overflow-y: auto; max-height: calc(85vh - 120px); -webkit-overflow-scrolling: touch; flex: 1; touch-action: pan-y;">
                 <input type="hidden" name="id" id="edit_id" value="0">
                 <input type="hidden" name="address_id" id="edit_address_id" value="0">
 
@@ -703,10 +688,10 @@ $givenDate = !empty($jobcard['givenDate']) ? $jobcard['givenDate'] : date('Y-m-d
         const grandTotal = Math.round(sparesSubtotal + laborCharge);
         const balanceAmount = Math.round(grandTotal - paidAmount);
 
-        document.getElementById('summarySparesSub').textContent = '₹' + Math.round(sparesSubtotal);
-        document.getElementById('summaryLabour').textContent = '₹' + laborCharge;
-        document.getElementById('summaryTotal').textContent = '₹' + grandTotal;
-        document.getElementById('summaryBalance').textContent = '₹' + balanceAmount;
+        if (document.getElementById('summarySparesSub')) document.getElementById('summarySparesSub').textContent = '₹' + Math.round(sparesSubtotal);
+        if (document.getElementById('summaryLabour')) document.getElementById('summaryLabour').textContent = '₹' + laborCharge;
+        if (document.getElementById('summaryTotal')) document.getElementById('summaryTotal').textContent = '₹' + grandTotal;
+        if (document.getElementById('summaryBalance')) document.getElementById('summaryBalance').textContent = '₹' + balanceAmount;
 
         // Auto-update jobStatus dropdown based on paid amount, labor charge, and spares
         const statusSelect = document.querySelector('select[name="jobStatus"]');

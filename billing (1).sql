@@ -1,4 +1,4 @@
--- MySQL Dump - SUNDER MACHINES WORKS Fresh Database
+-- MySQL Dump - SUNDER MACHINES WORLD Fresh Database
 -- Host: localhost    Database: billing
 -- ------------------------------------------------------
 

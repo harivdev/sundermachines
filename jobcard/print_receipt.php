@@ -145,7 +145,7 @@ $formattedDateTime = date('d/m/Y h:i A', strtotime($dateTimeRaw));
 <body onload="window.print()">
 
     <div class="header">
-        <h2>SUNDER MACHINES WORKS</h2>
+        <h2>SUNDER MACHINES WORLD</h2>
         <p>4, Sunder Towers, Near Bus Stand.</p>
         <p>Gobi - 638 476</p>
         <p>Ph: 04285-224176 &nbsp; Cell:+91 98433 61326</p>

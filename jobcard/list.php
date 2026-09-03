@@ -75,23 +75,23 @@ unset($queryParams['page']);
 $queryString = http_build_query($queryParams);
 ?>
 
-<div style="padding: 20px; background: #f8fafc; min-height: calc(100vh - 110px);">
+<div class="page-main-container erp-container" style="padding: 20px; background: #f8fafc; min-height: calc(100vh - 110px);">
     
     <!-- HEADER BAR -->
-    <div style="background: #ffffff; display: flex; align-items: center; justify-content: space-between; border-radius: 8px 8px 0 0; padding: 15px 20px; border: 1px solid #e2e8f0; border-bottom: none;">
-        <div style="color: #1e293b; font-weight: 700; font-size: 20px;">Job Card Bills</div>
-        <div style="display: flex; gap: 15px; align-items: center;">
-            <a href="create.php" style="color: #1e293b; text-decoration: none; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 5px;">
-                <span style="background: #1e293b; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 12px;">+</span> New
+    <div class="list-header-bar" style="background: #ffffff; display: flex; align-items: center; justify-content: space-between; border-radius: 8px 8px 0 0; padding: 15px 20px; border: 1px solid #e2e8f0; border-bottom: none; flex-wrap: wrap; gap: 10px;">
+        <div class="list-header-title" style="color: #1e293b; font-weight: 700; font-size: 20px;">Job Card Bills</div>
+        <div class="list-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <a href="create.php" style="background: #2563eb; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); transition: all 0.15s ease;">
+                <span style="font-size: 13px;">➕</span> New
             </a>
-            <a href="javascript:void(0)" onclick="location.reload()" style="color: #1e293b; text-decoration: none; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 5px;">
-                <span>🔄</span> Refresh
+            <a href="javascript:void(0)" onclick="location.reload()" style="background: #475569; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(71, 85, 105, 0.2); transition: all 0.15s ease;">
+                <span style="font-size: 13px;">🔄</span> Refresh
             </a>
-            <a href="print_summary.php?<?= http_build_query($_GET) ?>" target="_blank" style="background: #16a34a; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 13px; padding: 6px 14px; border-radius: 6px; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <span>📄</span> Print A4 Summary
+            <a href="print_summary.php?<?= http_build_query($_GET) ?>" target="_blank" style="background: #16a34a; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2); transition: all 0.15s ease;">
+                <span style="font-size: 13px;">📄</span> Print A4 Summary
             </a>
-            <a href="javascript:void(0)" onclick="document.getElementById('jobcardFilter').style.display = document.getElementById('jobcardFilter').style.display === 'none' ? 'block' : 'none'" style="color: #1e293b; text-decoration: none; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 5px;">
-                <span>🔽</span> Filter
+            <a href="javascript:void(0)" onclick="document.getElementById('jobcardFilter').style.display = document.getElementById('jobcardFilter').style.display === 'none' ? 'block' : 'none'" style="background: #d97706; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2); transition: all 0.15s ease;">
+                <span style="font-size: 13px;">🔽</span> Filter
             </a>
         </div>
     </div>
@@ -121,9 +121,9 @@ $queryString = http_build_query($queryParams);
     </div>
 
     <!-- MAIN LIST -->
-    <div style="background: #fff; border-radius: 0 0 12px 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 0; border: 1px solid #e2e8f0; overflow: hidden; overflow-x: auto;">
+    <div style="background: #fff; border-radius: 0 0 12px 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 0; border: 1px solid #e2e8f0; overflow-x: auto;">
         
-        <table style="width: 100%; border-collapse: collapse; text-align: left; min-width: 1000px;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; min-width: 1350px; white-space: nowrap;">
             <thead>
                 <tr style="background: #f8fafc;">
                     <th rowspan="2" style="padding: 12px 15px; border-bottom: 2px solid #e2e8f0; font-size: 14px; color: #1e293b;">#</th>
@@ -252,16 +252,16 @@ $queryString = http_build_query($queryParams);
     </div>
 
     <!-- PAGINATION -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; font-size:14px; color:#64748b;">
-        <div>
+    <div class="list-pagination-bar" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; font-size:14px; color:#64748b; flex-wrap:wrap; gap:10px;">
+        <div class="pagination-info">
             <?php 
             $startRecord = $totalRows > 0 ? $offset + 1 : 0;
             $endRecord = min($offset + $limit, $totalRows);
             ?>
-            Showing <?= $startRecord ?>–<?= $endRecord ?> of <?= $totalRows ?> records. &nbsp;|&nbsp; Page <?= $page ?> of <?= $totalPages ?>
+            Showing <?= $startRecord ?>–<?= $endRecord ?> of <?= $totalRows ?> records &nbsp;|&nbsp; Page <?= $page ?> of <?= $totalPages ?>
         </div>
 
-        <div style="display:flex; gap:5px; align-items:center;">
+        <div class="pagination-buttons" style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
             <?php if ($page <= 1): ?>
                 <span style="padding:6px 12px; background:#e2e8f0; border-radius:5px; color:#94a3b8; cursor:not-allowed;">First</span>
                 <span style="padding:6px 12px; background:#e2e8f0; border-radius:5px; color:#94a3b8; cursor:not-allowed;">Previous</span>

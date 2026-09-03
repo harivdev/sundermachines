@@ -32,7 +32,7 @@ while ($row = mysqli_fetch_assoc($iRes)) {
 }
 ?>
 
-<div style="padding: 20px; background: #f8fafc; min-height: calc(100vh - 110px); display: flex; justify-content: center;">
+<div class="page-main-container erp-container" style="padding: 20px; background: #f8fafc; min-height: calc(100vh - 110px); display: flex; justify-content: center;">
     
     <div style="width: 100%; max-width: 900px;">
         <!-- ACTION BAR -->

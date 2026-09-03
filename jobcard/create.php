@@ -120,26 +120,26 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
                 </div>
             </div>
 
-            <div class="erp-form-grid" style="grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);">
+            <div class="erp-form-grid jobcard-2col-grid">
                 <!-- JOB DETAIL SECTION -->
                 <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px;">
                     <h4 style="margin-bottom: 25px; color: #334155; font-size: 16px; font-weight: 700;">Job Card Item #: 1</h4>
 
-                    <div style="display: flex; gap: 20px; margin-bottom: 25px; align-items: flex-start; flex-wrap: wrap;">
+                    <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 25px;">
                         <!-- Photo Upload & Preview Section -->
-                        <div style="display: flex; flex-direction: column; gap: 10px; width: 180px; min-width: 180px;">
-                            <div id="photoPreviewContainer" style="display: flex; gap: 8px; flex-wrap: wrap; width: 100%; align-items: center;">
-                                <div id="noPhotoPlaceholder" style="width: 100%; height: 110px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 11px; font-weight: 600; text-align: center; padding: 4px; box-sizing: border-box;">
-                                    <span style="font-size: 24px;">🖼️</span>
+                        <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+                            <div id="photoPreviewContainer" style="display: flex; gap: 10px; flex-wrap: wrap; width: 100%; align-items: center; justify-content: center;">
+                                <div id="noPhotoPlaceholder" style="width: 100%; height: 130px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 12px; font-weight: 600; text-align: center; padding: 10px; box-sizing: border-box;">
+                                    <span style="font-size: 28px; margin-bottom: 4px;">🖼️</span>
                                     <span>No Photo</span>
                                 </div>
                             </div>
                             
-                            <div style="display: flex; gap: 6px; flex-direction: column; width: 100%;">
-                                <button type="button" onclick="openErpCamera(function(dataUrl, file){ if(file){ try { let c = new DataTransfer(); c.items.add(file); const inp = document.getElementById('createCameraInput'); inp.files = c.files; previewPhotos(inp); } catch(e){} } })" style="width: 100%; background: #2563eb; color: #fff; border: none; padding: 9px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box;">
+                            <div style="display: flex; gap: 10px; width: 100%; flex-wrap: wrap;">
+                                <button type="button" onclick="openErpCamera(function(dataUrl, file){ if(file){ try { let c = new DataTransfer(); c.items.add(file); const inp = document.getElementById('createCameraInput'); inp.files = c.files; previewPhotos(inp); } catch(e){} } })" style="flex: 1; min-width: 140px; background: #2563eb; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box;">
                                     📷 Take Photo
                                 </button>
-                                <button type="button" onclick="document.getElementById('createGalleryInput').click()" style="width: 100%; background: #475569; color: #fff; border: none; padding: 9px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box;">
+                                <button type="button" onclick="document.getElementById('createGalleryInput').click()" style="flex: 1; min-width: 140px; background: #475569; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box;">
                                     📁 Choose From Device
                                 </button>
                             </div>
@@ -148,8 +148,8 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
                             <input type="file" id="createGalleryInput" name="jobcard_photos[]" accept="image/*" multiple style="display: none;" onchange="previewPhotos(this)">
                         </div>
 
-                        <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div style="width: 100%; display: flex; flex-direction: column; gap: 15px;">
+                            <div class="jobcard-2col-grid">
                                 <div class="form-group">
                                     <label>Machine <span class="required">*</span></label>
                                     <input type="text" name="machineName" placeholder="Enter Machine Name" required style="width: 100%; height: 42px; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 0 12px;">
@@ -161,20 +161,20 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
                                     </div>
                                 </div>
                             </div>
-                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                                 <div class="form-group">
-                                     <label>Work Details</label>
-                                     <select name="workDetails" style="width: 100%; height: 42px; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 0 12px;">
-                                         <option value="Service">Service</option>
-                                         <option value="Repair">Repair</option>
-                                         <option value="Replacement">Replacement</option>
-                                     </select>
-                                 </div>
-                                 <div class="form-group">
-                                      <label>Technician / Employee Allocated</label>
-                                      <input type="text" name="employeeName" placeholder="Enter Technician Name" style="width: 100%; height: 42px; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 0 12px;">
+                            <div class="jobcard-2col-grid" style="align-items: end;">
+                                  <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end;">
+                                      <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600;">Work Details</label>
+                                      <select name="workDetails" style="width: 100%; height: 42px; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 0 12px;">
+                                          <option value="Service">Service</option>
+                                          <option value="Repair">Repair</option>
+                                          <option value="Replacement">Replacement</option>
+                                      </select>
                                   </div>
-                             </div>
+                                  <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end;">
+                                       <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600;" title="Technician / Employee Allocated">Technician / Employee</label>
+                                       <input type="text" name="employeeName" placeholder="Enter Technician Name" style="width: 100%; height: 42px; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 0 12px;">
+                                   </div>
+                             </div>          
                         </div>
                     </div>
 
@@ -186,7 +186,7 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
 
                 <!-- RIGHT SIDE (LOGO PLACEHOLDER) -->
                 <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 10px;">
-                    <img src="../img/logo.png" alt="SUNDER MACHINES WORKS" style="max-width: 100%; height: auto; border-radius: 10px; max-height: 280px; object-fit: contain;">
+                    <img src="../img/logo.png" alt="SUNDER MACHINES WORLD" style="max-width: 100%; height: auto; border-radius: 10px; max-height: 280px; object-fit: contain;">
                 </div>
             </div>
 
@@ -202,13 +202,13 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
 <!-- CUSTOMER LOOKUP MODAL -->
 <div id="customerLookupModal" class="modal-overlay">
     <div class="modal-content" style="max-width: 1050px; width: 95%;">
-        <div class="modal-header">
-            <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
-                <h3 style="margin: 0; color: #0f172a; font-size: 18px; font-weight: 700;">Customer Lookup</h3>
-                <input type="text" id="modalSearchInput" placeholder="Search by Phone, Name, or Customer ID..." autocomplete="off" oninput="triggerModalSearch(this.value)" style="flex: 1; max-width: 450px; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 0 12px; font-size: 14px;">
+        <div class="modal-header" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px;">
+                <h3 style="margin: 0; color: #0f172a; font-size: 17px; font-weight: 700; white-space: nowrap;">Customer Lookup</h3>
+                <input type="text" id="modalSearchInput" placeholder="search..." autocomplete="off" oninput="triggerModalSearch(this.value)" style="flex: 1; min-width: 150px; max-width: 450px; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 0 12px; font-size: 13px;">
             </div>
             <div style="display: flex; align-items: center; gap: 10px;">
-                <button type="button" onclick="openNewCustomerModal()" style="background: #16a34a; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;">
+                <button type="button" onclick="openNewCustomerModal()" style="background: #16a34a; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; white-space: nowrap;">
                     + New Customer
                 </button>
                 <button type="button" onclick="closeCustomerLookupModal()" style="background: transparent; border: none; font-size: 24px; color: #64748b; cursor: pointer; line-height: 1;">&times;</button>
@@ -239,14 +239,14 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
 </div>
 
 <!-- CUSTOMER EDIT / NEW MODAL -->
-<div id="customerEditModal" class="modal-overlay" style="z-index: 10000;">
-    <div class="modal-content" style="max-width: 650px; width: 90%;">
+<div id="customerEditModal" class="modal-overlay" style="z-index: 10000; overflow-y: auto;">
+    <div class="modal-content" style="max-width: 650px; width: 90%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;">
         <div class="modal-header">
             <h3 id="editModalTitle" style="margin: 0; color: #0f172a; font-size: 18px; font-weight: 700;">Edit Customer</h3>
             <button type="button" onclick="closeCustomerEditModal()" style="background: transparent; border: none; font-size: 24px; color: #64748b; cursor: pointer; line-height: 1;">&times;</button>
         </div>
-        <form id="customerEditForm" onsubmit="saveCustomerAjax(event)">
-            <div class="modal-body" style="padding: 20px;">
+        <form id="customerEditForm" onsubmit="saveCustomerAjax(event)" style="display: flex; flex-direction: column; overflow: hidden; flex: 1; margin: 0;">
+            <div class="modal-body" style="padding: 20px; overflow-y: auto; max-height: calc(85vh - 120px); -webkit-overflow-scrolling: touch; flex: 1; touch-action: pan-y;">
                 <input type="hidden" name="id" id="edit_id" value="0">
                 <input type="hidden" name="address_id" id="edit_address_id" value="0">
 

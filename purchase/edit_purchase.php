@@ -290,9 +290,14 @@ while ($m = mysqli_fetch_assoc($modelsRes)) { $modelsList[] = $m; }
 
   .po-table input.tbl-input, .po-table select.tbl-input {
     height: 32px;
-    padding: 4px 8px;
+    padding: 4px 5px;
     font-size: 12px;
+    box-sizing: border-box;
   }
+
+  .item-select { min-width: 220px !important; width: 100%; }
+  .brand-select { min-width: 145px !important; width: 100%; }
+  .model-select { min-width: 145px !important; width: 100%; }
 
   .btn-row-add {
     background: #2563eb;
@@ -520,9 +525,9 @@ while ($m = mysqli_fetch_assoc($modelsRes)) { $modelsList[] = $m; }
           <thead>
             <tr>
               <th rowspan="2" style="width:35px;">#</th>
-              <th rowspan="2" style="min-width:200px;">Item *</th>
-              <th rowspan="2" style="width:120px;">Brand</th>
-              <th rowspan="2" style="width:120px;">Model</th>
+              <th rowspan="2" style="min-width:220px; width:220px;">Item *</th>
+              <th rowspan="2" style="min-width:145px; width:145px;">Brand</th>
+              <th rowspan="2" style="min-width:145px; width:145px;">Model</th>
               <th colspan="2" class="th-grp">Quantity</th>
               <th colspan="3" class="th-grp">Purchase Price</th>
               <th class="th-grp">Selling Price</th>

@@ -167,7 +167,7 @@ $sampleCustId = 'C' . str_pad($nextCustNum, 7, '0', STR_PAD_LEFT);
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
-    min-width: 780px;
+    min-width: 950px;
   }
   .items-table th {
     background: #f8f9fa; font-weight: 700; color: #495057;
@@ -180,6 +180,9 @@ $sampleCustId = 'C' . str_pad($nextCustNum, 7, '0', STR_PAD_LEFT);
   .td-input {
     width: 100%;
     padding: 6px 8px; font-size: 13px; border: 1px solid #ced4da; border-radius: 4px;
+  }
+  .item-name-inp {
+    min-width: 200px !important;
   }
   .img-cell {
     width: 36px; height: 36px; background: #e9ecef; border-radius: 4px;
@@ -450,15 +453,15 @@ $sampleCustId = 'C' . str_pad($nextCustNum, 7, '0', STR_PAD_LEFT);
             <tr>
               <th style="width:30px;">#</th>
               <th style="width:45px;">Image</th>
-              <th>Item</th>
-              <th style="width:120px;">Barcode</th>
-              <th style="width:120px;">Part/Serial #</th>
-              <th style="width:80px;">Rack #</th>
-              <th style="width:65px;">Qty</th>
-              <th style="width:100px;">Price/Qty</th>
-              <th style="width:65px;">GST %</th>
-              <th style="width:110px;">Total Price</th>
-              <th style="width:65px; text-align:center;">Action</th>
+              <th style="min-width:220px; width:220px;">Item</th>
+              <th style="min-width:120px; width:120px;">Barcode</th>
+              <th style="min-width:120px; width:120px;">Part/Serial #</th>
+              <th style="min-width:80px; width:80px;">Rack #</th>
+              <th style="min-width:65px; width:65px;">Qty</th>
+              <th style="min-width:100px; width:100px;">Price/Qty</th>
+              <th style="min-width:65px; width:65px;">GST %</th>
+              <th style="min-width:110px; width:110px;">Total Price</th>
+              <th style="min-width:65px; width:65px; text-align:center;">Action</th>
             </tr>
           </thead>
           <tbody id="itemsBody">

@@ -1,6 +1,20 @@
 <?php require_once("../config/db.php"); ?>
 <?php require_once("../includes/auth.php"); ?>
 <?php requireAdmin(); ?>
+<?php
+// Quick POST handler for adding machine
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'add') {
+    $mName = mysqli_real_escape_string($conn, $_POST['machineName']);
+    if (!empty($mName)) {
+        $now = date('Y-m-d H:i:s');
+        $user = "System Admin";
+        $sql = "INSERT INTO machine (machineName, active, createdBy, createdOn) VALUES ('$mName', b'1', '$user', '$now')";
+        mysqli_query($conn, $sql);
+        echo "<script>window.location.href='list_machine.php';</script>";
+        exit();
+    }
+}
+?>
 <?php include("../includes/header.php"); ?>
 
 <?php
@@ -150,7 +164,7 @@ $queryString = http_build_query($queryParams);
     }
 </style>
 
-<div class="erp-container">
+<div class="page-main-container erp-container" style="padding: 20px;">
 
     <!-- HEADER BAR -->
     <div class="erp-header-bar">
@@ -158,16 +172,16 @@ $queryString = http_build_query($queryParams);
             <span style="margin-right: 8px;">⚙️</span>Manage Machines
         </div>
 
-        <div class="erp-header-actions">
-            <a href="add_machine.php" class="btn-erp btn-erp-new">+ New Machine</a>
-            <button type="button" onclick="location.reload()" class="btn-erp btn-erp-secondary">⟳ Refresh</button>
-            <button type="button" onclick="openFilter()" class="btn-erp btn-erp-primary">⛃ Filter</button>
+        <div class="erp-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button type="button" onclick="focusAddMachineField()" style="background: #2563eb; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">➕ New Machine</button>
+            <button type="button" onclick="location.reload()" style="background: #475569; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(71, 85, 105, 0.2);">🔄 Refresh</button>
+            <button type="button" onclick="openFilter()" style="background: #d97706; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);">🔽 Filter</button>
         </div>
     </div>
 
     <!-- TABLE BOX -->
-    <div class="erp-table-box" style="overflow-x: auto; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-        <table class="erp-table" style="width: 100%; border-collapse: collapse;">
+    <div class="erp-table-box" style="overflow-x: auto; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); width: 100%;">
+        <table class="erp-table master-table" style="width: 100%; border-collapse: collapse; min-width: 0;">
             <thead>
                 <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
                     <th style="width: 60px; padding: 14px 18px; color: #475569; font-weight: 700; font-size: 13px; text-transform: uppercase;">#</th>
@@ -216,6 +230,20 @@ $queryString = http_build_query($queryParams);
                     </tr>
                 <?php } ?>
             </tbody>
+            <tfoot>
+                <tr id="addMachineSection" style="background: #f8fafc; border-top: 2px solid #e2e8f0;">
+                    <td style="padding: 12px 10px; color: #2563eb; font-size: 13px; font-weight: 700; width: 50px; text-align: center;">Add</td>
+                    <td colspan="3" style="padding: 12px 20px;">
+                        <form action="list_machine.php" method="POST" style="display: flex; gap: 10px; width: 100%; align-items: center;">
+                            <input type="hidden" name="action" value="add">
+                            <input type="text" name="machineName" id="newMachineInput" placeholder="New Machine Name" required
+                                style="flex: 1; min-width: 120px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; font-size: 14px; background: #fff; transition: all 0.3s ease;">
+                            <button type="submit"
+                                style="background: #2563eb; color: #fff; border: none; padding: 10px 26px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; flex-shrink: 0; white-space: nowrap;">Add Machine</button>
+                        </form>
+                    </td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 
@@ -283,6 +311,25 @@ $queryString = http_build_query($queryParams);
         document.getElementById("filterDrawer").classList.remove("active");
         document.getElementById("overlay").classList.remove("active");
     }
+
+    function focusAddMachineField() {
+        const input = document.getElementById('newMachineInput');
+        if (input) {
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+                input.focus();
+                input.style.borderColor = '#f97316';
+                input.style.boxShadow = '0 0 0 4px rgba(249, 115, 22, 0.25)';
+            }, 300);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('focus') === 'add' || window.location.hash === '#add') {
+            focusAddMachineField();
+        }
+    });
 </script>
 
 <?php include("../includes/footer.php"); ?>

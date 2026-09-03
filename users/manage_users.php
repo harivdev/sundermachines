@@ -80,7 +80,7 @@ $queryString = http_build_query($queryParams);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Users – Sunder Machine</title>
+  <title>Manage Users – Sunder Machines World</title>
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Grotesk:wght@700&display=swap"
     rel="stylesheet">
@@ -1042,6 +1042,20 @@ $queryString = http_build_query($queryParams);
         location.href = "user_delete.php?id=" + id;
       }
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('action') === 'change_password') {
+        openNewUser();
+        var passInput = document.getElementById('edit_password');
+        if (passInput) {
+          setTimeout(function () {
+            passInput.focus();
+            passInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 300);
+        }
+      }
+    });
   </script>
 
   <?php include("../includes/footer.php"); ?>
