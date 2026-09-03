@@ -841,15 +841,15 @@ if (strpos($current_path, '/jobcard/') !== false) {
         .quick-access-banner {
             background: #f97316; /* Warm light orange header banner box */
             color: #ffffff;
-            padding: 11px 14px;
-            font-size: 15px;
+            padding: 0 14px;
+            font-size: 14px;
             font-weight: 700;
             display: flex;
             align-items: center;
             gap: 8px;
             letter-spacing: 0.3px;
             box-shadow: 0 2px 4px rgba(249, 115, 22, 0.15);
-            height: 48px; /* Matches menu-container height for smooth horizontal alignment */
+            height: 40px; /* Matches menu-container height (40px) for smooth horizontal alignment */
             box-sizing: border-box;
         }
 
@@ -1064,15 +1064,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
             <span class="brand-accent">Sunder</span>&nbsp;Billing
         </div>
         <div class="topbar-right">
-            <!-- Desktop Action Items -->
-            <div class="topbar-actions-desktop">
-                <label class="quick-access-toggle" title="Toggle Left Quick Access Sidebar">
-                    <input type="checkbox" id="toggleQuickAccessCheckbox" <?php echo $showQuickAccess ? 'checked' : ''; ?> onchange="toggleQuickAccessSidebar(this.checked)">
-                    <span class="toggle-slider"></span>
-                    <span>Show Quick Access</span>
-                </label>
-            </div>
-
             <!-- Mobile Action Button (Placed BEFORE Hamburger) -->
             <button type="button" id="mobileActionBtn" class="mobile-action-btn" onclick="toggleMobileActionPanel(event)" title="Actions">
                 <i class="fa-solid fa-sliders"></i> Action <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
@@ -1372,6 +1363,15 @@ if (strpos($current_path, '/jobcard/') !== false) {
                     </a>
                 </li>
             <?php endif; ?>
+
+            <!-- SHOW QUICK ACCESS TOGGLE IN HEADER RIGHT CORNER -->
+            <li class="menu-item quick-access-header-toggle" style="margin-left: auto; display: flex; align-items: center;">
+                <label class="quick-access-toggle" title="Toggle Left Quick Access Sidebar" style="margin: 0; padding: 4px 10px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 20px; color: #c2410c; font-weight: 600; font-size: 12.5px;">
+                    <input type="checkbox" id="toggleQuickAccessCheckbox" <?php echo $showQuickAccess ? 'checked' : ''; ?> onchange="toggleQuickAccessSidebar(this.checked)">
+                    <span class="toggle-slider"></span>
+                    <span>Show Quick Access</span>
+                </label>
+            </li>
         </ul>
     </div>
 
