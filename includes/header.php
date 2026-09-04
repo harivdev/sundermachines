@@ -3,7 +3,6 @@ require_once(__DIR__ . '/auth.php');
 requireLogin();
 
 $current_page = basename($_SERVER['PHP_SELF']);
-$showQuickAccess = (isset($_COOKIE['showQuickAccess']) && $_COOKIE['showQuickAccess'] === 'true');
 
 // Dynamic Breadcrumb Calculation
 $current_path = strtolower($_SERVER['PHP_SELF']);
@@ -82,18 +81,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sunder Billing</title>
 
-    <!-- INLINE SCRIPT: Instant non-flickering Quick Access preference sync before first paint -->
-    <script>
-    (function() {
-        var m = document.cookie.match(/(?:^|; )showQuickAccess=([^;]*)/);
-        var pref = m ? m[1] : localStorage.getItem('showQuickAccess');
-        if (pref === 'true') {
-            document.documentElement.classList.add('has-quick-access');
-        } else {
-            document.documentElement.classList.remove('has-quick-access');
-        }
-    })();
-    </script>
 
     <!-- JsBarcode library -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
@@ -111,28 +98,34 @@ if (strpos($current_path, '/jobcard/') !== false) {
         body {
             font-family: 'Inter', Arial, sans-serif;
             background: #f4f6f9;
-            padding-top: 88px;
-            /* Offset for fixed menu (41px) + breadcrumb (44px) + borders */
-            padding-bottom: 20px;
+            padding-top: 50px;
+            padding-bottom: 80px;
         }
 
-        /* TOP BAR REMOVED */
+        /* TOP BAR (Mobile only) */
         .topbar {
             display: none !important;
         }
 
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .brand {
             font-weight: 700;
-            color: #fff;
+            color: #24231F;
             font-size: 16px;
             letter-spacing: 0.4px;
             display: flex;
             align-items: center;
             gap: 6px;
+            text-decoration: none !important;
         }
 
         .brand .brand-accent {
-            color: #FDD017;
+            color: #C9A227;
         }
 
         .topbar-right {
@@ -145,48 +138,49 @@ if (strpos($current_path, '/jobcard/') !== false) {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
+            background: #FBF7E8;
+            color: #24231F;
             padding: 6px 12px;
             border-radius: 999px;
             font-size: 13px;
             font-weight: 600;
+            border: 1px solid #E3D49C;
         }
 
         .user-pill small {
-            color: rgba(255, 255, 255, 0.75);
+            color: #8A877D;
             font-size: 11px;
             text-transform: uppercase;
         }
 
         .btn-logout {
-            background: rgba(239, 68, 68, 0.15);
-            color: #f87171;
+            background: transparent;
+            color: #9A7618;
             padding: 7px 16px;
-            border: 1px solid rgba(239, 68, 68, 0.3);
+            border: 1px solid #C9A227;
             border-radius: 8px;
             cursor: pointer;
             font-size: 13px;
             font-weight: 500;
             font-family: 'Inter', Arial, sans-serif;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
         }
 
         .btn-logout:hover {
-            background: #ef4444;
-            color: #fff;
-            border-color: #ef4444;
+            background: #C9A227;
+            color: #FFFFFF;
+            border-color: #C9A227;
         }
 
         /* MENU CONTAINER */
         .menu-container {
-            background: #fff;
+            background: #FCFBF7;
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 999;
-            border-bottom: 1px solid #e5e7eb;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid #E4E0D6;
+            box-shadow: 0 1px 4px rgba(36, 35, 31, 0.05);
         }
 
         .menu-bar {
@@ -196,7 +190,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
             list-style: none;
             align-items: center;
             width: 100%;
-            height: 41px;
+            height: 46px;
             overflow: visible !important;
         }
 
@@ -208,21 +202,21 @@ if (strpos($current_path, '/jobcard/') !== false) {
         .menu-item>.menu-link {
             display: flex;
             align-items: center;
-            gap: 5px;
-            padding: 10px 14px;
-            text-decoration: none;
-            color: #374151;
+            gap: 6px;
+            padding: 10px 16px;
+            text-decoration: none !important;
+            color: #4D4A42;
             font-weight: 600;
-            font-size: 13.5px;
+            font-size: 16.5px;
             cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s;
+            border-bottom: none !important;
+            transition: all 0.25s ease;
             white-space: nowrap;
             user-select: none;
         }
 
         .nav-icon {
-            font-size: 13.5px;
+            font-size: 16.5px;
             color: inherit;
             transition: color 0.15s ease;
             margin-right: 5px;
@@ -230,54 +224,69 @@ if (strpos($current_path, '/jobcard/') !== false) {
 
         .nav-shortcut {
             display: inline-block;
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 600;
             font-family: inherit;
-            color: #000000 !important; /* Black font color */
-            border: none !important; /* No border around shortcut */
+            color: #8A877D !important; /* Muted shortcut color */
+            border: none !important;
             background: transparent !important;
             padding: 0;
             margin-left: auto;
             letter-spacing: 0.3px;
             vertical-align: middle;
-            transition: color 0.15s ease;
+            transition: color 0.25s ease;
         }
 
         .dropdown a:hover .nav-shortcut,
         .dropdown a:focus .nav-shortcut {
-            color: #b45309 !important;
+            color: #9A7618 !important;
         }
 
+        .menu-item:hover > a,
+        .menu-item:hover > .menu-link,
         .menu-item>a:hover,
         .menu-item>.menu-link:hover,
         .menu-item>a:focus,
         .menu-item>.menu-link:focus,
         .menu-item>a:focus-visible,
         .menu-item>.menu-link:focus-visible {
-            color: #b45309;
+            color: #C9A227 !important;
             background: transparent !important;
             border-bottom: none !important;
+            text-decoration: none !important;
             outline: none;
+        }
+
+        .menu-item:hover > a .nav-icon,
+        .menu-item:hover > .menu-link .nav-icon,
+        .menu-item>a:hover .nav-icon,
+        .menu-item>.menu-link:hover .nav-icon {
+            color: #E6C65C !important;
         }
 
         .menu-item>a.active-link,
         .menu-item>.menu-link.active-link {
-            color: #b45309;
+            color: #9A7618 !important;
             background: transparent !important;
             border-bottom: none !important;
             font-weight: 600;
         }
 
         .arrow {
-            font-size: 9px;
+            font-size: 12px;
             display: inline-block;
             margin-left: 3px;
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease;
             transform: rotate(-90deg);
         }
 
         .menu-item:hover > a .arrow,
         .menu-item:hover > .menu-link .arrow,
+        .menu-item>a:hover .arrow,
+        .menu-item>.menu-link:hover .arrow {
+            color: #E6C65C !important;
+            transform: rotate(0deg);
+        }
         .menu-item:focus-within > a .arrow,
         .menu-item:focus-within > .menu-link .arrow,
         .submenu:hover > .submenu-link .arrow,
@@ -289,14 +298,14 @@ if (strpos($current_path, '/jobcard/') !== false) {
         .dropdown {
             display: none;
             position: absolute;
-            background: #fff;
+            background: #FFFFFF;
             min-width: 200px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 8px 24px rgba(36, 35, 31, 0.12);
             top: 100%;
             left: 0;
             z-index: 1001;
             border-radius: 0 0 10px 10px;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #E2DED3;
             border-top: none;
             overflow: visible;
         }
@@ -312,37 +321,46 @@ if (strpos($current_path, '/jobcard/') !== false) {
         }
 
         .dropdown>a {
-            padding: 10px 16px;
+            padding: 9px 15px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            color: #374151;
-            font-size: 15px; /* Increased from 13px by 2px */
+            gap: 6px;
+            color: #4D4A42;
+            font-size: 16px;
             font-weight: 500;
             text-decoration: none;
-            transition: all 0.15s;
+            transition: all 0.25s ease;
             border-left: 3px solid transparent;
+        }
+
+        .dropdown a .nav-icon,
+        .dropdown a i,
+        .submenu-link .nav-icon,
+        .submenu-link i,
+        .submenu-dropdown a .nav-icon,
+        .submenu-dropdown a i {
+            font-size: 14.5px;
         }
 
         .dropdown>a:hover,
         .dropdown>a:focus,
         .dropdown>a:focus-visible {
-            background: #fefce8;
-            color: #b45309;
-            border-left-color: #FDD017;
+            background: #FBF7E8;
+            color: #9A7618;
+            border-left-color: #C9A227;
             outline: none;
         }
 
         .dropdown>a.active-link {
-            background: #fefce8;
-            color: #b45309;
-            border-left-color: #FDD017;
+            background: #FBF7E8;
+            color: #9A7618;
+            border-left-color: #C9A227;
             font-weight: 600;
         }
 
         .dropdown-divider {
             border: none;
-            border-top: 1px solid #f3f4f6;
+            border-top: 1px solid #ECE8DE;
             margin: 4px 0;
         }
 
@@ -352,16 +370,17 @@ if (strpos($current_path, '/jobcard/') !== false) {
         }
 
         .submenu-link {
-            padding: 10px 16px;
+            padding: 9px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: #374151;
-            font-size: 15px; /* Increased from 13px by 2px */
+            gap: 6px;
+            color: #4D4A42;
+            font-size: 16px;
             font-weight: 500;
             text-decoration: none;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.25s ease;
             border-left: 3px solid transparent;
         }
 
@@ -369,9 +388,9 @@ if (strpos($current_path, '/jobcard/') !== false) {
         .submenu-link:hover,
         .submenu-link:focus,
         .submenu-link:focus-visible {
-            background: #fefce8;
-            color: #b45309;
-            border-left-color: #FDD017;
+            background: #FBF7E8;
+            color: #9A7618;
+            border-left-color: #C9A227;
             outline: none;
         }
 
@@ -380,33 +399,33 @@ if (strpos($current_path, '/jobcard/') !== false) {
             position: absolute;
             left: 100%;
             top: -4px;
-            background: #fff;
+            background: #FFFFFF;
             min-width: 190px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 8px 24px rgba(36, 35, 31, 0.12);
             border-radius: 8px;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #E2DED3;
             overflow: hidden;
             z-index: 1002;
         }
 
         .submenu-dropdown a {
-            padding: 10px 16px;
+            padding: 9px 15px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            color: #374151;
-            font-size: 15px; /* Increased from 13px by 2px */
+            gap: 6px;
+            color: #4D4A42;
+            font-size: 16px;
             text-decoration: none;
-            transition: all 0.15s;
+            transition: all 0.25s ease;
             border-left: 3px solid transparent;
         }
 
         .submenu-dropdown a:hover,
         .submenu-dropdown a:focus,
         .submenu-dropdown a:focus-visible {
-            background: #fefce8;
-            color: #b45309;
-            border-left-color: #FDD017;
+            background: #FBF7E8;
+            color: #9A7618;
+            border-left-color: #C9A227;
             outline: none;
         }
 
@@ -430,20 +449,39 @@ if (strpos($current_path, '/jobcard/') !== false) {
             background: none;
             border: none;
             cursor: pointer;
-            color: #fff;
+            color: #24231F;
             font-size: 22px;
             padding: 4px 8px;
         }
 
         /* MOBILE RESPONSIVE NAV */
+        /* MOBILE RESPONSIVE NAV */
         @media (max-width: 768px) {
             body {
                 padding-top: 65px !important;
+                padding-bottom: 160px !important;
             }
 
             .topbar {
-                padding: 0 12px;
+                display: flex !important;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
                 height: 56px;
+                background: #FCFBF7;
+                z-index: 10000;
+                padding: 0 12px;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 1px solid #E4E0D6;
+                box-shadow: 0 2px 10px rgba(36, 35, 31, 0.08);
+            }
+
+            .topbar-left {
+                display: flex;
+                align-items: center;
+                gap: 10px;
             }
 
             .topbar-right {
@@ -459,38 +497,55 @@ if (strpos($current_path, '/jobcard/') !== false) {
 
             .brand {
                 font-size: 16px;
+                color: #24231F;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                gap: 6px;
             }
 
-            /* Mobile Action button - placed before hamburger */
+            /* Hamburger icon - FIRST ON LEFT */
+            #menuToggle {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                background: none;
+                border: none;
+                color: #24231F;
+                font-size: 22px;
+                cursor: pointer;
+                padding: 6px;
+            }
+
+            /* Mobile Action button */
             .mobile-action-btn {
                 display: inline-flex;
                 align-items: center;
                 gap: 6px;
-                background: rgba(255, 255, 255, 0.12);
-                color: #ffffff;
-                border: 1px solid rgba(255, 255, 255, 0.25);
+                background: rgba(36, 35, 31, 0.08);
+                color: #24231F;
+                border: 1px solid rgba(36, 35, 31, 0.15);
                 border-radius: 8px;
                 padding: 6px 12px;
                 font-size: 12px;
                 font-weight: 600;
                 cursor: pointer;
                 transition: background 0.15s ease;
-                order: 90;
             }
 
             .mobile-action-btn:hover {
-                background: rgba(255, 255, 255, 0.22);
+                background: rgba(36, 35, 31, 0.12);
             }
 
             /* Mobile Action Dropdown Panel (Exact width matching Action label button) */
             .mobile-action-panel {
                 position: fixed;
                 top: 58px;
-                background: #0f172a;
-                border: 1px solid #334155;
+                background: #FCFBF7;
+                border: 1px solid #E4E0D6;
                 border-radius: 10px;
                 padding: 8px 6px;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+                box-shadow: 0 10px 25px rgba(36, 35, 31, 0.15);
                 z-index: 10002;
                 display: none;
                 flex-direction: column;
@@ -512,51 +567,69 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
 
-            /* Hamburger icon - LAST TO CORNER (Far Right) */
-            #menuToggle {
-                display: flex !important;
-                align-items: center;
-                justify-content: center;
-                order: 99 !important;
-                margin-left: 2px !important;
-                font-size: 24px;
-                padding: 4px 6px;
-            }
-
-            /* MOBILE MENU DRAWER (Max width 290px - does not cover full page) */
+            /* MOBILE MENU DRAWER (Strict Fixed Width) */
             .menu-container {
-                display: none !important;
+                display: block !important;
                 position: fixed !important;
                 top: 56px !important;
                 left: 0 !important;
-                width: 85% !important;
-                max-width: 290px !important;
-                background: #ffffff !important;
+                width: 250px !important;
+                min-width: 250px !important;
+                max-width: 250px !important;
+                overflow-x: hidden !important;
+                background: #FFFFFF !important;
                 z-index: 10005 !important;
-                border-right: 2px solid #cbd5e1;
-                border-bottom: 2px solid #cbd5e1;
-                box-shadow: 6px 0 25px rgba(0, 0, 0, 0.3) !important;
+                border-right: 1px solid #E4E0D6;
+                border-bottom: 1px solid #E4E0D6;
+                box-shadow: 6px 0 25px rgba(36, 35, 31, 0.08) !important;
                 max-height: calc(100vh - 56px);
                 overflow-y: auto !important;
+                scrollbar-gutter: stable !important;
                 -webkit-overflow-scrolling: touch;
+                transform: translateX(-105%);
+                opacity: 0;
+                pointer-events: none;
+                transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.32s ease !important;
+            }
+
+            /* Custom Slim Scrollbar for Drawer to prevent layout shifts */
+            .menu-container::-webkit-scrollbar {
+                width: 5px !important;
+            }
+            .menu-container::-webkit-scrollbar-track {
+                background: transparent !important;
+            }
+            .menu-container::-webkit-scrollbar-thumb {
+                background: #D8D4C8 !important;
+                border-radius: 4px !important;
             }
 
             .menu-container.open {
-                display: block !important;
+                transform: translateX(0) !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+            }
+
+            .menu-container .nav-icon {
+                margin-right: 0 !important;
+                font-size: 15px !important;
             }
 
             .menu-bar {
                 flex-direction: column !important;
                 display: flex !important;
+                height: auto !important;
+                max-height: none !important;
                 padding: 0 !important;
                 margin: 0 !important;
-                background: #ffffff !important;
+                background: #FFFFFF !important;
                 border-top: none;
             }
 
             .menu-item {
                 width: 100% !important;
-                border-bottom: 1px solid #f1f5f9;
+                height: auto !important;
+                border-bottom: 1px solid #F6F3EA;
             }
 
             .menu-item > a,
@@ -564,65 +637,80 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 display: flex !important;
                 align-items: center !important;
                 justify-content: flex-start !important;
-                gap: 10px !important;
-                padding: 14px 20px !important;
-                color: #0f172a !important;
+                gap: 2px !important;
+                padding: 13px 18px !important;
+                color: #4D4A42 !important;
                 font-size: 15px !important;
                 font-weight: 600 !important;
                 text-decoration: none !important;
-                background: #ffffff !important;
+                background: #FFFFFF !important;
                 border: none !important;
+                border-left: 3px solid transparent !important;
                 cursor: pointer !important;
+                transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
             }
 
+            /* Arrows align in a straight vertical line on the right edge */
             .menu-item > a .arrow,
             .menu-item > .menu-link .arrow {
                 margin-left: auto !important;
+                flex-shrink: 0 !important;
+                transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
             }
 
             .menu-item > a:hover,
             .menu-item > .menu-link:hover,
             .menu-item > a:active,
-            .menu-item > .menu-link:active {
-                background: #f8fafc !important;
-                color: #f97316 !important;
+            .menu-item > .menu-link:active,
+            .menu-item > a.active-link,
+            .menu-item > .menu-link.active-link {
+                background: #FBF7E8 !important;
+                color: #9A7618 !important;
+                border-left-color: #C9A227 !important;
             }
 
             /* MOBILE INLINE ACCORDION DROPDOWNS */
             .dropdown {
-                display: none !important;
+                display: block !important;
+                max-height: 0 !important;
+                overflow: hidden !important;
+                opacity: 0 !important;
                 position: static !important;
                 width: 100% !important;
-                background: #f8fafc !important;
+                background: #FCFBF7 !important;
                 box-shadow: none !important;
                 border: none !important;
-                border-top: 1px solid #e2e8f0 !important;
-                border-bottom: 1px solid #e2e8f0 !important;
                 padding: 0 !important;
                 border-radius: 0 !important;
+                transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease !important;
             }
 
             .dropdown.open {
-                display: block !important;
+                max-height: 600px !important;
+                opacity: 1 !important;
             }
 
             .dropdown > a {
                 display: flex !important;
                 align-items: center !important;
-                gap: 10px !important;
-                padding: 12px 24px !important;
-                color: #334155 !important;
+                gap: 6px !important;
+                padding: 11px 22px !important;
+                color: #4D4A42 !important;
                 font-size: 14px !important;
                 font-weight: 500 !important;
                 text-decoration: none !important;
                 background: transparent !important;
-                border-bottom: 1px solid #f1f5f9 !important;
+                border-bottom: 1px solid #F6F3EA !important;
+                border-left: 3px solid transparent !important;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
             }
 
             .dropdown > a:hover,
-            .dropdown > a:active {
-                background: #fff7ed !important;
-                color: #f97316 !important;
+            .dropdown > a:active,
+            .dropdown > a.active-link {
+                background: #FBF7E8 !important;
+                color: #9A7618 !important;
+                border-left-color: #C9A227 !important;
             }
 
             /* MOBILE INLINE ACCORDION SUBMENUS */
@@ -634,28 +722,44 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 display: flex !important;
                 align-items: center !important;
                 justify-content: space-between !important;
-                padding: 12px 24px !important;
-                color: #334155 !important;
+                gap: 6px !important;
+                padding: 11px 22px !important;
+                color: #4D4A42 !important;
                 font-size: 14px !important;
                 font-weight: 500 !important;
                 background: transparent !important;
-                border-bottom: 1px solid #f1f5f9 !important;
+                border-bottom: 1px solid #F6F3EA !important;
+                border-left: 3px solid transparent !important;
                 cursor: pointer !important;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            }
+
+            .submenu:hover > .submenu-link,
+            .submenu-link:hover,
+            .submenu-link:active {
+                background: #FBF7E8 !important;
+                color: #9A7618 !important;
+                border-left-color: #C9A227 !important;
             }
 
             .submenu-dropdown {
-                display: none !important;
+                display: block !important;
+                max-height: 0 !important;
+                overflow: hidden !important;
+                opacity: 0 !important;
                 position: static !important;
                 width: 100% !important;
-                background: #f1f5f9 !important;
+                background: #F6F3EA !important;
                 box-shadow: none !important;
                 border: none !important;
                 padding: 0 !important;
                 border-radius: 0 !important;
+                transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease !important;
             }
 
             .submenu-dropdown.open {
-                display: block !important;
+                max-height: 400px !important;
+                opacity: 1 !important;
             }
 
             .submenu-dropdown a {
@@ -663,17 +767,17 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 align-items: center !important;
                 gap: 10px !important;
                 padding: 10px 10px 10px 40px !important;
-                color: #475569 !important;
+                color: #5F5C54 !important;
                 font-size: 13.5px !important;
                 font-weight: 500 !important;
                 text-decoration: none !important;
-                border-bottom: 1px solid #e2e8f0 !important;
+                border-bottom: 1px solid #E6E1D6 !important;
             }
 
             .submenu-dropdown a:hover,
             .submenu-dropdown a:active {
-                background: #fff7ed !important;
-                color: #ea580c !important;
+                background: #FBF7E8 !important;
+                color: #9A7618 !important;
             }
 
             /* MOBILE LIST HEADER BAR ALIGNMENT (Fix for Image 2) */
@@ -705,33 +809,58 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 white-space: nowrap !important;
             }
 
-            /* MOBILE PAGINATION FOOTER ALIGNMENT (Fix for Image 3) */
-            .list-pagination-bar {
+            /* MOBILE PAGINATION FOOTER ALIGNMENT & CLEAN TEXT WRAPPING */
+            .pagination-bar,
+            .list-pagination-bar,
+            .pagination-container,
+            .cd-pagination-bar {
                 flex-direction: column !important;
                 align-items: center !important;
+                justify-content: center !important;
                 text-align: center !important;
                 gap: 10px !important;
-                margin-top: 15px !important;
+                margin: 15px auto !important;
+                padding: 0 10px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
             }
 
-            .pagination-info {
+            .pagination-bar > span,
+            .pagination-bar > div:first-child,
+            .list-pagination-bar > div:first-child,
+            .pagination-info,
+            .cd-pag-info {
                 width: 100% !important;
-                font-size: 12.5px !important;
+                font-size: 13px !important;
+                font-weight: 500 !important;
                 text-align: center !important;
                 color: #475569 !important;
+                display: block !important;
+                margin-bottom: 4px !important;
+                white-space: normal !important;
+                word-break: normal !important;
             }
 
-            .pagination-buttons {
+            .pagination-bar .pag-btns,
+            .list-pagination-bar .pagination-buttons,
+            .pagination-buttons,
+            .cd-pag-controls,
+            .pagination-bar > div:last-child {
                 width: 100% !important;
+                display: flex !important;
                 justify-content: center !important;
+                align-items: center !important;
                 flex-wrap: wrap !important;
                 gap: 4px !important;
             }
 
+            .pagination-bar .pag-btn,
             .pagination-buttons a,
-            .pagination-buttons span {
+            .pagination-buttons span,
+            .pag-btn {
                 font-size: 12px !important;
-                padding: 5px 8px !important;
+                padding: 6px 10px !important;
+                white-space: nowrap !important;
             }
 
             /* Prevent iOS auto-zoom on form elements */
@@ -765,193 +894,11 @@ if (strpos($current_path, '/jobcard/') !== false) {
             transition: background-color 5000s ease-in-out 0s;
         }
 
-        /* MINI-SIZED QUICK ACCESS TOGGLE SWITCH ON NAV BAR */
-        .quick-access-toggle {
-            display: inline-flex !important;
-            align-items: center !important;
-            gap: 6px !important;
-            white-space: nowrap !important;
-            color: #c2410c !important;
-            font-size: 11px !important;
-            font-weight: 700 !important;
-            cursor: pointer !important;
-            user-select: none !important;
-            margin: 0 !important;
-            padding: 3px 8px !important;
-            background: #fff7ed !important;
-            border: 1.5px solid #fed7aa !important;
-            border-radius: 20px !important;
-            flex-shrink: 0 !important;
-            height: 26px !important;
-            line-height: 1 !important;
-        }
 
-        .quick-access-toggle span {
-            white-space: nowrap !important;
-            display: inline-block !important;
-        }
 
-        /* Show button ONLY when Quick Access sidebar is OPEN so it fits 100% inside screen view */
-        html.has-quick-access .quick-access-toggle .toggle-label-text,
-        body.has-quick-access .quick-access-toggle .toggle-label-text {
-            display: none !important;
-        }
-
-        .quick-access-toggle input {
-            display: none;
-        }
-
-        .quick-access-toggle .toggle-slider {
-            width: 28px;
-            height: 15px;
-            background-color: #cbd5e1;
-            border-radius: 15px;
-            position: relative;
-            flex-shrink: 0;
-            transition: background-color 0.2s ease;
-        }
-
-        .quick-access-toggle .toggle-slider::before {
-            content: '';
-            position: absolute;
-            width: 11px;
-            height: 11px;
-            border-radius: 50%;
-            background-color: #ffffff;
-            top: 2px;
-            left: 2px;
-            transition: transform 0.2s ease;
-        }
-
-        .quick-access-toggle input:checked + .toggle-slider {
-            background-color: #ea580c;
-        }
-
-        .quick-access-toggle input:checked + .toggle-slider::before {
-            transform: translateX(13px);
-        }
-
-        /* LEFT SIDE QUICK ACCESS SIDEBAR (LIGHT ORANGE THEME) */
-        .quick-access-sidebar {
-            position: fixed;
-            top: 0; /* Align with menu-container at top 0 */
-            left: 0;
-            width: 220px;
-            bottom: 0;
-            background: #fff7ed; /* Light orange background */
-            border-right: 1px solid #fed7aa;
-            box-shadow: 3px 0 12px rgba(249, 115, 22, 0.12);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .quick-access-sidebar.hidden {
-            transform: translateX(-220px) !important;
-        }
-
-        .quick-access-banner {
-            background: #f97316; /* Warm light orange header banner box */
-            color: #ffffff;
-            padding: 0 16px;
-            font-size: 14px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            letter-spacing: 0.3px;
-            box-shadow: 0 2px 4px rgba(249, 115, 22, 0.15);
-            height: 41px; /* Exact match to menu-container height (41px) */
-            box-sizing: border-box;
-        }
-
-        .quick-access-menu-group {
-            padding: 6px 0;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .quick-access-nav-link {
-            padding: 10px 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #7c2d12; /* Dark warm amber text */
-            font-size: 14px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: background 0.15s ease, color 0.15s ease;
-        }
-
-        .quick-access-nav-link:hover {
-            background: #ffedd5; /* Soft light orange highlight */
-            color: #c2410c;
-        }
-
-        .quick-access-nav-link .nav-icon {
-            font-size: 16px;
-            color: #ea580c;
-        }
-
-        .quick-access-task-banner {
-            background: #f97316; /* Warm light orange Task header banner box */
-            color: #ffffff;
-            padding: 8px 14px;
-            font-size: 14px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 4px;
-            box-shadow: 0 2px 4px rgba(249, 115, 22, 0.15);
-        }
-
-        .quick-access-task-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 6px 0;
-        }
-
-        .quick-access-task-link {
-            padding: 6px 16px;
-            display: block;
-            color: #7c2d12; /* Dark warm amber text */
-            font-size: 13px;
-            font-weight: 700;
-            font-family: inherit;
-            text-decoration: none;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            transition: background 0.15s ease, color 0.15s ease;
-        }
-
-        /* BREADCRUMB PAGE BANNER STRIP */
+        /* BREADCRUMB PAGE BANNER STRIP (REMOVED) */
         .erp-breadcrumb-banner {
-            position: fixed;
-            top: 41px; /* Directly below menu-container at top 41px */
-            left: 0;
-            width: 100%;
-            z-index: 998;
-            background: linear-gradient(135deg, #15803d 0%, #166534 100%);
-            color: #ffffff;
-            height: 44px; /* Increased height to 44px for more vertical space */
-            padding: 0 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1.5px solid #14532d;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-            box-sizing: border-box;
-            transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-
-        html.has-quick-access .erp-breadcrumb-banner,
-        body.has-quick-access .erp-breadcrumb-banner {
-            margin-left: 220px !important;
-            width: calc(100% - 220px) !important;
+            display: none !important;
         }
 
         .breadcrumb-inner {
@@ -1010,100 +957,64 @@ if (strpos($current_path, '/jobcard/') !== false) {
             text-decoration: none !important;
         }
 
-        /* HEADER MENU BAR: left edge shifts, right edge stays fixed */
-        .menu-container {
-            transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-                        width 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        /* Prevent hover underlines & bottom borders across all header navigation elements, dropdowns, and breadcrumb banner */
+        .menu-container a,
+        .menu-container a:hover,
+        .menu-container a:focus,
+        .menu-container a:active,
+        .menu-container span,
+        .menu-container span:hover,
+        .menu-item > a,
+        .menu-item > a:hover,
+        .menu-item > .menu-link,
+        .menu-item > .menu-link:hover,
+        .dropdown a,
+        .dropdown a:hover,
+        .dropdown a:focus,
+        .submenu a,
+        .submenu a:hover,
+        .submenu-link:hover,
+        .erp-breadcrumb-banner a,
+        .erp-breadcrumb-banner a:hover,
+        .erp-breadcrumb-banner a:focus,
+        .erp-breadcrumb-banner span,
+        .erp-breadcrumb-banner span:hover,
+        .bc-brand,
+        .bc-brand:hover,
+        .bc-module,
+        .bc-module:hover,
+        .bc-page,
+        .bc-page:hover {
+            text-decoration: none !important;
+            border-bottom: none !important;
+            box-shadow: none !important;
         }
 
-        html.has-quick-access .menu-container,
-        body.has-quick-access .menu-container {
-            margin-left: 220px !important;
-            width: calc(100% - 220px) !important;
-        }
 
-        /* MAIN PAGE CONTENT: only left edge moves, right edge stays fixed at viewport right */
-        .erp-container,
-        .container,
-        main,
-        .main-content,
-        .page-wrapper,
-        .page-main-container {
-            transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-                        width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        }
 
-        html.has-quick-access .container,
-        html.has-quick-access .erp-container,
-        html.has-quick-access main,
-        html.has-quick-access .main-content,
-        html.has-quick-access .page-wrapper,
-        html.has-quick-access .page-main-container,
-        body.has-quick-access .container,
-        body.has-quick-access .erp-container,
-        body.has-quick-access main,
-        body.has-quick-access .main-content,
-        body.has-quick-access .page-wrapper,
-        body.has-quick-access .page-main-container {
-            margin-left: 220px !important;
-            width: calc(100% - 220px) !important;
-            box-sizing: border-box !important;
-        }
-
-        /* PREVENT TABLE COLUMNS FROM SQUISHING/SHRINKING WHEN QUICK ACCESS IS OPEN */
-        .erp-table-box,
-        .table-wrap,
-        .table-responsive,
-        div[style*="overflow-x: auto"] {
-            overflow-x: auto !important;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        body.has-quick-access .erp-table th,
-        body.has-quick-access .erp-table td,
-        body.has-quick-access table th,
-        body.has-quick-access table td,
-        html.has-quick-access .erp-table th,
-        html.has-quick-access .erp-table td,
-        html.has-quick-access table th,
-        html.has-quick-access table td {
-            white-space: nowrap;
-        }
-
-        @media (max-width: 768px) {
-            .quick-access-sidebar {
-                top: 56px;
-            }
-            html.has-quick-access .menu-container,
-            html.has-quick-access .container,
-            html.has-quick-access .erp-container,
-            html.has-quick-access .page-main-container,
-            body.has-quick-access .menu-container,
-            body.has-quick-access .container,
-            body.has-quick-access .erp-container,
-            body.has-quick-access .page-main-container {
-                margin-left: 0 !important;
-                width: 100% !important;
-            }
-        }
     </style>
 </head>
 
-<body class="<?php echo $showQuickAccess ? 'has-quick-access' : ''; ?>">
+<body>
 
-    <!-- TOP BAR REMOVED -->
-
-    <!-- MOBILE ACTION PANEL DROPDOWN (Contains 3 options matching exact Action label width) -->
-    <div id="mobileActionPanel" class="mobile-action-panel">
-        <!-- Option 1: Quick Access toggle switch (no text names) -->
-        <div class="mobile-action-item">
-            <label class="quick-access-toggle" style="margin: 0; padding: 0;" title="Toggle Left Quick Access Sidebar">
-                <input type="checkbox" id="toggleQuickAccessCheckboxMobile" <?php echo $showQuickAccess ? 'checked' : ''; ?> onchange="toggleQuickAccessSidebar(this.checked)">
-                <span class="toggle-slider"></span>
-            </label>
+    <!-- MOBILE TOP BAR HEADER -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <button id="menuToggle" onclick="toggleMobileMenu(event)" aria-label="Toggle Navigation">
+                <i class="fa-solid fa-bars"></i>
+            </button>
         </div>
+        <div class="topbar-right">
+            <button class="btn-logout" onclick="window.location.href='../login/logout.php'">
+                Logout &#x2192;
+            </button>
+        </div>
+    </div>
 
-        <!-- Option 2: Admin role pill (no "USER ACCOUNT" label, no doubled text) -->
+    <!-- MOBILE ACTION PANEL DROPDOWN -->
+    <div id="mobileActionPanel" class="mobile-action-panel">
+
+        <!-- Admin role pill -->
         <?php if (isset($_SESSION['employee_name']) || isset($_SESSION['username'])): ?>
             <div class="mobile-action-item">
                 <div class="user-pill" style="margin: 0; width: 100%; justify-content: center; text-align: center; box-sizing: border-box; padding: 4px 6px;">
@@ -1122,7 +1033,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
             </div>
         <?php endif; ?>
 
-        <!-- Option 3: Logout button (same width as Action label box) -->
+        <!-- Logout button -->
         <div class="mobile-action-item" style="border-bottom: none; padding-bottom: 0;">
             <button class="btn-logout" style="width: 100%; box-sizing: border-box; justify-content: center; text-align: center; margin: 0; padding: 6px 0; font-size: 12px;" onclick="window.location.href='../login/logout.php'">
                 Logout &#x2192;
@@ -1383,99 +1294,19 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 </li>
             <?php endif; ?>
 
-            <!-- SHOW QUICK ACCESS TOGGLE IN HEADER RIGHT CORNER -->
-            <li class="menu-item quick-access-header-toggle" style="margin-left: auto; display: flex; align-items: center; padding-right: 12px; flex-shrink: 0; white-space: nowrap;">
-                <label class="quick-access-toggle" title="Toggle Left Quick Access Sidebar">
-                    <input type="checkbox" id="toggleQuickAccessCheckbox" <?php echo $showQuickAccess ? 'checked' : ''; ?> onchange="toggleQuickAccessSidebar(this.checked)">
-                    <span class="toggle-slider"></span>
-                    <span class="toggle-label-text">Quick Access</span>
-                </label>
+            <!-- 9. LOGOUT (Desktop only, pushed to right) -->
+            <li class="menu-item topbar-actions-desktop" style="margin-left: auto; padding-right: 16px;">
+                <button class="btn-logout" onclick="window.location.href='../login/logout.php'">
+                    Logout &#x2192;
+                </button>
             </li>
+
         </ul>
     </div>
 
-    <!-- RECTANGULAR BREADCRUMB BANNER STRIP RIGHT BELOW THE HEADER -->
-    <div class="erp-breadcrumb-banner">
-        <div class="breadcrumb-inner">
-            <span class="bc-brand"><span style="color: #facc15;">SUNDER</span>&nbsp;<span style="color: #ffffff;">ERP</span></span>
-            <div class="bc-path-container" style="display: flex; align-items: center; gap: 4px;">
-                <span class="bc-sep">/</span>
-                <span class="bc-pill bc-module"><?= htmlspecialchars($current_module_title) ?></span>
-                <span class="bc-sep">/</span>
-                <span class="bc-pill bc-page"><?= htmlspecialchars($current_page_title) ?></span>
-            </div>
-        </div>
-    </div>
 
-    <!-- LEFT SIDE QUICK ACCESS SIDEBAR PANEL (EXACT MATCH FOR USER MONITOR PHOTO) -->
-    <?php
-    $quick_jobcards = [];
-    if (isset($conn) && $conn) {
-        $qjc_res = @mysqli_query($conn, "SELECT id, cardNo FROM jobcard ORDER BY id DESC LIMIT 100");
-        if ($qjc_res) {
-            while ($qrow = mysqli_fetch_assoc($qjc_res)) {
-                $quick_jobcards[] = $qrow;
-            }
-        }
-    }
-    ?>
-    <div id="quickAccessSidebarPanel" class="quick-access-sidebar <?php echo $showQuickAccess ? '' : 'hidden'; ?>">
-        <!-- Banner 1: Quick Access -->
-        <div class="quick-access-banner">
-            <i class="fa-solid fa-bolt" style="color: #facc15;"></i> Quick Access
-        </div>
 
-        <!-- Section 1: Links -->
-        <div class="quick-access-menu-group">
-            <a href="../jobcard/create.php" class="quick-access-nav-link">
-                <i class="fa-solid fa-clipboard-list nav-icon"></i> Job Card
-            </a>
-            <a href="../sales/create.php" class="quick-access-nav-link">
-                <i class="fa-solid fa-cart-shopping nav-icon"></i> Sales
-            </a>
-            <a href="../users/manage_users.php?action=change_password" class="quick-access-nav-link">
-                <i class="fa-solid fa-key nav-icon"></i> Change Password
-            </a>
-            <a href="../login/logout.php" class="quick-access-nav-link">
-                <i class="fa-solid fa-right-from-bracket nav-icon"></i> Exit
-            </a>
-
-            <!-- ADMIN / USER PROFILE BELOW EXIT (Matches Red Box in Image 2) -->
-            <?php if (isset($_SESSION['employee_name']) || isset($_SESSION['username'])): ?>
-                <div style="margin: 8px 12px; padding: 8px 12px; background: rgba(249, 115, 22, 0.15); border: 1.5px solid #f97316; border-radius: 8px; font-weight: 700; color: #9a3412; font-size: 13px; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(249, 115, 22, 0.1);">
-                    <i class="fa-solid fa-user-circle" style="font-size: 18px; color: #ea580c;"></i>
-                    <div style="display: flex; flex-direction: column; line-height: 1.2;">
-                        <?php if (isset($_SESSION['employee_name'])): ?>
-                            <span><?php echo htmlspecialchars($_SESSION['employee_name']); ?></span>
-                        <?php else: ?>
-                            <span><?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?></span>
-                        <?php endif; ?>
-                        <small style="font-size: 10.5px; color: #c2410c; font-weight: 700; text-transform: uppercase;"><?php echo htmlspecialchars($_SESSION['role'] ?? 'ADMIN'); ?></small>
-                    </div>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <!-- Banner 2: Task -->
-        <div class="quick-access-task-banner">
-            <i class="fa-solid fa-list-check" style="color: #facc15;"></i> Task
-        </div>
-
-        <!-- Section 2: Numbered Job Card List (1) 2403J00015, 2) 2403J00016 ...) -->
-        <div class="quick-access-task-container">
-            <?php if (!empty($quick_jobcards)): ?>
-                <?php $t_idx = 1; foreach ($quick_jobcards as $qjc): ?>
-                    <a href="../jobcard/edit.php?id=<?php echo $qjc['id']; ?>" class="quick-access-task-link" title="Edit <?php echo htmlspecialchars(!empty($qjc['cardNo']) ? $qjc['cardNo'] : 'JobCard #'.$qjc['id']); ?>">
-                        <?php echo $t_idx++; ?>) <?php echo htmlspecialchars(!empty($qjc['cardNo']) ? $qjc['cardNo'] : 'JobCard #'.$qjc['id']); ?>
-                    </a>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <span style="padding: 10px 16px; font-size: 12px; color: #064e3b; display: block;">No Tasks found</span>
-            <?php endif; ?>
-        </div>
-    </div>
-
-    <!-- SCRIPT FOR TOGGLING QUICK ACCESS SIDEBAR & MOBILE ACTION DROPDOWN -->
+    <!-- SCRIPT FOR MOBILE MENU -->
     <script>
     function toggleMobileMenu(e) {
         if (e) {
@@ -1517,59 +1348,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
         }
     }
 
-    function toggleQuickAccessFromHandle() {
-        var sidebar = document.getElementById('quickAccessSidebarPanel');
-        if (!sidebar) return;
-        var isHidden = sidebar.classList.contains('hidden');
-        var nextShowState = isHidden;
-        
-        var checkbox = document.getElementById('toggleQuickAccessCheckbox');
-        var checkboxMobile = document.getElementById('toggleQuickAccessCheckboxMobile');
-        if (checkbox) checkbox.checked = nextShowState;
-        if (checkboxMobile) checkboxMobile.checked = nextShowState;
-        toggleQuickAccessSidebar(nextShowState);
-    }
-
-    function toggleQuickAccessSidebar(show) {
-        var sidebar = document.getElementById('quickAccessSidebarPanel');
-        var handleIcon = document.getElementById('sidebarToggleHandleIcon');
-        var body = document.body;
-        var html = document.documentElement;
-
-        var cb1 = document.getElementById('toggleQuickAccessCheckbox');
-        var cb2 = document.getElementById('toggleQuickAccessCheckboxMobile');
-        if (cb1) cb1.checked = show;
-        if (cb2) cb2.checked = show;
-
-        if (!sidebar) return;
-
-        if (show) {
-            sidebar.classList.remove('hidden');
-            body.classList.add('has-quick-access');
-            html.classList.add('has-quick-access');
-            if (handleIcon) handleIcon.className = 'fa-solid fa-chevron-left';
-            localStorage.setItem('showQuickAccess', 'true');
-            document.cookie = "showQuickAccess=true; path=/; max-age=31536000";
-        } else {
-            sidebar.classList.add('hidden');
-            body.classList.remove('has-quick-access');
-            html.classList.remove('has-quick-access');
-            if (handleIcon) handleIcon.className = 'fa-solid fa-chevron-right';
-            localStorage.setItem('showQuickAccess', 'false');
-            document.cookie = "showQuickAccess=false; path=/; max-age=31536000";
-        }
-    }
-
     document.addEventListener('DOMContentLoaded', function () {
-        var m = document.cookie.match(/(?:^|; )showQuickAccess=([^;]*)/);
-        var pref = m ? m[1] : localStorage.getItem('showQuickAccess');
-        var checkbox = document.getElementById('toggleQuickAccessCheckbox');
-        var checkboxMobile = document.getElementById('toggleQuickAccessCheckboxMobile');
-        var shouldShow = (pref === 'true');
-
-        if (checkbox) checkbox.checked = shouldShow;
-        if (checkboxMobile) checkboxMobile.checked = shouldShow;
-
         // Click listeners for header dropdowns (Click to toggle on mobile)
         var mainMenu = document.getElementById('mainMenu');
         if (mainMenu) {

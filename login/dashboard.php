@@ -69,11 +69,11 @@ $lowStockCount = $lowStockRes ? mysqli_num_rows($lowStockRes) : 0;
 
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
                 <?php while ($r = mysqli_fetch_assoc($lowStockRes)): ?>
-                    <div style="padding:10px; border-radius:8px; background:#fff7ed; border:1px solid #ffedd5;">
-                        <div style="font-weight:700; color:#92400e; font-size:13px;"><?= htmlspecialchars($r['spareName'] ?? 'Item') ?></div>
-                        <div style="font-size:12px; color:#475569; margin-top:2px;">Available: <strong><?= (int) $r['availableQty'] ?></strong></div>
+                    <a href="../stock/edit_stock.php?id=<?= $r['id'] ?>" title="Click to edit stock for <?= htmlspecialchars($r['spareName'] ?? 'Item') ?>" style="display:block; text-decoration:none; padding:12px; border-radius:8px; background:#fff7ed; border:1px solid #fed7aa; transition: all 0.15s ease-in-out; cursor:pointer;" onmouseover="this.style.background='#ffedd5'; this.style.borderColor='#f97316'; this.style.transform='translateY(-2px)'; var n=this.querySelector('.low-stock-name'); if(n) n.style.textDecoration='underline';" onmouseout="this.style.background='#fff7ed'; this.style.borderColor='#fed7aa'; this.style.transform='translateY(0)'; var n=this.querySelector('.low-stock-name'); if(n) n.style.textDecoration='none';">
+                        <div class="low-stock-name" style="font-weight:700; color:#92400e; font-size:13px; line-height:1.3; text-decoration:none;"><?= htmlspecialchars($r['spareName'] ?? 'Item') ?></div>
+                        <div style="font-size:12px; color:#475569; margin-top:6px;">Available: <strong style="color:#c2410c;"><?= (int) $r['availableQty'] ?></strong></div>
                         <div style="font-size:12px; color:#475569;">Part #: <?= htmlspecialchars($r['partNo'] ?? '-') ?></div>
-                    </div>
+                    </a>
                 <?php endwhile; ?>
             </div>
         </div>

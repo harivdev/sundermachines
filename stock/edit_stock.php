@@ -510,9 +510,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     transform: translateY(-1px);
   }
 
+  .stock-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
   @media (max-width: 1024px) {
     .main-grid {
       grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .stock-stats-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .grid-3 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 425px) {
+    .grid-2, .grid-3, .stock-stats-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
     }
   }
 </style>
@@ -659,7 +681,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
 
           <!-- Reorder / Stocked / Warranty -->
-          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:12px;" class="form-group">
+          <!-- Reorder / Stocked / Warranty -->
+          <div class="stock-stats-grid form-group">
             <div>
               <label>Reorder Level</label>
               <small style="display:block; font-size:10px; color:var(--label); margin-bottom:4px;">Min Quantity</small>
@@ -671,7 +694,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <input type="number" id="oldStock" value="<?= intval($data['availableQty']) ?>" readonly style="background:#f1f5f9; font-weight:700; color:#475569; cursor:not-allowed;">
             </div>
             <div>
-              <label>&nbsp;</label>
+              <label>Add Stock</label>
               <small style="display:block; font-size:10px; color:var(--label); margin-bottom:4px;">New Stock (+ Add)</small>
               <input type="number" name="newStock" id="newStock" value="0" min="0" oninput="calculateEditTotalStock()" style="font-weight:700; color:#2563eb;">
             </div>

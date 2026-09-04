@@ -6,36 +6,43 @@
    ========================================================================== */
 
 :root {
-    /* Color Palette derived from 3D Hexagonal Logo */
-    --erp-primary: #0f172a;
-    --erp-primary-hover: #1e293b;
-    --erp-secondary: #64748b;
-    --erp-secondary-hover: #475569;
-    --erp-accent: #FDD017;
-    --erp-accent-hover: #eab308;
-    --erp-success: #16a34a;
-    --erp-success-hover: #15803d;
-    --erp-warning: #f59e0b;
-    --erp-warning-hover: #d97706;
-    --erp-danger: #ef4444;
-    --erp-danger-hover: #dc2626;
-    --erp-dark: #1e293b;
-    --erp-dark-hover: #0f172a;
+    /* PREMIUM SUNLIGHT + GOLD WEBSITE COLOR SYSTEM */
+    
+    /* Brand Colors */
+    --erp-primary: #C9A227;       /* Primary Gold */
+    --erp-primary-hover: #E6C65C; /* Bright / Hover Gold */
+    --erp-secondary: #9A7618;     /* Deep Gold */
+    --erp-secondary-hover: #C9A227;
+    --erp-accent: #C9A227;
+    --erp-accent-hover: #E6C65C;
+    
+    /* Feedback States */
+    --erp-success: #3F7D52;
+    --erp-success-hover: #2F5D3D;
+    --erp-warning: #B7791F;
+    --erp-warning-hover: #975F13;
+    --erp-danger: #B94A48;
+    --erp-danger-hover: #9A3837;
+    
+    /* Dark / Legacy Mapping */
+    --erp-dark: #24231F;          /* Mapped to Primary Heading Text Charcoal */
+    --erp-dark-hover: #35332C;    /* Secondary Heading Text */
 
     /* Backgrounds & Surfaces */
-    --erp-bg: #f8fafc;
-    --erp-card-bg: #ffffff;
-    --erp-subtle-bg: #f1f5f9;
+    --erp-bg: #FCFBF7;            /* Main Website Background */
+    --erp-card-bg: #FFFFFF;       /* Standard Card Background */
+    --erp-subtle-bg: #F6F3EA;     /* Secondary Section Background */
     
     /* Borders & Dividers */
-    --erp-border: #e2e8f0;
-    --erp-border-input: #cbd5e1;
-    --erp-border-dark: #94a3b8;
+    --erp-border: #E6E1D6;        /* Secondary Border */
+    --erp-border-input: #D8D4C8;  /* Input Border */
+    --erp-border-dark: #DED9CB;   /* Primary Border */
 
     /* Typography */
-    --erp-text-main: #1e293b;
-    --erp-text-muted: #64748b;
-    --erp-text-light: #94a3b8;
+    --erp-text-main: #5F5C54;     /* Primary Body Text */
+    --erp-text-muted: #8A877D;    /* Muted Text */
+    --erp-text-light: #AAA69B;    /* Disabled Text */
+    --erp-text-heading: #24231F;  /* New: Primary Heading Text */
     --erp-font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
     /* Radii */
@@ -45,9 +52,9 @@
     --erp-radius-xl: 12px;
 
     /* Shadows */
-    --erp-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-    --erp-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
-    --erp-shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    --erp-shadow-sm: 0 1px 3px rgba(36, 35, 31, 0.05);
+    --erp-shadow-md: 0 4px 6px -1px rgba(36, 35, 31, 0.08);
+    --erp-shadow-lg: 0 10px 25px -5px rgba(36, 35, 31, 0.12);
 }
 
 /* ── 0. GLOBAL RESET & OVERFLOW PREVENTION ── */

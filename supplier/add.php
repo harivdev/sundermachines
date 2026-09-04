@@ -5,9 +5,9 @@ requireAdmin();
 include("../includes/header.php");
 ?>
 
-<div class="page-main-container erp-container" style="padding: 30px 20px; background: #f8fafc; min-height: calc(100vh - 110px); display: flex; justify-content: center;">
+<div class="page-main-container erp-container" style="padding: 30px 20px; background: #f8fafc; min-height: calc(100vh - 110px);">
 
-    <div style="width: 100%; max-width: 820px;">
+    <div style="width: 100%;">
 
         <!-- HEADER BAR -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">

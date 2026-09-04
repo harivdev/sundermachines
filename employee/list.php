@@ -41,6 +41,8 @@ $page = max(1, intval($_GET['page'] ?? 1));
 $limit = 15;
 $offset = ($page - 1) * $limit;
 
+$whereSql = implode(' AND ', $whereClauses);
+
 $countRes = mysqli_query($conn, "SELECT COUNT(*) as total FROM employee WHERE $whereSql");
 $totalRows = mysqli_fetch_assoc($countRes)['total'] ?? 0;
 $totalPages = max(1, ceil($totalRows / $limit));
@@ -50,7 +52,7 @@ $employeesRes = mysqli_query($conn, "SELECT * FROM employee WHERE $whereSql ORDE
 include("../includes/header.php");
 ?>
 
-<div class="page-main-container erp-container" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+<div class="page-main-container erp-container" style="width: 100%; padding: 20px;">
     
     <!-- HEADER BAR -->
     <div class="erp-header-bar" style="background: #ffffff; padding: 16px 20px; border-radius: 8px 8px 0 0; border: 1px solid #cbd5e1; border-bottom: none; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
@@ -147,13 +149,7 @@ include("../includes/header.php");
                                 <div style="font-size: 12px; color: #64748b;"><?= htmlspecialchars($emp['designation'] ?: ($emp['employmentType'] ?: 'Employee')) ?></div>
                             </td>
                             <td style="padding: 10px; font-size: 13px; color: #334155;">
-                                <div>📞 <strong><?= htmlspecialchars($emp['phoneNo1']) ?></strong></div>
-                                <?php if (!empty($emp['phoneNo2'])): ?>
-                                    <div style="font-size: 12px; color: #16a34a;">💬 <?= htmlspecialchars($emp['phoneNo2']) ?> (WA)</div>
-                                <?php endif; ?>
-                                <?php if (!empty($emp['email'])): ?>
-                                    <div style="font-size: 12px; color: #2563eb;">✉️ <?= htmlspecialchars($emp['email']) ?></div>
-                                <?php endif; ?>
+                                <div>📞 <strong><?= htmlspecialchars($emp['phoneNo1'] ?? '-') ?></strong></div>
                             </td>
                             <td style="padding: 10px; font-size: 13.5px; color: #475569;">
                                 <?= htmlspecialchars($emp['city'] ?: '-') ?>
@@ -164,19 +160,19 @@ include("../includes/header.php");
                                 </span>
                             </td>
                             <td style="padding: 10px; text-align: center;">
-                                <?php if ($isActive): ?>
+                                <?php if (intval($emp['active']) === 1): ?>
                                     <span style="background: #dcfce7; color: #166534; font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 12px; border: 1px solid #86efac;">Active</span>
                                 <?php else: ?>
                                     <span style="background: #fee2e2; color: #991b1b; font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 12px; border: 1px solid #fca5a5;">Inactive</span>
                                 <?php endif; ?>
                             </td>
                             <td style="padding: 10px; text-align: center;">
-                                <div style="display: flex; gap: 6px; justify-content: center;">
-                                    <a href="edit.php?id=<?= $emp['id'] ?>" style="background: #475569; color: #fff; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-                                        ✏️ Edit
+                                <div style="display: flex; gap: 12px; justify-content: center; align-items: center;">
+                                    <a href="edit.php?id=<?= $emp['id'] ?>" title="Edit Employee" style="text-decoration: none; font-size: 16px; background: none; border: none; padding: 2px; cursor: pointer; transition: transform 0.15s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+                                        ✏️
                                     </a>
-                                    <a href="delete.php?id=<?= $emp['id'] ?>&action=toggle" onclick="return confirm('Change status for this employee?')" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; text-decoration: none; padding: 6px 10px; border-radius: 6px; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center;">
-                                        <?= $isActive ? '⏸️' : '▶️' ?>
+                                    <a href="delete.php?id=<?= $emp['id'] ?>&action=delete" title="Delete Employee" onclick="return confirm('Are you sure you want to permanently delete this employee?')" style="text-decoration: none; font-size: 16px; background: none; border: none; padding: 2px; cursor: pointer; transition: transform 0.15s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+                                        🗑️
                                     </a>
                                 </div>
                             </td>

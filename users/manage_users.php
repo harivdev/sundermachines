@@ -703,7 +703,7 @@ $queryString = http_build_query($queryParams);
   </div>
 
   <!-- PAGINATION -->
-  <div style="display:flex; justify-content:space-between; align-items:center; margin:15px 28px; font-size:14px; color:var(--muted);">
+  <div class="pagination-bar" style="display:flex; justify-content:space-between; align-items:center; margin:15px 28px; font-size:14px; color:var(--muted);">
     <div>
       <?php 
       $startRecord = $total_records > 0 ? $offset + 1 : 0;

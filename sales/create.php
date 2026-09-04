@@ -179,10 +179,23 @@ $sampleCustId = 'C' . str_pad($nextCustNum, 7, '0', STR_PAD_LEFT);
   }
   .td-input {
     width: 100%;
-    padding: 6px 8px; font-size: 13px; border: 1px solid #ced4da; border-radius: 4px;
+    padding: 7px 10px; font-size: 13px; border: 1.5px solid #ced4da; border-radius: 6px;
+    transition: all 0.15s ease-in-out;
   }
   .item-name-inp {
     min-width: 200px !important;
+    cursor: text !important;
+    caret-color: #f59e0b !important;
+  }
+  .item-name-inp:focus,
+  .item-name-inp:active,
+  .td-input:focus,
+  .td-input:active {
+    outline: none !important;
+    border: 2.5px solid #f59e0b !important;
+    background-color: #fff7ed !important;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.25) !important;
+    caret-color: #f59e0b !important;
   }
   .img-cell {
     width: 36px; height: 36px; background: #e9ecef; border-radius: 4px;
@@ -209,7 +222,8 @@ $sampleCustId = 'C' . str_pad($nextCustNum, 7, '0', STR_PAD_LEFT);
 
   /* ── Action Bar ── */
   .action-bar {
-    display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px;
+    display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; margin-bottom: 40px;
+    flex-wrap: wrap;
   }
   .btn-sub {
     background: var(--blue); color: #fff; border: none; border-radius: 6px;
@@ -326,14 +340,14 @@ $sampleCustId = 'C' . str_pad($nextCustNum, 7, '0', STR_PAD_LEFT);
   }
 
   @media (max-width: 768px) {
-    .page-wrapper { margin: 10px auto; padding: 0 10px; }
+    .page-wrapper { margin: 10px auto; padding: 0 10px 160px 10px !important; }
     .grid-3, .grid-2, .grid-4 { grid-template-columns: 1fr; gap: 12px; }
     .cust-addr-grid { grid-template-columns: 1fr; gap: 16px; }
     .cd-search-inputs { grid-template-columns: 1fr; }
     .totals-container { justify-content: stretch; }
     .totals-table { width: 100%; }
-    .action-bar { flex-direction: column; }
-    .action-bar button { width: 100%; }
+    .action-bar { flex-direction: column; width: 100%; margin-top: 24px; margin-bottom: 60px !important; }
+    .action-bar button, .btn-sub, .btn-res { width: 100% !important; padding: 12px 0 !important; font-size: 15px !important; box-sizing: border-box !important; }
     .cd-pagination-bar { flex-direction: column; align-items: center; text-align: center; }
     .cd-pag-controls { justify-content: center; }
     .modal-box { margin: 20px auto; padding: 16px; width: 95%; }

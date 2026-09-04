@@ -23,7 +23,7 @@ if (!$employee) {
 include("../includes/header.php");
 ?>
 
-<div class="page-main-container erp-container" style="max-width: 900px; margin: 0 auto; padding: 20px;">
+<div class="page-main-container erp-container" style="width: 100%; padding: 20px;">
     
     <!-- HEADER BAR -->
     <div class="erp-header-bar" style="margin-bottom: 20px;">
@@ -159,7 +159,12 @@ include("../includes/header.php");
 
                 <div class="form-group">
                     <label class="erp-label">ERP Login Password (Leave blank to keep current)</label>
-                    <input type="password" name="password" placeholder="Leave blank to keep unchanged" class="erp-input" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 12px; height: 38px;">
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input type="password" id="editPasswordInput" name="password" placeholder="Leave blank to keep unchanged" class="erp-input" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 40px 0 12px; height: 38px; width: 100%;">
+                        <button type="button" onclick="togglePasswordVisibility('editPasswordInput', this)" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: #64748b; font-size: 15px; padding: 0; outline: none;">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <?php 
@@ -216,6 +221,18 @@ function toggleCustomRole(selectElem) {
         box.style.display = 'none';
         input.required = false;
         input.value = '';
+    }
+}
+
+function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'fa-solid fa-eye';
     }
 }
 </script>
