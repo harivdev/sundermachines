@@ -735,7 +735,7 @@ $queryString = http_build_query($queryParams);
         </head>
         <body>
             <div class="label-card">
-                <div class="company">* Sunder BILLING *</div>
+                <div class="company">* SUNDER MACHNES WORLD *</div>
                 <svg id="labelSvg"></svg>
                 <div class="barcode-num">${barcode}</div>
                 <div class="item-name">${spareName || ''}</div>
@@ -789,7 +789,7 @@ $queryString = http_build_query($queryParams);
             if (!item.code) return;
             labelHtml += `
                 <div style="border: 1px solid #ccc; padding: 6px; text-align: center; border-radius: 4px; background: #fff;">
-                    <div style="font-size: 11px; font-weight: bold;">* Sunder *</div>
+                    <div style="font-size: 11px; font-weight: bold;">* SUNDER MACHNES WORLD *</div>
                     <svg id="lblSvg_${idx}"></svg>
                     <div style="font-size: 10px; font-family: monospace; font-weight: bold; margin-top: 2px;">
                         ${item.code} &nbsp;&nbsp;&nbsp; Rs: ${item.price}

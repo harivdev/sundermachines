@@ -45,6 +45,39 @@ while ($row = mysqli_fetch_assoc($iRes)) {
     <meta charset="UTF-8">
     <title>Customer Bill - <?= htmlspecialchars($sale['orderNo']) ?></title>
     <style>
+        @media print {
+            .no-print { display: none !important; }
+        }
+        .whatsapp-toolbar {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            padding: 8px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .btn-wa {
+            display: inline-block;
+            background: #25D366;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        .btn-print {
+            display: inline-block;
+            background: #475569;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 11px;
+            margin-right: 5px;
+        }
         @page {
             size: 80mm auto;
             margin: 0;
@@ -124,10 +157,32 @@ while ($row = mysqli_fetch_assoc($iRes)) {
     </style>
 </head>
 <body>
+<?php
+$custPhoneRaw = !empty($sale['whatsAppNo']) ? $sale['whatsAppNo'] : $sale['phoneNo1'];
+$custPhoneClean = preg_replace('/[^0-9]/', '', $custPhoneRaw);
+if (strlen($custPhoneClean) === 10) {
+    $custPhoneClean = '91' . $custPhoneClean;
+}
+
+$waMessage = "Hello " . ($sale['customer_name'] ?: 'Customer') . ",\n\n" .
+             "Thank you for visiting *SUNDER MACHINES WORLD*!\n" .
+             "Here is your Invoice summary:\n" .
+             "📄 *Invoice No:* " . $sale['orderNo'] . "\n" .
+             "📅 *Date:* " . date('d/m/Y', strtotime($sale['orderDate'])) . "\n" .
+             "💰 *Total Amount:* ₹" . number_format($sale['actualAmountSum'], 2) . "\n" .
+             "💳 *Paid Amount:* ₹" . number_format($sale['paidAmountSum'], 2) . "\n\n" .
+             "Thank you for your business! Visit Again!";
+$waUrl = "https://api.whatsapp.com/send?phone=" . urlencode($custPhoneClean) . "&text=" . urlencode($waMessage);
+?>
+
+    <div class="no-print whatsapp-toolbar">
+        <a href="#" onclick="window.print(); return false;" class="btn-print">🖨️ Print Bill</a>
+        <a href="<?= $waUrl ?>" target="_blank" class="btn-wa">📲 Share Bill on WhatsApp</a>
+    </div>
 
     <div class="header">
         <div class="sub-title">Sales</div>
-        <h2>SUNDER MACHINES WORLD</h2>
+        <h2>SUNDER MACHNES WORLD</h2>
         <p>4, Sunder Towers, Near Bus Stand.</p>
         <p>Gobi - 638 476</p>
         <p>Ph: 04285-224176 &nbsp; Cell:+91 98433 61326</p>
@@ -189,10 +244,5 @@ while ($row = mysqli_fetch_assoc($iRes)) {
         <p>* Visit Again *</p>
     </div>
 
-    <script>
-        window.onload = function() {
-            setTimeout(function() { window.print(); }, 400);
-        };
-    </script>
 </body>
 </html>

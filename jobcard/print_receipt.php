@@ -64,6 +64,40 @@ $formattedDateTime = date('d/m/Y h:i A', strtotime($dateTimeRaw));
     <meta charset="UTF-8">
     <title>Job Card - <?= htmlspecialchars($cleanCardNo) ?></title>
     <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { width: 78mm; padding: 0; }
+        }
+        .whatsapp-toolbar {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            padding: 8px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .btn-wa {
+            display: inline-block;
+            background: #25D366;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        .btn-print {
+            display: inline-block;
+            background: #475569;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 11px;
+            margin-right: 5px;
+        }
         @page {
             size: 80mm auto;
             margin: 0;
@@ -91,28 +125,31 @@ $formattedDateTime = date('d/m/Y h:i A', strtotime($dateTimeRaw));
         }
         .header p {
             margin: 1px 0;
-            font-size: 10px;
+            font-size: 9.5px;
         }
         .divider {
-            border-top: 1px dotted #000;
-            margin: 5px 0;
+            border-top: 1px dashed #000;
+            margin: 4px 0;
         }
         .info-row {
-            font-size: 10.5px;
-            margin-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            margin-bottom: 1.5px;
         }
-        .info-row span.label {
-            display: inline-block;
-            width: 70px;
+        .info-row .label {
+            font-weight: bold;
+            width: 75px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 4px 0;
-            font-size: 10.5px;
+            font-size: 10px;
         }
         th {
-            border-bottom: 1px dotted #000;
+            border-bottom: 1px dashed #000;
+            border-top: 1px dashed #000;
             padding: 3px 0;
             text-align: left;
             font-weight: bold;
@@ -123,29 +160,37 @@ $formattedDateTime = date('d/m/Y h:i A', strtotime($dateTimeRaw));
         }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
-        .totals-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 10.5px;
-            margin-top: 2px;
-        }
-        .footer-notice {
+        .footer {
             text-align: center;
-            font-size: 10px;
+            font-size: 9.5px;
             margin-top: 6px;
-        }
-        .footer-notice p {
-            margin: 2px 0;
-        }
-        @media print {
-            body { width: 78mm; padding: 2mm; }
         }
     </style>
 </head>
-<body onload="window.print()">
+<body>
+<?php
+$jcPhoneRaw = !empty($jobcard['whatsAppNo']) ? $jobcard['whatsAppNo'] : ($jobcard['phoneNo1'] ?? '');
+$jcPhoneClean = preg_replace('/[^0-9]/', '', $jcPhoneRaw);
+if (strlen($jcPhoneClean) === 10) {
+    $jcPhoneClean = '91' . $jcPhoneClean;
+}
+
+$jcMessage = "Hello " . ($jobcard['customer_name'] ?: 'Customer') . ",\n\n" .
+             "Your Job Card at *SUNDER MACHINES WORLD* has been created!\n" .
+             "🛠️ *Job Card No:* " . $cleanCardNo . "\n" .
+             "📅 *Date:* " . $formattedDateTime . "\n" .
+             "⚙️ *Machine:* " . ($jobcard['mName'] ?? 'Machine') . "\n\n" .
+             "Thank you for choosing us!";
+$jcWaUrl = "https://api.whatsapp.com/send?phone=" . urlencode($jcPhoneClean) . "&text=" . urlencode($jcMessage);
+?>
+
+    <div class="no-print whatsapp-toolbar">
+        <a href="#" onclick="window.print(); return false;" class="btn-print">🖨️ Print Job Card</a>
+        <a href="<?= $jcWaUrl ?>" target="_blank" class="btn-wa">📲 Share Job Card on WhatsApp</a>
+    </div>
 
     <div class="header">
-        <h2>SUNDER MACHINES WORLD</h2>
+        <h2>SUNDER MACHNES WORLD</h2>
         <p>4, Sunder Towers, Near Bus Stand.</p>
         <p>Gobi - 638 476</p>
         <p>Ph: 04285-224176 &nbsp; Cell:+91 98433 61326</p>

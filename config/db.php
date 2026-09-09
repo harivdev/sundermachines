@@ -10,20 +10,23 @@ if (!$conn) {
 
 @mysqli_query($conn, "SET time_zone = '+05:30'");
 
-// Global UI Output Filter to convert UI display names to SUNDER MACHINES WORLD
+// Global UI Output Filter to convert UI display names to SUNDER MACHNES WORLD
 if (!function_exists('sunder_ui_output_filter')) {
     function sunder_ui_output_filter($buffer) {
         static $map = [
-            'SANRUTH MACHINES' => 'SUNDER MACHINES WORLD',
-            'Sanruth Machines' => 'Sunder Machines World',
-            'sanruth machines' => 'sunder machines world',
+            'SUNDER MACHINES WORLD' => 'SUNDER MACHNES WORLD',
+            'Sunder Machines World' => 'SUNDER MACHNES WORLD',
+            'sunder machines world' => 'SUNDER MACHNES WORLD',
+            'SANRUTH MACHINES' => 'SUNDER MACHNES WORLD',
+            'Sanruth Machines' => 'SUNDER MACHNES WORLD',
+            'sanruth machines' => 'sunder machnes world',
             'Sanruth Softtech' => 'Sanruth Softtech',
             'SANRUTH SOFTTECH' => 'Sanruth Softtech',
             'sanruth softtech' => 'Sanruth Softtech',
             'owner@sunder.com' => 'owner@sunder.com',
-            'SANRUTH' => 'SUNDER MACHINES WORLD',
-            'Sanruth' => 'Sunder Machines World',
-            'sanruth' => 'sunder machines world'
+            'SANRUTH' => 'SUNDER MACHNES WORLD',
+            'Sanruth' => 'SUNDER MACHNES WORLD',
+            'sanruth' => 'sunder machnes world'
         ];
         return strtr($buffer, $map);
     }

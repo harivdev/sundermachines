@@ -1,5 +1,6 @@
 <?php
 require_once("../config/db.php");
+require_once("../config/whatsapp.php");
 require_once("../includes/auth.php");
 requireAdmin();
 
@@ -241,6 +242,37 @@ try {
 
     // Commit Transaction
     mysqli_commit($conn);
+
+    // Resolve Supplier Name for Admin Notification
+    $supplierName = 'Supplier #' . $supplierId;
+    $suppRes = mysqli_query($conn, "SELECT name FROM supplier WHERE id = $supplierId LIMIT 1");
+    if ($suppRes && $suppRow = mysqli_fetch_assoc($suppRes)) {
+        $supplierName = $suppRow['name'];
+    }
+
+    // Build Product Summary
+    $prodLines = [];
+    if (is_array($items)) {
+        $idx = 1;
+        foreach ($items as $item) {
+            $iName = trim($item['itemName'] ?? '');
+            if (!empty($iName)) {
+                $prodLines[] = (count($items) > 1 ? "$idx. " : "") . $iName;
+                $idx++;
+            }
+            if ($idx > 5) break; // Limit summary to first 5 items to prevent overly long messages
+        }
+    }
+    $productSummary = !empty($prodLines) ? implode(", ", $prodLines) : "Purchase Items";
+
+    // Send Admin WhatsApp Notification (purchase_order_created template)
+    send_purchase_notification(
+        $orderNo,
+        $supplierName,
+        $productSummary,
+        $actualAmountSum,
+        $purchaseId
+    );
 
     echo "<script>alert('✅ Purchase Order $orderNo created successfully!'); window.location.href='purchase_list.php';</script>";
     exit();

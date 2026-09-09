@@ -186,7 +186,7 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
 
                 <!-- RIGHT SIDE (LOGO PLACEHOLDER) -->
                 <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 10px;">
-                    <img src="../img/logo.png" alt="SUNDER MACHINES WORLD" style="max-width: 100%; height: auto; border-radius: 10px; max-height: 280px; object-fit: contain;">
+                    <img src="../img/logo.png" alt="SUNDER MACHNES WORLD" style="max-width: 100%; height: auto; border-radius: 10px; max-height: 280px; object-fit: contain;">
                 </div>
             </div>
 

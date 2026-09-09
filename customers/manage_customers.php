@@ -66,7 +66,7 @@ $next_customer_id = 'C' . str_pad($next_num, 7, '0', STR_PAD_LEFT);
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Customers – Sunder Machines World</title>
+  <title>Manage Customers – SUNDER MACHNES WORLD</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
@@ -334,7 +334,7 @@ tbody td{padding:10px 8px;font-size:.83rem;vertical-align:middle;overflow:hidden
       <div class="id-card-container">
         <div class="id-card" id="idCardPrint">
           <div class="id-card-top">
-            <div class="company-name">SUNDER MACHINES WORLD</div>
+            <div class="company-name">SUNDER MACHNES WORLD</div>
             <div class="company-addr">4, Sunder Building, Gobichettypalayam,<br>Erode - Dt TN - 638476.</div>
             <div class="id-card-logo"><div class="logo-placeholder">🧵</div></div>
             <div class="id-card-cust-name" id="ic_name">—</div>

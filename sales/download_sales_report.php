@@ -80,7 +80,7 @@ if ($format === 'csv') {
     fputs($output, "\xEF\xBB\xBF");
 
     // Title info
-    fputcsv($output, ['Sunder Billing - Sales Report Summary']);
+    fputcsv($output, ['SUNDER MACHNES WORLD - Sales Report Summary']);
     fputcsv($output, ['Range:', $rangeLabel]);
     fputcsv($output, ['Generated On:', date('d/m/Y H:i:s')]);
     fputcsv($output, []);
@@ -203,7 +203,7 @@ if ($format === 'csv') {
 
     <div class="hdr">
         <div>
-            <h2>Sunder Billing - Sales Report</h2>
+            <h2>SUNDER MACHNES WORLD - Sales Report</h2>
             <div style="margin-top:4px; font-weight:bold; color:#555;"><?= htmlspecialchars($rangeLabel) ?></div>
         </div>
         <div style="text-align:right;">

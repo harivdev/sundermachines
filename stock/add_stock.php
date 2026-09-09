@@ -678,11 +678,21 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
             <input type="number" id="qtyInput" name="quantity" value="1" min="1" required oninput="syncQty(this)">
           </div>
 
-          <!-- REORDER LEVEL -->
-          <div class="section-title">Reorder Level:</div>
-          <div class="form-group">
-            <label>Min Qunatity</label>
-            <input type="number" name="minQty" id="minQty" placeholder="0" min="0">
+          <!-- STOCK THRESHOLDS -->
+          <div class="section-title">Stock Thresholds:</div>
+          <div class="grid-3 form-group">
+            <div>
+              <label>Min Qty</label>
+              <input type="number" name="minQty" id="minQty" placeholder="0" min="0">
+            </div>
+            <div>
+              <label>Max Qty</label>
+              <input type="number" name="maxQty" id="maxQty" placeholder="0" min="0">
+            </div>
+            <div>
+              <label>Reorder Level</label>
+              <input type="number" name="reorderLevel" id="reorderLevel" placeholder="0" min="0">
+            </div>
           </div>
 
           <!-- STOCKED QUANTITY -->

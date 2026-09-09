@@ -1085,6 +1085,9 @@ if (strpos($current_path, '/jobcard/') !== false) {
                         <a href="../stock/list.php" <?php echo ($current_page == 'list.php' && strpos($_SERVER['PHP_SELF'], 'stock') !== false) ? 'class="active-link"' : ''; ?>>
                             <i class="fa-solid fa-boxes-stacked nav-icon"></i> Stock List
                         </a>
+                        <a href="../stock/reorder_level.php" <?php echo ($current_page == 'reorder_level.php' && strpos($_SERVER['PHP_SELF'], 'stock') !== false) ? 'class="active-link"' : ''; ?>>
+                            <i class="fa-solid fa-triangle-exclamation nav-icon"></i> Reorder Level
+                        </a>
                     </div>
                 </li>
             <?php endif; ?>

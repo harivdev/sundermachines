@@ -1,5 +1,6 @@
 <?php
 require_once("../config/db.php");
+require_once("../config/whatsapp.php");
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -62,6 +63,10 @@ if ($multiBatch && is_array($multiBatch) && count($multiBatch) > 0) {
         $sellingUnit = floatval($itemData['sellingPricePerUnit'] ?? 0);
         $selledUnit = floatval($itemData['selledPricePerUnit'] ?? 0);
         $gstPercentage = floatval($itemData['gstPercentage'] ?? 0);
+        
+        $minQty = intval($itemData['minQty'] ?? 0);
+        $maxQty = intval($itemData['maxQty'] ?? 0);
+        $reorderLevel = intval($itemData['reorderLevel'] ?? 0);
 
         if (empty($spare) || empty($itemName)) continue;
 
@@ -101,10 +106,10 @@ if ($multiBatch && is_array($multiBatch) && count($multiBatch) > 0) {
         }
         $serialVal = ($serialNo !== '') ? $serialNo : NULL;
 
-        $sql = "INSERT INTO stock (id, spare, itemName, barCode, quantity, availableQty, actualPricePerQty, actualPricePerUnit, sellingPricePerQty, sellingPricePerUnit, selledPricePerUnit, gstPercentage, selled, brand, model, machine, unit, serialNo, warrantyInMonths, purchaseItem) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO stock (id, spare, itemName, barCode, quantity, availableQty, actualPricePerQty, actualPricePerUnit, sellingPricePerQty, sellingPricePerUnit, selledPricePerUnit, gstPercentage, selled, brand, model, machine, unit, serialNo, warrantyInMonths, purchaseItem, minQty, maxQty, reorderLevel) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($conn, $sql);
         if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "sissiiddddddiiiiisii", $id, $spare, $itemName, $barcode, $quantity, $quantity, $actualQty, $actualUnit, $sellingQty, $sellingUnit, $selledUnit, $gstPercentage, $selled, $brandVal, $modelVal, $machineVal, $unit, $serialVal, $warrantyInMonths, $purchaseVal);
+            mysqli_stmt_bind_param($stmt, "sissiiddddddiiiiisiiiii", $id, $spare, $itemName, $barcode, $quantity, $quantity, $actualQty, $actualUnit, $sellingQty, $sellingUnit, $selledUnit, $gstPercentage, $selled, $brandVal, $modelVal, $machineVal, $unit, $serialVal, $warrantyInMonths, $purchaseVal, $minQty, $maxQty, $reorderLevel);
             if (mysqli_stmt_execute($stmt)) {
                 $insertedCount++;
                 $lastBarcode = $barcode;
@@ -134,6 +139,9 @@ $barcodeInput = trim($_POST['barCode'] ?? '');
 $purchaseItem = intval($_POST['purchaseItem'] ?? 0);
 $warrantyInMonths = intval($_POST['warrantyInMonths'] ?? 0);
 $selled = isset($_POST['selled']) ? 1 : 0;
+$minQty = intval($_POST['minQty'] ?? 0);
+$maxQty = intval($_POST['maxQty'] ?? 0);
+$reorderLevel = intval($_POST['reorderLevel'] ?? 0);
 
 // Check mandatory fields
 if (empty($brand) || $brand === '0' || empty($model) || $model === '0') {
@@ -252,7 +260,7 @@ if ($purchaseItem > 0) {
 }
 $serialVal = ($serialNo !== '') ? $serialNo : NULL;
 
-$sql = "INSERT INTO stock (id, spare, itemName, barCode, quantity, availableQty, actualPricePerQty, actualPricePerUnit, sellingPricePerQty, sellingPricePerUnit, selledPricePerUnit, gstPercentage, selled, brand, model, machine, unit, serialNo, warrantyInMonths, purchaseItem) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+$sql = "INSERT INTO stock (id, spare, itemName, barCode, quantity, availableQty, actualPricePerQty, actualPricePerUnit, sellingPricePerQty, sellingPricePerUnit, selledPricePerUnit, gstPercentage, selled, brand, model, machine, unit, serialNo, warrantyInMonths, purchaseItem, minQty, maxQty, reorderLevel) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 $stmt = mysqli_prepare($conn, $sql);
 
 if (!$stmt) {
@@ -261,7 +269,7 @@ if (!$stmt) {
 
 mysqli_stmt_bind_param(
     $stmt,
-    "sissiiddddddiiiiisii",
+    "sissiiddddddiiiiisiiiii",
     $id,
     $spareVal,
     $itemName,
@@ -281,10 +289,16 @@ mysqli_stmt_bind_param(
     $unit,
     $serialVal,
     $warrantyInMonths,
-    $purchaseVal
+    $purchaseVal,
+    $minQty,
+    $maxQty,
+    $reorderLevel
 );
 
 if (mysqli_stmt_execute($stmt)) {
+    if ($reorderLevel > 0 && $availableQty <= $reorderLevel) {
+        send_stock_reorder_notification($itemName, $barcode, $availableQty, $reorderLevel, $id);
+    }
     if ($isAjax) {
         header('Content-Type: application/json');
         echo json_encode([

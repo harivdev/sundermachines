@@ -61,7 +61,7 @@ if ($spRes) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Stock Report - Sunder ERP</title>
+    <title>Stock Report - SUNDER MACHNES WORLD</title>
     <style>
         body {
             font-family: sans-serif;

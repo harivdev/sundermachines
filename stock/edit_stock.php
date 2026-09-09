@@ -49,6 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $newQty = $oldQty + max(0, $addedStock);
   $preserveQuantity = intval($data['quantity'] ?? 0);
   $minQty = intval($_POST['minQty'] ?? 0);
+  $maxQty = intval($_POST['maxQty'] ?? 0);
+  $reorderLevel = intval($_POST['reorderLevel'] ?? 0);
   $warrantyMons = intval($_POST['warrantyInMonths'] ?? 0);
   $brand = intval($_POST['brand'] ?? 0);
   $model = intval($_POST['model'] ?? 0);
@@ -118,7 +120,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             serialNo            = ?,
             warrantyInMonths    = ?,
             selled              = ?,
-            barCode             = ?
+            barCode             = ?,
+            minQty              = ?,
+            maxQty              = ?,
+            reorderLevel        = ?
         WHERE id = ?
         LIMIT 1
     ");
@@ -127,10 +132,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     die("Prepare failed: " . mysqli_error($conn));
   }
 
-  // 15 params: i i d d d d d d i i s i i s s
+  // 18 params: i i d d d d d d i i s i i s i i i s
   mysqli_stmt_bind_param(
     $stmt,
-    "iiddddddiiisiss",
+    "iiddddddiisiisiiis",
     $newQty,
     $preserveQuantity,
     $actualUnit,
@@ -145,6 +150,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $warrantyMons,
     $selled,
     $barCode,
+    $minQty,
+    $maxQty,
+    $reorderLevel,
     $id
   );
 
@@ -681,13 +689,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
 
           <!-- Reorder / Stocked / Warranty -->
-          <!-- Reorder / Stocked / Warranty -->
-          <div class="stock-stats-grid form-group">
+          <!-- Stock Thresholds -->
+          <div class="grid-3 form-group">
             <div>
-              <label>Reorder Level</label>
-              <small style="display:block; font-size:10px; color:var(--label); margin-bottom:4px;">Min Quantity</small>
+              <label>Min Qty</label>
               <input type="number" name="minQty" value="<?= intval($data['minQty'] ?? 0) ?>" min="0">
             </div>
+            <div>
+              <label>Max Qty</label>
+              <input type="number" name="maxQty" value="<?= intval($data['maxQty'] ?? 0) ?>" min="0">
+            </div>
+            <div>
+              <label>Reorder Level</label>
+              <input type="number" name="reorderLevel" value="<?= intval($data['reorderLevel'] ?? 0) ?>" min="0">
+            </div>
+          </div>
+
+          <!-- Stocked / Warranty -->
+          <div class="grid-3 form-group">
             <div>
               <label>Stocked Qty</label>
               <small style="display:block; font-size:10px; color:var(--label); margin-bottom:4px;">Old Stock</small>
@@ -882,7 +901,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </head>
     <body>
         <div class="label-card">
-            <div class="company">* Sunder BILLING *</div>
+            <div class="company">* SUNDER MACHNES WORLD *</div>
             <svg id="labelSvg"></svg>
             <div class="barcode-num">${code}</div>
             <div class="item-name">${name}</div>

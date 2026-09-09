@@ -7,7 +7,7 @@ header('Content-Type: application/json');
 $term = trim($_GET['query'] ?? $_GET['term'] ?? $_GET['q'] ?? '');
 $termEsc = mysqli_real_escape_string($conn, $term);
 
-$where = "WHERE s.spare IS NOT NULL";
+$where = "WHERE 1=1";
 if ($termEsc !== '') {
     $where .= " AND (
         sp.spareName LIKE '%$termEsc%' OR 
@@ -27,8 +27,10 @@ $sql = "SELECT
             COALESCE(sp.rackNumber, '-') AS rackNumber,
             COALESCE(s.barCode, '-') AS barCode,
             s.availableQty,
-            COALESCE(s.sellingPricePerQty, s.sellingPricePerUnit, 0) AS sellingPrice,
+            COALESCE(s.actualPricePerQty, s.actualPricePerUnit, 0) AS costPrice,
+            COALESCE(s.sellingPricePerQty, s.sellingPricePerUnit, s.selledPricePerUnit, 0) AS sellingPrice,
             COALESCE(s.gstPercentage, 0) AS gstPercentage,
+            'SPR' AS category,
             sp.picture
         FROM stock s
         LEFT JOIN spares sp ON s.spare = sp.id
@@ -43,6 +45,7 @@ if ($res) {
     while ($row = mysqli_fetch_assoc($res)) {
         $row['availableQty'] = (int)$row['availableQty'];
         $row['sellingPrice'] = (float)$row['sellingPrice'];
+        $row['costPrice'] = (float)$row['costPrice'];
         $row['gstPercentage'] = (float)$row['gstPercentage'];
         if (empty($row['picture'])) {
             $row['picture'] = "no-image.png";

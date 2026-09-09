@@ -1,5 +1,6 @@
 <?php
 require_once("../config/db.php");
+require_once("../config/whatsapp.php");
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -257,6 +258,40 @@ try {
     }
 
     mysqli_commit($conn);
+
+    // Send Admin WhatsApp Notification (sales_order_created template)
+    send_sales_order_notification(
+        $orderNo,
+        $customerName,
+        $customerPhone,
+        $whatsApp,
+        $actualSum,
+        $salesId
+    );
+
+    // Check sold stock items for Stock Reorder Reminder trigger
+    if (!empty($_POST['stockId']) && is_array($_POST['stockId'])) {
+        foreach ($_POST['stockId'] as $stkId) {
+            $stkId = trim($stkId);
+            if (!empty($stkId)) {
+                $stkQuery = mysqli_query($conn, "SELECT id, itemName, barCode, availableQty, reorderLevel FROM stock WHERE id = '" . mysqli_real_escape_string($conn, $stkId) . "' LIMIT 1");
+                if ($stkQuery && $stkRow = mysqli_fetch_assoc($stkQuery)) {
+                    $avail = (int)$stkRow['availableQty'];
+                    $reorder = (int)$stkRow['reorderLevel'];
+                    if ($reorder > 0 && $avail <= $reorder) {
+                        send_stock_reorder_notification(
+                            $stkRow['itemName'],
+                            $stkRow['barCode'],
+                            $avail,
+                            $reorder,
+                            $stkRow['id']
+                        );
+                    }
+                }
+            }
+        }
+    }
+
     echo "<script>alert('✅ Sales Order #" . addslashes($orderNo) . " created successfully!'); window.location.href='print_receipt.php?id=$salesId';</script>";
 
 } catch (Exception $e) {

@@ -1,5 +1,5 @@
 <?php
-require_once("../config/db.php");
+require_once(__DIR__ . "/../config/db.php");
 
 // Determine active filter preset and date range
 $preset = isset($_GET['preset']) ? trim($_GET['preset']) : '';
@@ -26,6 +26,29 @@ if ($preset === 'today') {
 } elseif ($preset === 'all') {
     $fromDate = '';
     $toDate = '';
+}
+
+// Calculate active preset for button styling
+$todayStr = date('Y-m-d');
+$yesterdayStr = date('Y-m-d', strtotime('-1 day'));
+$weekStr = date('Y-m-d', strtotime('-7 days'));
+$fifteenStr = date('Y-m-d', strtotime('-15 days'));
+
+$activePreset = $preset;
+if ($preset === 'custom' || empty($preset)) {
+    if ($fromDate === $todayStr && $toDate === $todayStr) {
+        $activePreset = 'today';
+    } elseif ($fromDate === $yesterdayStr && $toDate === $yesterdayStr) {
+        $activePreset = 'yesterday';
+    } elseif ($fromDate === $weekStr && $toDate === $todayStr) {
+        $activePreset = 'week';
+    } elseif ($fromDate === $fifteenStr && $toDate === $todayStr) {
+        $activePreset = '15days';
+    } elseif (empty($fromDate) && empty($toDate)) {
+        $activePreset = 'all';
+    } else {
+        $activePreset = 'custom';
+    }
 }
 
 // Build WHERE clause
@@ -138,7 +161,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
 }
 
 // Standard Page Request Header Inclusion
-include("../includes/header.php");
+include(__DIR__ . "/../includes/header.php");
 
 $limit = 10;
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
@@ -202,6 +225,9 @@ $queryString = http_build_query($queryParams);
         font-weight: 500;
         text-decoration: none;
         transition: all 0.15s;
+        text-align: center;
+        flex: 1 1 auto;
+        box-sizing: border-box;
     }
     .btn-preset:hover {
         background: #e2e8f0;
@@ -241,6 +267,78 @@ $queryString = http_build_query($queryParams);
         cursor: not-allowed;
         pointer-events: none;
     }
+
+    /* RESPONSIVE FILTER PANEL LAYOUT */
+    .filter-form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: flex-end;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .filter-group-search {
+        flex: 1 1 100%;
+        box-sizing: border-box;
+    }
+    .filter-group-date {
+        flex: 1 1 calc(50% - 6px);
+        min-width: 120px;
+        box-sizing: border-box;
+    }
+    .filter-group-actions {
+        flex: 1 1 100%;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        box-sizing: border-box;
+    }
+    .filter-btn-apply {
+        flex: 1;
+        background: #2563eb;
+        color: #ffffff;
+        border: none;
+        height: 38px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+    .filter-btn-reset {
+        flex: 1;
+        background: #e2e8f0;
+        color: #475569;
+        text-decoration: none;
+        height: 38px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+
+    @media (min-width: 768px) {
+        .filter-group-search {
+            flex: 2 1 240px;
+        }
+        .filter-group-date {
+            flex: 0 0 150px;
+        }
+        .filter-group-actions {
+            flex: 0 0 auto;
+        }
+        .filter-btn-apply,
+        .filter-btn-reset {
+            flex: initial;
+            padding: 0 16px;
+        }
+    }
 </style>
 
 <div class="page-main-container erp-container" style="padding: 20px; background: #f8fafc; min-height: calc(100vh - 110px);">
@@ -264,38 +362,38 @@ $queryString = http_build_query($queryParams);
     </div>
 
     <!-- PRESET BUTTONS BAR -->
-    <div style="background: #ffffff; padding: 10px 20px; border: 1px solid #e2e8f0; border-bottom: none; display: flex; gap: 10px; align-items: center;">
+    <div style="background: #ffffff; padding: 10px 20px; border: 1px solid #e2e8f0; border-bottom: none; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
         <span style="font-size: 13px; font-weight: 600; color: #64748b; white-space: nowrap;">Quick Date:</span>
         <div style="display: flex; gap: 8px; flex-wrap: wrap; flex: 1; align-items: center;">
-            <a href="spares_list.php?preset=today<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $preset === 'today' ? 'active' : '' ?>">Today</a>
-            <a href="spares_list.php?preset=yesterday<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $preset === 'yesterday' ? 'active' : '' ?>">Yesterday</a>
-            <a href="spares_list.php?preset=week<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $preset === 'week' ? 'active' : '' ?>">Last Week</a>
-            <a href="spares_list.php?preset=15days<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $preset === '15days' ? 'active' : '' ?>">15 Days</a>
-            <a href="spares_list.php?preset=all<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $preset === 'all' ? 'active' : '' ?>">All Records</a>
+            <a href="spares_list.php?preset=today<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $activePreset === 'today' ? 'active' : '' ?>">Today</a>
+            <a href="spares_list.php?preset=yesterday<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $activePreset === 'yesterday' ? 'active' : '' ?>">Yesterday</a>
+            <a href="spares_list.php?preset=week<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $activePreset === 'week' ? 'active' : '' ?>">Last Week</a>
+            <a href="spares_list.php?preset=15days<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $activePreset === '15days' ? 'active' : '' ?>">15 Days</a>
+            <a href="spares_list.php?preset=all<?= !empty($search) ? '&search='.urlencode($search) : '' ?>" class="btn-preset <?= $activePreset === 'all' ? 'active' : '' ?>">All Records</a>
         </div>
     </div>
 
     <!-- FILTER PANEL -->
     <div id="sparesFilter" style="display:<?= (!empty($search) || !empty($_GET['from_date']) || !empty($_GET['to_date'])) ? 'block' : 'none' ?>; background:#ffffff; padding:15px 20px; border:1px solid #e2e8f0; border-bottom:none;">
-        <form method="GET" action="spares_list.php" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
+        <form method="GET" action="spares_list.php" class="filter-form-row">
             <input type="hidden" name="preset" value="custom">
-            <div style="flex: 1; min-width: 200px;">
+            <div class="filter-group-search">
                 <label style="display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Search (Job Card / Spare)</label>
-                <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Job Card No or Spare Name..." class="form-control" style="height: 38px; width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 10px;">
+                <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Job Card No or Spare Name..." class="form-control" style="height: 38px; width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 10px; box-sizing: border-box;">
             </div>
-            <div style="width: 150px;">
+            <div class="filter-group-date">
                 <label style="display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px;">From Date</label>
-                <input type="date" name="from_date" value="<?= htmlspecialchars($fromDate) ?>" class="form-control" style="height: 38px; width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 10px;">
+                <input type="date" name="from_date" value="<?= htmlspecialchars($fromDate) ?>" class="form-control" style="height: 38px; width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 10px; box-sizing: border-box;">
             </div>
-            <div style="width: 150px;">
+            <div class="filter-group-date">
                 <label style="display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px;">To Date</label>
-                <input type="date" name="to_date" value="<?= htmlspecialchars($toDate) ?>" class="form-control" style="height: 38px; width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 10px;">
+                <input type="date" name="to_date" value="<?= htmlspecialchars($toDate) ?>" class="form-control" style="height: 38px; width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 10px; box-sizing: border-box;">
             </div>
-            <div>
-                <button type="submit" style="background: #2563eb; color: #ffffff; border: none; padding: 0 16px; height: 38px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+            <div class="filter-group-actions">
+                <button type="submit" class="filter-btn-apply">
                     Apply Date Filter
                 </button>
-                <a href="spares_list.php?preset=today" style="background: #e2e8f0; color: #475569; text-decoration: none; padding: 10px 14px; height: 38px; border-radius: 6px; font-weight: 600; display: inline-block; box-sizing: border-box; line-height: 18px; margin-left: 5px;">
+                <a href="spares_list.php?preset=today" class="filter-btn-reset">
                     Reset
                 </a>
             </div>
@@ -357,8 +455,15 @@ $queryString = http_build_query($queryParams);
                     <?php endwhile; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="7" style="padding: 35px; text-align: center; color: #94a3b8; font-size: 15px;">
-                            No spare usage records found for the selected filter.
+                        <td colspan="7" style="padding: 35px; text-align: center; color: #64748b; font-size: 15px;">
+                            <div>No spare usage records found for the selected date range.</div>
+                            <?php if (!empty($search) && $activePreset !== 'all'): ?>
+                                <div style="margin-top: 14px;">
+                                    <a href="spares_list.php?preset=all&search=<?= urlencode($search) ?>" style="background: #2563eb; color: #ffffff; padding: 9px 18px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
+                                        <span>🔍</span> Search '<?= htmlspecialchars($search) ?>' Across All Records
+                                    </a>
+                                </div>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endif; ?>
@@ -476,4 +581,4 @@ function toggleModalCustomDates(show) {
 }
 </script>
 
-<?php include("../includes/footer.php"); ?>
+<?php include(__DIR__ . "/../includes/footer.php"); ?>

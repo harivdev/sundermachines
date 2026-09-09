@@ -2,5 +2,10 @@
 .db_cleaned_v2
 config/.db_cleaned_v2
 scratch_*
+scratch/
+uploads/
+test.php
 *.tmp
 *.log
+
+

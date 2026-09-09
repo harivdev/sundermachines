@@ -341,7 +341,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
         <div class="login-card">
             <div class="logo-section">
-                <div class="logo-container"><img src="img/logo.png" alt="Sunder Machines World Logo"></div>
+                <div class="logo-container"><img src="img/logo.png" alt="SUNDER MACHNES WORLD Logo"></div>
                 <h1 class="brand-name"><span class="brand-accent">Sunder</span> Billing</h1>
                 <p class="subtitle">Please enter your credentials</p>
             </div>

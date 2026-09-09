@@ -67,11 +67,11 @@ while ($row = mysqli_fetch_assoc($iRes)) {
                     </div>
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-size: 24px; font-weight: 800; color: #16a34a;">Sunder Billing</div>
+                    <div style="font-size: 24px; font-weight: 800; color: #16a34a;">SUNDER MACHNES WORLD</div>
                     <div style="color: #64748b; font-size: 13px; line-height: 1.6; margin-top: 10px;">
-                        123 Tech Street, IT Park<br>
-                        Coimbatore, TN, 641001<br>
-                        Ph: +91 9876543210
+                        4, Sunder Towers, Near Bus Stand,<br>
+                        Gobi - 638 476.<br>
+                        Ph: 04285-224176 / +91 98433 61326
                     </div>
                 </div>
             </div>

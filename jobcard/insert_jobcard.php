@@ -1,5 +1,6 @@
 <?php
 require_once(__DIR__ . "/../config/db.php");
+require_once(__DIR__ . "/../config/whatsapp.php");
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -250,6 +251,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Clear session reservation after successful save
         unset($_SESSION['draft_jobcard_no']);
         unset($_SESSION['draft_jobcard_year']);
+
+        // Send Admin WhatsApp Notification (job_card_created template)
+        send_job_card_notification(
+            $finalCardNo,
+            $customerName,
+            $customerPhone,
+            $customerCity,
+            $jobcardId
+        );
 
         echo "<script>alert('Job Card Created successfully! Number: $finalCardNo'); window.location.href='edit.php?id=$jobcardId';</script>";
     } else {
