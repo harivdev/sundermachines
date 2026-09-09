@@ -77,6 +77,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
             break;
 
+        case 'test_job_card_delivered':
+            $actionResult = send_job_card_delivered_notification(
+                "JC-2026-0045",
+                "Ramesh Kumar",
+                "9876543210",
+                "Coimbatore",
+                "Single Needle Lockstitch",
+                "SN-884920",
+                1500.00,
+                1500.00,
+                99902
+            );
+            break;
+
         case 'test_stock_reorder':
             $actionResult = send_stock_reorder_notification(
                 "Clutch Plate 120mm",
@@ -257,6 +271,10 @@ $logsRes = mysqli_query($conn, "SELECT * FROM whatsapp_notification_log ORDER BY
 
         <button type="submit" name="action" value="test_job_card">
             📋 2. job_card_created<br><small style="font-weight:normal;">Job Card Created Event</small>
+        </button>
+
+        <button type="submit" name="action" value="test_job_card_delivered" class="btn-green">
+            🚚 3. job_card_delivered<br><small style="font-weight:normal;">Job Card Delivered Event</small>
         </button>
 
         <button type="submit" name="action" value="test_stock_reorder">

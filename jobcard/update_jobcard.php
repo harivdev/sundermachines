@@ -1,6 +1,7 @@
 <?php
 // jobcard/update_jobcard.php
 require_once(__DIR__ . "/../config/db.php");
+require_once(__DIR__ . "/../config/whatsapp.php");
 
 header('Content-Type: application/json');
 
@@ -322,6 +323,25 @@ try {
             $deductSql = "UPDATE stock SET availableQty = availableQty - {$sItem['qty']} WHERE id = '$stockIdEsc'";
             mysqli_query($conn, $deductSql);
         }
+    }
+
+    // Trigger WhatsApp Job Card Delivered Notification if delivered
+    if ($isDelivered) {
+        $cNoRes = mysqli_query($conn, "SELECT cardNo FROM jobcard WHERE id = $jobcardId LIMIT 1");
+        $cNoRow = $cNoRes ? mysqli_fetch_assoc($cNoRes) : [];
+        $finalCardNo = $cNoRow['cardNo'] ?? ("JC-" . $jobcardId);
+
+        send_job_card_delivered_notification(
+            $finalCardNo,
+            $_POST['customerName'] ?? '',
+            $_POST['customerPhone'] ?? '',
+            $_POST['city'] ?? '',
+            $mName,
+            $serial,
+            $grandTotal,
+            $paidAmount,
+            $jobcardId
+        );
     }
 
     mysqli_commit($conn);

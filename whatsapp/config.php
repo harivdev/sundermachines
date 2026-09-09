@@ -446,6 +446,63 @@ function send_daily_sales_report_notification($reportDate, $orderCount, $totalSa
 }
 
 /**
+ * 6. JOB CARD DELIVERED
+ * Template: job_card_delivered
+ * Parameters:
+ * {{1}} Job Card No
+ * {{2}} Customer Name
+ * {{3}} Phone
+ * {{4}} City
+ * {{5}} Machine Type
+ * {{6}} Serial No
+ * {{7}} Total Amount
+ * {{8}} Paid Amount
+ */
+function send_job_card_delivered_notification(
+    $jobCardNumber,
+    $customerName,
+    $primaryPhone,
+    $city = null,
+    $machineType = null,
+    $serialNo = null,
+    $totalAmount = 0,
+    $paidAmount = 0,
+    $jobCardId = null,
+    $recipientPhone = null
+) {
+    $safeCity = !empty($city) ? $city : 'Not provided';
+    $safeMachine = !empty($machineType) ? $machineType : 'N/A';
+    $safeSerial = !empty($serialNo) ? $serialNo : 'N/A';
+    $formattedTotal = number_format((float)$totalAmount, 2, '.', '');
+    $formattedPaid = number_format((float)$paidAmount, 2, '.', '');
+
+    $parameters = [
+        (string)$jobCardNumber,
+        (string)($customerName ?: 'Customer'),
+        (string)($primaryPhone ?: 'N/A'),
+        (string)$safeCity,
+        (string)$safeMachine,
+        (string)$safeSerial,
+        (string)$formattedTotal,
+        (string)$formattedPaid
+    ];
+
+    $targetPhone = !empty($recipientPhone) ? $recipientPhone : ADMIN_WHATSAPP_NUMBER;
+
+    return send_template_with_fallback(
+        'job_card_delivered',
+        $parameters,
+        $targetPhone,
+        'JOB_CARD_DELIVERED',
+        $jobCardId,
+        $jobCardNumber,
+        null,
+        'en_US'
+    );
+}
+
+
+/**
  * Backward compatibility wrapper for generic legacy calls
  */
 function send_erp_whatsapp_notification($eventType, $docNumber, $details, $recipientPhone = null) {
