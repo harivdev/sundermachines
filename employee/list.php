@@ -58,7 +58,7 @@ include("../includes/header.php");
     <div class="erp-header-bar" style="background: #ffffff; padding: 16px 20px; border-radius: 8px 8px 0 0; border: 1px solid #cbd5e1; border-bottom: none; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
         <div class="erp-header-title" style="font-size: 20px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
             <span>👥 Employee Management</span>
-            <span style="font-size: 13px; font-weight: 600; color: #64748b; background: #f1f5f9; padding: 2px 10px; border-radius: 12px; border: 1px solid #cbd5e1;"><?= $totalRows ?> Total</span>
+            <span style="font-size: 13px; font-weight: 600; color: #64748b; background: #f1f5f9; padding: 2px 10px; border-radius: 4px; border: 1px solid #cbd5e1;"><?= $totalRows ?> Total</span>
         </div>
         
         <!-- COLOR CODED OUTER ACTION BOXES -->
