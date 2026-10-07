@@ -96,7 +96,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
 
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo $fav_dir; ?>includes/local_icons.css?v=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="<?php echo $fav_dir; ?>includes/common_erp.css?v=2.9">
 
     <style>
@@ -214,11 +214,11 @@ if (strpos($current_path, '/jobcard/') !== false) {
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 10px 15px;
+            padding: 10px 16px;
             text-decoration: none !important;
             color: #4D4A42;
             font-weight: 600;
-            font-size: 15.5px;
+            font-size: 16.5px;
             cursor: pointer;
             border-bottom: none !important;
             transition: all 0.25s ease;
@@ -227,7 +227,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
         }
 
         .nav-icon {
-            font-size: 15.5px;
+            font-size: 16.5px;
             color: inherit;
             transition: color 0.15s ease;
             margin-right: 5px;
@@ -1194,23 +1194,11 @@ if (strpos($current_path, '/jobcard/') !== false) {
     <div class="menu-container">
         <ul class="menu-bar" id="mainMenu">
 
-            <li class="menu-item has-dropdown">
-                <span class="menu-link <?php echo ($current_page == 'dashboard.php' || $current_page == 'today_income.php' || $current_page == 'closing_income_report.php') ? 'active-link' : ''; ?>" tabindex="0" role="button" aria-haspopup="true">
-                    <i class="fa-solid fa-gauge-high nav-icon"></i> Dashboard <span class="arrow">&#9660;</span>
-                </span>
-                <div class="dropdown">
-                    <a href="../login/dashboard.php" <?php echo ($current_page == 'dashboard.php') ? 'class="active-link"' : ''; ?>>
-                        <i class="fa-solid fa-gauge-high nav-icon"></i> Overview
-                    </a>
-                    <?php if (isAdmin()): ?>
-                        <a href="../login/today_income.php" <?php echo ($current_page == 'today_income.php') ? 'class="active-link"' : ''; ?>>
-                            <i class="fa-solid fa-indian-rupee-sign nav-icon"></i> Today Income
-                        </a>
-                        <a href="../login/closing_income_report.php" <?php echo ($current_page == 'closing_income_report.php') ? 'class="active-link"' : ''; ?>>
-                            <i class="fa-solid fa-file-invoice nav-icon"></i> Closing Income
-                        </a>
-                    <?php endif; ?>
-                </div>
+            <!-- 1. DASHBOARD -->
+            <li class="menu-item">
+                <a href="../login/dashboard.php" <?php echo ($current_page == 'dashboard.php') ? 'class="active-link"' : ''; ?>>
+                    <i class="fa-solid fa-gauge-high nav-icon"></i> Dashboard
+                </a>
             </li>
 
             <li class="menu-item has-dropdown">
@@ -1442,6 +1430,12 @@ if (strpos($current_path, '/jobcard/') !== false) {
                         <a href="../report/employee_works.php" <?php echo ($current_page == 'employee_works.php') ? 'class="active-link"' : ''; ?>>
                             <i class="fa-solid fa-user-gear nav-icon"></i> Employee Works
                         </a>
+                        <a href="../login/today_income.php" <?php echo ($current_page == 'today_income.php') ? 'class="active-link"' : ''; ?>>
+                            <i class="fa-solid fa-indian-rupee-sign nav-icon"></i> Today Income
+                        </a>
+                        <a href="../login/closing_income_report.php" <?php echo ($current_page == 'closing_income_report.php') ? 'class="active-link"' : ''; ?>>
+                            <i class="fa-solid fa-file-invoice nav-icon"></i> Closing Income
+                        </a>
                     </div>
                 </li>
             <?php endif; ?>
@@ -1449,7 +1443,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
             <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'ADMIN'): ?>
                 <li class="menu-item">
                     <a href="../users/manage_users.php" <?php echo ($current_page == 'manage_users.php') ? 'class="active-link"' : ''; ?>>
-                        <i class="fa-solid fa-user-gear nav-icon"></i> Users
+                        <i class="fa-solid fa-users nav-icon"></i> Users
                     </a>
                 </li>
             <?php endif; ?>
