@@ -4,7 +4,6 @@ requireLogin();
 
 $current_page = basename($_SERVER['PHP_SELF']);
 
-// Dynamic Breadcrumb Calculation
 $current_path = strtolower($_SERVER['PHP_SELF']);
 $current_page_name = strtolower(basename($current_path));
 
@@ -67,10 +66,14 @@ if (strpos($current_path, '/jobcard/') !== false) {
     $current_module_title = 'Reports';
     if ($current_page_name === 'daily_sales.php') $current_page_title = 'Daily Sales Report';
     elseif ($current_page_name === 'monthly_sales.php') $current_page_title = 'Monthly Sales Report';
+    elseif ($current_page_name === 'jobcard_profit.php') $current_page_title = 'Jobcard Profit Report';
+    elseif ($current_page_name === 'employee_works.php') $current_page_title = 'Employee Works Report';
     else $current_page_title = 'Reports Overview';
 } else {
     $current_module_title = 'Dashboard';
-    $current_page_title = 'Main Dashboard';
+    if ($current_page_name === 'today_income.php') $current_page_title = 'Today Income';
+    elseif ($current_page_name === 'closing_income_report.php') $current_page_title = 'Closing Income Report';
+    else $current_page_title = 'Main Dashboard';
 }
 ?>
 <!DOCTYPE html>
@@ -78,15 +81,23 @@ if (strpos($current_path, '/jobcard/') !== false) {
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sunder Billing</title>
 
+    <?php
+    $fav_dir = file_exists('img/logo.png') ? '' : '../';
+    if (!file_exists($fav_dir . 'img/logo.png') && file_exists('../../img/logo.png')) {
+        $fav_dir = '../../';
+    }
+    ?>
+    <link rel="icon" type="image/png" href="<?php echo $fav_dir; ?>img/logo.png">
+    <link rel="shortcut icon" type="image/x-icon" href="<?php echo $fav_dir; ?>favicon.ico">
+    <link rel="apple-touch-icon" href="<?php echo $fav_dir; ?>img/logo.png">
 
-    <!-- JsBarcode library -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="../includes/common_erp.css">
+    <link rel="stylesheet" href="<?php echo $fav_dir; ?>includes/local_icons.css?v=1.0">
+    <link rel="stylesheet" href="<?php echo $fav_dir; ?>includes/common_erp.css?v=2.9">
 
     <style>
         * {
@@ -99,10 +110,9 @@ if (strpos($current_path, '/jobcard/') !== false) {
             font-family: 'Inter', Arial, sans-serif;
             background: #f4f6f9;
             padding-top: 50px;
-            padding-bottom: 80px;
+            padding-bottom: 16px;
         }
 
-        /* TOP BAR (Mobile only) */
         .topbar {
             display: none !important;
         }
@@ -164,6 +174,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
             font-weight: 500;
             font-family: 'Inter', Arial, sans-serif;
             transition: all 0.25s ease;
+            white-space: nowrap;
         }
 
         .btn-logout:hover {
@@ -172,7 +183,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
             border-color: #C9A227;
         }
 
-        /* MENU CONTAINER */
         .menu-container {
             background: #FCFBF7;
             position: fixed;
@@ -185,11 +195,12 @@ if (strpos($current_path, '/jobcard/') !== false) {
 
         .menu-bar {
             display: flex;
-            margin: 0;
+            margin: 0 auto;
             padding: 0 12px;
             list-style: none;
             align-items: center;
             width: 100%;
+            max-width: 1240px;
             height: 46px;
             overflow: visible !important;
         }
@@ -203,11 +214,11 @@ if (strpos($current_path, '/jobcard/') !== false) {
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 10px 16px;
+            padding: 10px 15px;
             text-decoration: none !important;
             color: #4D4A42;
             font-weight: 600;
-            font-size: 16.5px;
+            font-size: 15.5px;
             cursor: pointer;
             border-bottom: none !important;
             transition: all 0.25s ease;
@@ -216,7 +227,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
         }
 
         .nav-icon {
-            font-size: 16.5px;
+            font-size: 15.5px;
             color: inherit;
             transition: color 0.15s ease;
             margin-right: 5px;
@@ -224,22 +235,26 @@ if (strpos($current_path, '/jobcard/') !== false) {
 
         .nav-shortcut {
             display: inline-block;
-            font-size: 14px;
+            font-size: 10px;
             font-weight: 600;
             font-family: inherit;
-            color: #8A877D !important; /* Muted shortcut color */
-            border: none !important;
-            background: transparent !important;
-            padding: 0;
+            color: #78716c !important;
+            border: 1px solid #e7e5e4 !important;
+            background: #f5f5f4 !important;
+            border-radius: 4px;
+            padding: 1px 5px;
             margin-left: auto;
             letter-spacing: 0.3px;
             vertical-align: middle;
-            transition: color 0.25s ease;
+            line-height: 1.2;
+            transition: all 0.25s ease;
         }
 
         .dropdown a:hover .nav-shortcut,
         .dropdown a:focus .nav-shortcut {
             color: #9A7618 !important;
+            border-color: #DCCFA8 !important;
+            background: #FFFDF7 !important;
         }
 
         .menu-item:hover > a,
@@ -273,9 +288,9 @@ if (strpos($current_path, '/jobcard/') !== false) {
         }
 
         .arrow {
-            font-size: 12px;
+            font-size: 11px;
             display: inline-block;
-            margin-left: 3px;
+            margin-left: 4px;
             transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease;
             transform: rotate(-90deg);
         }
@@ -294,7 +309,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
             transform: rotate(0deg);
         }
 
-        /* DROPDOWN */
         .dropdown {
             display: none;
             position: absolute;
@@ -321,12 +335,12 @@ if (strpos($current_path, '/jobcard/') !== false) {
         }
 
         .dropdown>a {
-            padding: 9px 15px;
+            padding: 8px 14px;
             display: flex;
             align-items: center;
             gap: 6px;
             color: #4D4A42;
-            font-size: 16px;
+            font-size: 13.5px;
             font-weight: 500;
             text-decoration: none;
             transition: all 0.25s ease;
@@ -339,7 +353,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
         .submenu-link i,
         .submenu-dropdown a .nav-icon,
         .submenu-dropdown a i {
-            font-size: 14.5px;
+            font-size: 13px;
         }
 
         .dropdown>a:hover,
@@ -364,19 +378,18 @@ if (strpos($current_path, '/jobcard/') !== false) {
             margin: 4px 0;
         }
 
-        /* SUBMENU */
         .submenu {
             position: relative;
         }
 
         .submenu-link {
-            padding: 9px 15px;
+            padding: 8px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 6px;
             color: #4D4A42;
-            font-size: 16px;
+            font-size: 13.5px;
             font-weight: 500;
             text-decoration: none;
             cursor: pointer;
@@ -409,12 +422,12 @@ if (strpos($current_path, '/jobcard/') !== false) {
         }
 
         .submenu-dropdown a {
-            padding: 9px 15px;
+            padding: 8px 14px;
             display: flex;
             align-items: center;
             gap: 6px;
             color: #4D4A42;
-            font-size: 16px;
+            font-size: 13.5px;
             text-decoration: none;
             transition: all 0.25s ease;
             border-left: 3px solid transparent;
@@ -443,7 +456,10 @@ if (strpos($current_path, '/jobcard/') !== false) {
             display: none;
         }
 
-        /* MOBILE TOGGLE */
+        .mobile-logout-item {
+            display: none !important;
+        }
+
         #menuToggle {
             display: none;
             background: none;
@@ -454,12 +470,10 @@ if (strpos($current_path, '/jobcard/') !== false) {
             padding: 4px 8px;
         }
 
-        /* MOBILE RESPONSIVE NAV */
-        /* MOBILE RESPONSIVE NAV */
         @media (max-width: 768px) {
             body {
                 padding-top: 65px !important;
-                padding-bottom: 160px !important;
+                padding-bottom: 16px !important;
             }
 
             .topbar {
@@ -481,17 +495,60 @@ if (strpos($current_path, '/jobcard/') !== false) {
             .topbar-left {
                 display: flex;
                 align-items: center;
-                gap: 10px;
+                flex: 0 0 40px;
+            }
+
+            .topbar-center {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                flex: 1 1 auto;
+                text-align: center;
+            }
+
+            .mobile-brand-title {
+                font-size: 21.5px !important;
+                font-weight: 800 !important;
+                letter-spacing: 1.8px !important;
+                line-height: 1 !important;
+                text-transform: uppercase !important;
+                color: #9A7618 !important;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+                text-decoration: none !important;
+                white-space: nowrap !important;
+                font-family: 'Inter', Arial, sans-serif !important;
+                display: inline-block !important;
+            }
+
+            @media (max-width: 360px) {
+                .mobile-brand-title {
+                    font-size: 19.5px !important;
+                    letter-spacing: 1.2px !important;
+                }
             }
 
             .topbar-right {
-                display: flex;
+                display: flex !important;
                 align-items: center;
-                gap: 8px;
-                margin-left: auto;
+                justify-content: flex-end;
+                flex: 0 0 40px;
             }
 
-            .topbar-actions-desktop {
+            .mobile-logo-link {
+                display: flex;
+                align-items: center;
+                text-decoration: none !important;
+            }
+
+            .mobile-topbar-logo {
+                width: 36px;
+                height: 36px;
+                object-fit: contain;
+                border-radius: 6px;
+                display: block;
+            }
+
+            .topbar .btn-logout {
                 display: none !important;
             }
 
@@ -504,7 +561,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 gap: 6px;
             }
 
-            /* Hamburger icon - FIRST ON LEFT */
             #menuToggle {
                 display: flex !important;
                 align-items: center;
@@ -512,12 +568,34 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 background: none;
                 border: none;
                 color: #24231F;
-                font-size: 22px;
+                font-size: 24px;
                 cursor: pointer;
                 padding: 6px;
+                transition: color 0.2s ease;
             }
 
-            /* Mobile Action button */
+            #menuToggle.open,
+            #menuToggle.active {
+                color: #9A7618;
+            }
+
+            #menuToggle.open i::before,
+            #menuToggle.active i::before {
+                content: "\f00d" !important;
+            }
+
+            .mobile-logout-item {
+                display: block !important;
+                border-top: 1px solid #F6F3EA;
+            }
+
+            .topbar-actions-desktop,
+            .menu-item.topbar-actions-desktop,
+            .menu-bar .topbar-actions-desktop,
+            .menu-container .btn-logout {
+                display: none !important;
+            }
+
             .mobile-action-btn {
                 display: inline-flex;
                 align-items: center;
@@ -537,7 +615,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 background: rgba(36, 35, 31, 0.12);
             }
 
-            /* Mobile Action Dropdown Panel (Exact width matching Action label button) */
             .mobile-action-panel {
                 position: fixed;
                 top: 58px;
@@ -567,15 +644,14 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
 
-            /* MOBILE MENU DRAWER (Strict Fixed Width) */
             .menu-container {
                 display: block !important;
                 position: fixed !important;
                 top: 56px !important;
                 left: 0 !important;
-                width: 250px !important;
-                min-width: 250px !important;
-                max-width: 250px !important;
+                width: 260px !important;
+                min-width: 260px !important;
+                max-width: 280px !important;
                 overflow-x: hidden !important;
                 background: #FFFFFF !important;
                 z-index: 10005 !important;
@@ -592,7 +668,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.32s ease !important;
             }
 
-            /* Custom Slim Scrollbar for Drawer to prevent layout shifts */
             .menu-container::-webkit-scrollbar {
                 width: 5px !important;
             }
@@ -612,7 +687,13 @@ if (strpos($current_path, '/jobcard/') !== false) {
 
             .menu-container .nav-icon {
                 margin-right: 0 !important;
-                font-size: 15px !important;
+                font-size: 17px !important;
+                width: 20px !important;
+                text-align: center !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                flex-shrink: 0 !important;
             }
 
             .menu-bar {
@@ -637,10 +718,10 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 display: flex !important;
                 align-items: center !important;
                 justify-content: flex-start !important;
-                gap: 2px !important;
+                gap: 10px !important;
                 padding: 13px 18px !important;
                 color: #4D4A42 !important;
-                font-size: 15px !important;
+                font-size: 17px !important;
                 font-weight: 600 !important;
                 text-decoration: none !important;
                 background: #FFFFFF !important;
@@ -650,7 +731,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
             }
 
-            /* Arrows align in a straight vertical line on the right edge */
             .menu-item > a .arrow,
             .menu-item > .menu-link .arrow {
                 margin-left: auto !important;
@@ -669,7 +749,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 border-left-color: #C9A227 !important;
             }
 
-            /* MOBILE INLINE ACCORDION DROPDOWNS */
             .dropdown {
                 display: block !important;
                 max-height: 0 !important;
@@ -693,16 +772,32 @@ if (strpos($current_path, '/jobcard/') !== false) {
             .dropdown > a {
                 display: flex !important;
                 align-items: center !important;
-                gap: 6px !important;
-                padding: 11px 22px !important;
+                gap: 10px !important;
+                padding: 12px 22px !important;
                 color: #4D4A42 !important;
-                font-size: 14px !important;
+                font-size: 16px !important;
                 font-weight: 500 !important;
                 text-decoration: none !important;
                 background: transparent !important;
                 border-bottom: 1px solid #F6F3EA !important;
                 border-left: 3px solid transparent !important;
                 transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            }
+
+            .dropdown > a .nav-icon,
+            .dropdown > a i {
+                font-size: 16px !important;
+                width: 20px !important;
+                text-align: center !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                flex-shrink: 0 !important;
+            }
+
+            /* Hide keyboard shortcuts on mobile so they don't break or get truncated */
+            .nav-shortcut {
+                display: none !important;
             }
 
             .dropdown > a:hover,
@@ -713,7 +808,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 border-left-color: #C9A227 !important;
             }
 
-            /* MOBILE INLINE ACCORDION SUBMENUS */
             .submenu {
                 width: 100% !important;
             }
@@ -722,16 +816,27 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 display: flex !important;
                 align-items: center !important;
                 justify-content: space-between !important;
-                gap: 6px !important;
-                padding: 11px 22px !important;
+                gap: 10px !important;
+                padding: 12px 22px !important;
                 color: #4D4A42 !important;
-                font-size: 14px !important;
+                font-size: 16px !important;
                 font-weight: 500 !important;
                 background: transparent !important;
                 border-bottom: 1px solid #F6F3EA !important;
                 border-left: 3px solid transparent !important;
                 cursor: pointer !important;
                 transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            }
+
+            .submenu-link .nav-icon,
+            .submenu-link i {
+                font-size: 16px !important;
+                width: 20px !important;
+                text-align: center !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                flex-shrink: 0 !important;
             }
 
             .submenu:hover > .submenu-link,
@@ -766,12 +871,23 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 display: flex !important;
                 align-items: center !important;
                 gap: 10px !important;
-                padding: 10px 10px 10px 40px !important;
+                padding: 11px 12px 11px 40px !important;
                 color: #5F5C54 !important;
-                font-size: 13.5px !important;
+                font-size: 15.5px !important;
                 font-weight: 500 !important;
                 text-decoration: none !important;
                 border-bottom: 1px solid #E6E1D6 !important;
+            }
+
+            .submenu-dropdown a .nav-icon,
+            .submenu-dropdown a i {
+                font-size: 15.5px !important;
+                width: 18px !important;
+                text-align: center !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                flex-shrink: 0 !important;
             }
 
             .submenu-dropdown a:hover,
@@ -780,7 +896,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 color: #9A7618 !important;
             }
 
-            /* MOBILE LIST HEADER BAR ALIGNMENT (Fix for Image 2) */
             .list-header-bar {
                 flex-direction: column !important;
                 align-items: flex-start !important;
@@ -809,7 +924,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 white-space: nowrap !important;
             }
 
-            /* MOBILE PAGINATION FOOTER ALIGNMENT & CLEAN TEXT WRAPPING */
             .pagination-bar,
             .list-pagination-bar,
             .pagination-container,
@@ -863,7 +977,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 white-space: nowrap !important;
             }
 
-            /* Prevent iOS auto-zoom on form elements */
             input,
             select,
             textarea {
@@ -871,9 +984,53 @@ if (strpos($current_path, '/jobcard/') !== false) {
             }
         }
 
-        /* Global light orange tone input focus & autofill styling across all pages */
-        .erp-input:focus, .erp-select:focus, .erp-textarea:focus, 
-        .form-control:focus, .form-select:focus, 
+        /* TABLET (PORTRAIT) SPECIFIC STYLING - LARGER MENU ITEMS */
+        @media (min-width: 600px) and (max-width: 768px) {
+            .menu-container {
+                width: 320px !important;
+                max-width: 320px !important;
+            }
+            .menu-item > a,
+            .menu-item > .menu-link {
+                font-size: 21px !important;
+                padding: 16px 24px !important;
+            }
+            .menu-container .nav-icon {
+                font-size: 20px !important;
+                width: 26px !important;
+                margin-right: 6px !important;
+            }
+            .dropdown > a {
+                font-size: 19px !important;
+                padding: 15px 30px !important;
+            }
+            .dropdown > a .nav-icon,
+            .dropdown > a i {
+                font-size: 18px !important;
+                width: 26px !important;
+            }
+            .submenu-link {
+                font-size: 19px !important;
+                padding: 15px 30px !important;
+            }
+            .submenu-link .nav-icon,
+            .submenu-link i {
+                font-size: 18px !important;
+                width: 26px !important;
+            }
+            .submenu-dropdown a {
+                font-size: 18px !important;
+                padding: 14px 16px 14px 50px !important;
+            }
+            .submenu-dropdown a .nav-icon,
+            .submenu-dropdown a i {
+                font-size: 17px !important;
+                width: 24px !important;
+            }
+        }
+
+        .erp-input:focus, .erp-select:focus, .erp-textarea:focus,
+        .form-control:focus, .form-select:focus,
         input:focus, select:focus, textarea:focus,
         input:active, select:active, textarea:active {
             outline: none !important;
@@ -883,8 +1040,8 @@ if (strpos($current_path, '/jobcard/') !== false) {
         }
 
         input:-webkit-autofill,
-        input:-webkit-autofill:hover, 
-        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
         input:-webkit-autofill:active,
         select:-webkit-autofill,
         textarea:-webkit-autofill {
@@ -894,9 +1051,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
             transition: background-color 5000s ease-in-out 0s;
         }
 
-
-
-        /* BREADCRUMB PAGE BANNER STRIP (REMOVED) */
         .erp-breadcrumb-banner {
             display: none !important;
         }
@@ -937,7 +1091,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
             display: inline-flex;
             align-items: center;
             box-shadow: none !important;
-            margin-right: 40px !important; /* Pushes page names further to the right as requested */
+            margin-right: 40px !important;
         }
 
         .bc-sep {
@@ -957,7 +1111,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
             text-decoration: none !important;
         }
 
-        /* Prevent hover underlines & bottom borders across all header navigation elements, dropdowns, and breadcrumb banner */
         .menu-container a,
         .menu-container a:hover,
         .menu-container a:focus,
@@ -990,31 +1143,29 @@ if (strpos($current_path, '/jobcard/') !== false) {
             box-shadow: none !important;
         }
 
-
-
     </style>
 </head>
 
 <body>
 
-    <!-- MOBILE TOP BAR HEADER -->
     <div class="topbar">
         <div class="topbar-left">
             <button id="menuToggle" onclick="toggleMobileMenu(event)" aria-label="Toggle Navigation">
                 <i class="fa-solid fa-bars"></i>
             </button>
         </div>
+        <div class="topbar-center">
+            <a href="../login/dashboard.php" class="mobile-brand-title">SUNDER ERP</a>
+        </div>
         <div class="topbar-right">
-            <button class="btn-logout" onclick="window.location.href='../login/logout.php'">
-                Logout &#x2192;
-            </button>
+            <a href="../login/dashboard.php" class="mobile-logo-link">
+                <img src="<?php echo $fav_dir; ?>img/logo.png" alt="Sunder ERP" class="mobile-topbar-logo">
+            </a>
         </div>
     </div>
 
-    <!-- MOBILE ACTION PANEL DROPDOWN -->
     <div id="mobileActionPanel" class="mobile-action-panel">
 
-        <!-- Admin role pill -->
         <?php if (isset($_SESSION['employee_name']) || isset($_SESSION['username'])): ?>
             <div class="mobile-action-item">
                 <div class="user-pill" style="margin: 0; width: 100%; justify-content: center; text-align: center; box-sizing: border-box; padding: 4px 6px;">
@@ -1022,9 +1173,9 @@ if (strpos($current_path, '/jobcard/') !== false) {
                         <span><?php echo htmlspecialchars($_SESSION['employee_name']); ?></span>
                     <?php else: ?>
                         <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
-                        <?php 
+                        <?php
                         $roleDisplay = $_SESSION['role'] ?? 'Admin';
-                        if (strcasecmp($_SESSION['username'], $roleDisplay) !== 0): 
+                        if (strcasecmp($_SESSION['username'], $roleDisplay) !== 0):
                         ?>
                             <small><?php echo htmlspecialchars($roleDisplay); ?></small>
                         <?php endif; ?>
@@ -1033,7 +1184,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
             </div>
         <?php endif; ?>
 
-        <!-- Logout button -->
         <div class="mobile-action-item" style="border-bottom: none; padding-bottom: 0;">
             <button class="btn-logout" style="width: 100%; box-sizing: border-box; justify-content: center; text-align: center; margin: 0; padding: 6px 0; font-size: 12px;" onclick="window.location.href='../login/logout.php'">
                 Logout &#x2192;
@@ -1041,20 +1191,30 @@ if (strpos($current_path, '/jobcard/') !== false) {
         </div>
     </div>
 
-    <!-- MENU -->
     <div class="menu-container">
         <ul class="menu-bar" id="mainMenu">
 
-            <!-- 1. DASHBOARD -->
-            <li class="menu-item">
-                <a href="../login/dashboard.php" <?php echo ($current_page == 'dashboard.php') ? 'class="active-link"' : ''; ?>>
-                    <i class="fa-solid fa-gauge-high nav-icon"></i> Dashboard
-                </a>
+            <li class="menu-item has-dropdown">
+                <span class="menu-link <?php echo ($current_page == 'dashboard.php' || $current_page == 'today_income.php' || $current_page == 'closing_income_report.php') ? 'active-link' : ''; ?>" tabindex="0" role="button" aria-haspopup="true">
+                    <i class="fa-solid fa-gauge-high nav-icon"></i> Dashboard <span class="arrow">&#9660;</span>
+                </span>
+                <div class="dropdown">
+                    <a href="../login/dashboard.php" <?php echo ($current_page == 'dashboard.php') ? 'class="active-link"' : ''; ?>>
+                        <i class="fa-solid fa-gauge-high nav-icon"></i> Overview
+                    </a>
+                    <?php if (isAdmin()): ?>
+                        <a href="../login/today_income.php" <?php echo ($current_page == 'today_income.php') ? 'class="active-link"' : ''; ?>>
+                            <i class="fa-solid fa-indian-rupee-sign nav-icon"></i> Today Income
+                        </a>
+                        <a href="../login/closing_income_report.php" <?php echo ($current_page == 'closing_income_report.php') ? 'class="active-link"' : ''; ?>>
+                            <i class="fa-solid fa-file-invoice nav-icon"></i> Closing Income
+                        </a>
+                    <?php endif; ?>
+                </div>
             </li>
 
-            <!-- 2. JOB CARD (Moved to 2nd position from left) -->
             <li class="menu-item has-dropdown">
-                <span class="menu-link <?php echo (strpos($_SERVER['PHP_SELF'], 'jobcard') !== false) ? 'active-link' : ''; ?>" tabindex="0" role="button" aria-haspopup="true">
+                <span class="menu-link <?php echo (strpos($_SERVER['PHP_SELF'], '/jobcard/') !== false) ? 'active-link' : ''; ?>" tabindex="0" role="button" aria-haspopup="true">
                     <i class="fa-solid fa-clipboard-list nav-icon"></i> Job Card <span class="arrow">&#9660;</span>
                 </span>
                 <div class="dropdown">
@@ -1072,10 +1232,9 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 </div>
             </li>
 
-            <!-- 3. STOCK -->
             <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'ADMIN'): ?>
                 <li class="menu-item has-dropdown">
-                    <span class="menu-link <?php echo (strpos($_SERVER['PHP_SELF'], 'stock') !== false) ? 'active-link' : ''; ?>" tabindex="0" role="button" aria-haspopup="true">
+                    <span class="menu-link <?php echo (strpos($_SERVER['PHP_SELF'], '/stock/') !== false) ? 'active-link' : ''; ?>" tabindex="0" role="button" aria-haspopup="true">
                         <i class="fa-solid fa-boxes-stacked nav-icon"></i> Stock <span class="arrow">&#9660;</span>
                     </span>
                     <div class="dropdown">
@@ -1092,9 +1251,8 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 </li>
             <?php endif; ?>
 
-            <!-- 4. SALES -->
             <li class="menu-item has-dropdown">
-                <span class="menu-link <?php echo (strpos($_SERVER['PHP_SELF'], 'sales') !== false) ? 'active-link' : ''; ?>" tabindex="0" role="button" aria-haspopup="true">
+                <span class="menu-link <?php echo (strpos($_SERVER['PHP_SELF'], '/sales/') !== false) ? 'active-link' : ''; ?>" tabindex="0" role="button" aria-haspopup="true">
                     <i class="fa-solid fa-cart-shopping nav-icon"></i> Sales <span class="arrow">&#9660;</span>
                 </span>
                 <div class="dropdown">
@@ -1107,10 +1265,9 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 </div>
             </li>
 
-            <!-- 5. PURCHASE -->
             <?php if (isAdmin()): ?>
                 <li class="menu-item has-dropdown">
-                    <span class="menu-link <?php echo (strpos($_SERVER['PHP_SELF'], 'purchase') !== false) ? 'active-link' : ''; ?>" tabindex="0" role="button" aria-haspopup="true">
+                    <span class="menu-link <?php echo (strpos($_SERVER['PHP_SELF'], '/purchase/') !== false) ? 'active-link' : ''; ?>" tabindex="0" role="button" aria-haspopup="true">
                         <i class="fa-solid fa-bag-shopping nav-icon"></i> Purchase <span class="arrow">&#9660;</span>
                     </span>
                     <div class="dropdown">
@@ -1124,8 +1281,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 </li>
             <?php endif; ?>
 
-            <!-- 6. MASTER -->
-            <?php 
+            <?php
             $is_master_active = (
                 strpos($_SERVER['PHP_SELF'], 'brand') !== false ||
                 strpos($_SERVER['PHP_SELF'], 'model') !== false ||
@@ -1183,7 +1339,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
                                 <span class="arrow">&#9660;</span>
                             </span>
                             <div class="submenu-dropdown">
-                                <a href="../machine/add_machine.php" <?php echo ($current_page == 'add_machine.php') ? 'class="active-link"' : ''; ?>>
+                                <a href="../machine/list_machine.php?focus=add#addMachineSection" <?php echo ($current_page == 'add_machine.php' || (isset($_GET['focus']) && $_GET['focus'] == 'add')) ? 'class="active-link"' : ''; ?>>
                                     <i class="fa-solid fa-plus nav-icon"></i> Add Machine
                                 </a>
                                 <a href="../machine/list_machine.php" <?php echo ($current_page == 'list_machine.php') ? 'class="active-link"' : ''; ?>>
@@ -1215,7 +1371,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
                     <?php if (isAdmin()): ?>
                         <hr class="dropdown-divider">
 
-                        <!-- CUSTOMERS -->
                         <div class="submenu <?php echo (strpos($_SERVER['PHP_SELF'], 'customers') !== false) ? 'active' : ''; ?>">
                             <span class="submenu-link" tabindex="0" role="button" aria-haspopup="true">
                                 <span><i class="fa-solid fa-users nav-icon"></i> Customers</span>
@@ -1233,7 +1388,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
 
                         <hr class="dropdown-divider">
 
-                        <!-- SUPPLIER (Separated as its own distinct submenu under Master) -->
                         <div class="submenu <?php echo (strpos($_SERVER['PHP_SELF'], 'supplier') !== false) ? 'active' : ''; ?>">
                             <span class="submenu-link" tabindex="0" role="button" aria-haspopup="true">
                                 <span><i class="fa-solid fa-truck-field nav-icon"></i> Supplier</span>
@@ -1251,7 +1405,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
 
                         <hr class="dropdown-divider">
 
-                        <!-- EMPLOYEE (Submenu under Master) -->
                         <div class="submenu <?php echo (strpos($_SERVER['PHP_SELF'], 'employee') !== false) ? 'active' : ''; ?>">
                             <span class="submenu-link" tabindex="0" role="button" aria-haspopup="true">
                                 <span><i class="fa-solid fa-id-badge nav-icon"></i> Employee</span>
@@ -1271,10 +1424,9 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 </div>
             </li>
 
-            <!-- 7. REPORTS -->
             <?php if (isAdmin()): ?>
                 <li class="menu-item has-dropdown">
-                    <span class="menu-link <?php echo (strpos($_SERVER['PHP_SELF'], 'report') !== false) ? 'active-link' : ''; ?>" tabindex="0" role="button" aria-haspopup="true">
+                    <span class="menu-link <?php echo (strpos($_SERVER['PHP_SELF'], '/report/') !== false) ? 'active-link' : ''; ?>" tabindex="0" role="button" aria-haspopup="true">
                         <i class="fa-solid fa-chart-pie nav-icon"></i> Reports <span class="arrow">&#9660;</span>
                     </span>
                     <div class="dropdown">
@@ -1284,11 +1436,16 @@ if (strpos($current_path, '/jobcard/') !== false) {
                         <a href="../report/monthly_sales.php" <?php echo ($current_page == 'monthly_sales.php') ? 'class="active-link"' : ''; ?>>
                             <i class="fa-solid fa-calendar-days nav-icon"></i> Monthly Sales
                         </a>
+                        <a href="../report/jobcard_profit.php" <?php echo ($current_page == 'jobcard_profit.php') ? 'class="active-link"' : ''; ?>>
+                            <i class="fa-solid fa-file-invoice-dollar nav-icon"></i> Jobcard Profit
+                        </a>
+                        <a href="../report/employee_works.php" <?php echo ($current_page == 'employee_works.php') ? 'class="active-link"' : ''; ?>>
+                            <i class="fa-solid fa-user-gear nav-icon"></i> Employee Works
+                        </a>
                     </div>
                 </li>
             <?php endif; ?>
 
-            <!-- 8. USERS (Only for ADMIN) -->
             <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'ADMIN'): ?>
                 <li class="menu-item">
                     <a href="../users/manage_users.php" <?php echo ($current_page == 'manage_users.php') ? 'class="active-link"' : ''; ?>>
@@ -1297,7 +1454,12 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 </li>
             <?php endif; ?>
 
-            <!-- 9. LOGOUT (Desktop only, pushed to right) -->
+            <li class="menu-item mobile-logout-item">
+                <a href="../login/logout.php">
+                    <i class="fa-solid fa-right-from-bracket nav-icon"></i> Logout
+                </a>
+            </li>
+
             <li class="menu-item topbar-actions-desktop" style="margin-left: auto; padding-right: 16px;">
                 <button class="btn-logout" onclick="window.location.href='../login/logout.php'">
                     Logout &#x2192;
@@ -1307,9 +1469,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
         </ul>
     </div>
 
-
-
-    <!-- SCRIPT FOR MOBILE MENU -->
     <script>
     function toggleMobileMenu(e) {
         if (e) {
@@ -1319,13 +1478,37 @@ if (strpos($current_path, '/jobcard/') !== false) {
         var menuContainer = document.querySelector('.menu-container');
         var menuBar = document.getElementById('mainMenu');
         var actionPanel = document.getElementById('mobileActionPanel');
+        var menuToggle = document.getElementById('menuToggle');
+        var icon = menuToggle ? menuToggle.querySelector('i') : null;
 
-        if (menuContainer) {
-            menuContainer.classList.toggle('open');
+        if (!menuContainer) return;
+
+        var willOpen = !menuContainer.classList.contains('open');
+
+        if (willOpen) {
+            menuContainer.classList.add('open');
+            if (menuBar) menuBar.classList.add('open');
+            if (menuToggle) {
+                menuToggle.classList.add('open');
+                menuToggle.classList.add('active');
+            }
+            if (icon) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-xmark');
+            }
+        } else {
+            menuContainer.classList.remove('open');
+            if (menuBar) menuBar.classList.remove('open');
+            if (menuToggle) {
+                menuToggle.classList.remove('open');
+                menuToggle.classList.remove('active');
+            }
+            if (icon) {
+                icon.classList.remove('fa-xmark');
+                icon.classList.add('fa-bars');
+            }
         }
-        if (menuBar) {
-            menuBar.classList.toggle('open');
-        }
+
         if (actionPanel) {
             actionPanel.classList.remove('open');
         }
@@ -1352,7 +1535,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        // Click listeners for header dropdowns (Click to toggle on mobile)
         var mainMenu = document.getElementById('mainMenu');
         if (mainMenu) {
             mainMenu.querySelectorAll('.menu-item.has-dropdown > .menu-link').forEach(function (link) {
@@ -1391,7 +1573,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
             });
         }
 
-        // Close mobile action panel or menu when clicking anywhere outside
         document.addEventListener('click', function (e) {
             var actionPanel = document.getElementById('mobileActionPanel');
             var actionBtn = document.getElementById('mobileActionBtn');
@@ -1410,6 +1591,34 @@ if (strpos($current_path, '/jobcard/') !== false) {
                     if (!menuContainer.contains(e.target) && (!menuToggleBtn || !menuToggleBtn.contains(e.target))) {
                         menuContainer.classList.remove('open');
                         if (menuBar) menuBar.classList.remove('open');
+                        if (menuToggleBtn) {
+                            menuToggleBtn.classList.remove('open');
+                            menuToggleBtn.classList.remove('active');
+                            var icon = menuToggleBtn.querySelector('i');
+                            if (icon) {
+                                icon.classList.remove('fa-xmark');
+                                icon.classList.add('fa-bars');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 768) {
+                var menuContainer = document.querySelector('.menu-container');
+                var menuBar = document.getElementById('mainMenu');
+                var menuToggleBtn = document.getElementById('menuToggle');
+                if (menuContainer) menuContainer.classList.remove('open');
+                if (menuBar) menuBar.classList.remove('open');
+                if (menuToggleBtn) {
+                    menuToggleBtn.classList.remove('open');
+                    menuToggleBtn.classList.remove('active');
+                    var icon = menuToggleBtn.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('fa-xmark');
+                        icon.classList.add('fa-bars');
                     }
                 }
             }
@@ -1417,12 +1626,10 @@ if (strpos($current_path, '/jobcard/') !== false) {
     });
     </script>
 
-    <!-- STRICT 4-DIRECTION KEYBOARD ARROW NAVIGATION & SHORTCUT SCRIPT -->
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const mainMenu = document.getElementById('mainMenu');
 
-        // GLOBAL SHORTCUT KEYS (Ctrl+J, Ctrl+S, Ctrl+P, Ctrl+U, Ctrl+D, Ctrl+M)
         document.addEventListener('keydown', function (e) {
             if (!e.ctrlKey && !e.metaKey) return;
 
@@ -1492,7 +1699,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
 
             const key = e.key;
 
-            // 1. TOP-LEVEL HEADERS: LEFT/RIGHT TO SWITCH HEADERS, DOWN TO ENTER DROPDOWN
             if (isTopItem) {
                 const topItems = getTopItems();
                 const index = topItems.indexOf(target);
@@ -1516,9 +1722,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
                 }
             }
 
-            // 2. INSIDE DROPDOWNS & SUBMENUS
             else if (inDropdown) {
-                // A. INSIDE A RIGHT SUBMENU DROPDOWN (e.g. inside + Add Brand, Brand List, etc.)
                 if (inSubmenuDropdown) {
                     const subItems = Array.from(target.closest('.submenu-dropdown').querySelectorAll('a'));
                     const index = subItems.indexOf(target);
@@ -1533,18 +1737,15 @@ if (strpos($current_path, '/jobcard/') !== false) {
                         if (index > 0) {
                             subItems[index - 1].focus();
                         } else {
-                            // Return focus to parent submenu header (e.g. Brand)
                             const parentSub = target.closest('.submenu').querySelector('.submenu-link');
                             if (parentSub) parentSub.focus();
                         }
                     } else if (key === 'ArrowLeft' || key === 'Escape') {
                         e.preventDefault();
-                        // Exit right submenu & return focus to parent submenu link (e.g. Brand, Customers, Supplier)
                         const parentSub = target.closest('.submenu').querySelector('.submenu-link');
                         if (parentSub) parentSub.focus();
                     }
-                } 
-                // B. ON PRIMARY DROPDOWN ITEMS (e.g. Brand, Model, Machine, Spares, Customers, Supplier)
+                }
                 else {
                     const dropdown = target.closest('.dropdown');
                     const items = getPrimaryDropdownItems(dropdown);
@@ -1552,23 +1753,19 @@ if (strpos($current_path, '/jobcard/') !== false) {
 
                     if (key === 'ArrowDown') {
                         e.preventDefault();
-                        // Strictly move down to the next primary submenu link in Master
                         if (index < items.length - 1) {
                             items[index + 1].focus();
                         }
                     } else if (key === 'ArrowUp') {
                         e.preventDefault();
-                        // Move up through primary submenu links
                         if (index > 0) {
                             items[index - 1].focus();
                         } else {
-                            // Focus top-level menu link (e.g. Master)
                             const topLink = dropdown.parentElement.querySelector('a, .menu-link');
                             if (topLink) topLink.focus();
                         }
                     } else if ((key === 'ArrowRight' || key === 'Enter' || key === ' ') && isSubmenuLink) {
                         e.preventDefault();
-                        // Strictly ONLY enter right submenu on ArrowRight, Enter, or Space
                         const subDropdown = target.parentElement.querySelector('.submenu-dropdown');
                         if (subDropdown) {
                             const firstSubItem = subDropdown.querySelector('a');
@@ -1576,7 +1773,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
                         }
                     } else if (key === 'ArrowLeft') {
                         e.preventDefault();
-                        // Return to top header bar
                         const topItems = getTopItems();
                         const topLink = dropdown.parentElement.querySelector('a, .menu-link');
                         const topIndex = topItems.indexOf(topLink);
@@ -1586,7 +1782,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
                         }
                     } else if (key === 'Escape') {
                         e.preventDefault();
-                        // Close dropdown and focus top header
                         const topLink = dropdown.parentElement.querySelector('a, .menu-link');
                         if (topLink) topLink.focus();
                     }
