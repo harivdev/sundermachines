@@ -1195,10 +1195,23 @@ if (strpos($current_path, '/jobcard/') !== false) {
         <ul class="menu-bar" id="mainMenu">
 
             <!-- 1. DASHBOARD -->
-            <li class="menu-item">
-                <a href="../login/dashboard.php" <?php echo ($current_page == 'dashboard.php') ? 'class="active-link"' : ''; ?>>
-                    <i class="fa-solid fa-gauge-high nav-icon"></i> Dashboard
-                </a>
+            <li class="menu-item has-dropdown">
+                <span class="menu-link <?php echo ($current_page == 'dashboard.php' || $current_page == 'today_income.php' || $current_page == 'closing_income_report.php') ? 'active-link' : ''; ?>" tabindex="0" role="button" aria-haspopup="true">
+                    <i class="fa-solid fa-gauge-high nav-icon"></i> Dashboard <span class="arrow">&#9660;</span>
+                </span>
+                <div class="dropdown">
+                    <a href="../login/dashboard.php" <?php echo ($current_page == 'dashboard.php') ? 'class="active-link"' : ''; ?>>
+                        <i class="fa-solid fa-gauge-high nav-icon"></i> Overview
+                    </a>
+                    <?php if (isAdmin()): ?>
+                        <a href="../login/today_income.php" <?php echo ($current_page == 'today_income.php') ? 'class="active-link"' : ''; ?>>
+                            <i class="fa-solid fa-indian-rupee-sign nav-icon"></i> Today Income
+                        </a>
+                        <a href="../login/closing_income_report.php" <?php echo ($current_page == 'closing_income_report.php') ? 'class="active-link"' : ''; ?>>
+                            <i class="fa-solid fa-file-invoice nav-icon"></i> Closing Income
+                        </a>
+                    <?php endif; ?>
+                </div>
             </li>
 
             <li class="menu-item has-dropdown">
@@ -1429,12 +1442,6 @@ if (strpos($current_path, '/jobcard/') !== false) {
                         </a>
                         <a href="../report/employee_works.php" <?php echo ($current_page == 'employee_works.php') ? 'class="active-link"' : ''; ?>>
                             <i class="fa-solid fa-user-gear nav-icon"></i> Employee Works
-                        </a>
-                        <a href="../login/today_income.php" <?php echo ($current_page == 'today_income.php') ? 'class="active-link"' : ''; ?>>
-                            <i class="fa-solid fa-indian-rupee-sign nav-icon"></i> Today Income
-                        </a>
-                        <a href="../login/closing_income_report.php" <?php echo ($current_page == 'closing_income_report.php') ? 'class="active-link"' : ''; ?>>
-                            <i class="fa-solid fa-file-invoice nav-icon"></i> Closing Income
                         </a>
                     </div>
                 </li>
