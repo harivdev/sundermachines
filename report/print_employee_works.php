@@ -70,18 +70,27 @@ $query = "
         j.givenDate,
         j.completedDate,
         (j.completed + 0) AS is_completed,
+        (j.delivered + 0) AS is_delivered,
+        j.deliveryDate,
         j.jobStatus,
         j.laborCharge,
+        j.actualAmountSum,
+        j.receivedAmountSum,
         j.createdOn,
+        emp.id AS employee_id,
         emp.name AS employee_name,
         emp.designation AS employee_role,
-        m.name AS machine_name
+        c.name AS customer_name,
+        COALESCE(NULLIF(MAX(m.machineName), ''), NULLIF(MAX(ji.machineName), ''), '-') AS machine_name,
+        MAX(ji.serialNo) AS serial_no
     FROM jobcard j
     LEFT JOIN employee emp ON j.employee = emp.id
-    LEFT JOIN machine m    ON j.machine = m.id
-    LEFT JOIN customer c   ON j.customer = c.id
+    LEFT JOIN customer c ON j.customer = c.id
+    LEFT JOIN jobcarditems ji ON j.id = ji.jobCard
+    LEFT JOIN machine m ON ji.machine = m.id
     $where_sql
-    ORDER BY j.id DESC
+    GROUP BY j.id, j.cardNo, j.givenDate, j.completedDate, j.completed, j.delivered, j.deliveryDate, j.jobStatus, j.laborCharge, j.actualAmountSum, j.receivedAmountSum, j.createdOn, emp.id, emp.name, emp.designation, c.name
+    ORDER BY COALESCE(j.givenDate, DATE(j.createdOn)) DESC, j.id DESC
 ";
 
 $result = mysqli_query($conn, $query);
