@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once("../config/db.php");
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -10,15 +10,14 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// ================= PAGINATION =================
 $limit = 10;
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $offset = ($page - 1) * $limit;
 
-// ================= FILTER =================
 $where = "WHERE 1=1";
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $statusFilter = isset($_GET['status']) ? trim($_GET['status']) : '';
+$modeFilter = isset($_GET['mode']) ? trim($_GET['mode']) : '';
 
 if ($search !== '') {
     $safeSearch = mysqli_real_escape_string($conn, $search);
@@ -30,10 +29,20 @@ if ($statusFilter !== '') {
     $where .= " AND s.orderStatus = '$safeStatus'";
 }
 
-// ================= COUNT =================
+if ($modeFilter !== '') {
+    $safeMode = mysqli_real_escape_string($conn, $modeFilter);
+    if ($modeFilter === 'NetBanking' || $modeFilter === 'Net Banking' || $modeFilter === 'NB') {
+        $where .= " AND s.id IN (SELECT sales FROM payment WHERE mode IN ('NetBanking', 'Net Banking', 'NB') AND sales IS NOT NULL)";
+    } elseif ($modeFilter === 'Cash') {
+        $where .= " AND (s.id IN (SELECT sales FROM payment WHERE mode = 'Cash' AND sales IS NOT NULL) OR s.id NOT IN (SELECT sales FROM payment WHERE sales IS NOT NULL))";
+    } else {
+        $where .= " AND s.id IN (SELECT sales FROM payment WHERE mode = '$safeMode' AND sales IS NOT NULL)";
+    }
+}
+
 $countQuery = "SELECT COUNT(*) AS total FROM sales s LEFT JOIN customer c ON s.customer = c.id $where";
 $countResult = mysqli_query($conn, $countQuery);
-$totalRows = (int)mysqli_fetch_assoc($countResult)['total'];
+$totalRows = ($countResult && $cRow = mysqli_fetch_assoc($countResult)) ? (int)$cRow['total'] : 0;
 $totalPages = $totalRows > 0 ? ceil($totalRows / $limit) : 1;
 
 if ($page > $totalPages && $totalPages > 0) {
@@ -41,18 +50,34 @@ if ($page > $totalPages && $totalPages > 0) {
     $offset = ($page - 1) * $limit;
 }
 
-// ================= DATA =================
-$query = "SELECT s.*, c.name as customer_name 
-          FROM sales s 
-          LEFT JOIN customer c ON s.customer = c.id 
+$query = "SELECT s.*, c.name as customer_name
+          FROM sales s
+          LEFT JOIN customer c ON s.customer = c.id
           $where
           ORDER BY s.id DESC
           LIMIT $limit OFFSET $offset";
 $result = mysqli_query($conn, $query);
 
 $rows = [];
-while ($r = mysqli_fetch_assoc($result)) {
-    $rows[] = $r;
+if ($result) {
+    while ($r = mysqli_fetch_assoc($result)) {
+        $rows[] = $r;
+    }
+}
+
+// Fetch payment modes for the retrieved sales records
+$paymentModes = [];
+if (!empty($rows)) {
+    $salesIds = array_filter(array_map('intval', array_column($rows, 'id')));
+    if (!empty($salesIds)) {
+        $idList = implode(',', $salesIds);
+        $pRes = mysqli_query($conn, "SELECT sales, mode FROM payment WHERE sales IN ($idList) AND mode IS NOT NULL AND mode != ''");
+        if ($pRes) {
+            while ($pRow = mysqli_fetch_assoc($pRes)) {
+                $paymentModes[$pRow['sales']] = $pRow['mode'];
+            }
+        }
+    }
 }
 
 $queryParams = $_GET;
@@ -172,7 +197,6 @@ $fifteenDaysAgo = date('Y-m-d', strtotime('-15 days'));
         color: #6c757d;
     }
 
-    /* Download Modal */
     .dl-modal-overlay {
         display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
         z-index: 3000; align-items: center; justify-content: center; padding: 16px;
@@ -201,7 +225,6 @@ $fifteenDaysAgo = date('Y-m-d', strtotime('-15 days'));
 
 <div class="erp-container">
 
-    <!-- PAGE HEADER BAR -->
     <div class="erp-header-bar">
         <div class="erp-header-title">Manage Sales Orders</div>
         <div class="erp-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
@@ -214,12 +237,22 @@ $fifteenDaysAgo = date('Y-m-d', strtotime('-15 days'));
         </div>
     </div>
 
-    <!-- FILTER PANEL -->
-    <div id="salesFilter" class="erp-filter-panel" style="display:<?= ($search !== '' || $statusFilter !== '') ? 'block' : 'none' ?>;">
+    <div id="salesFilter" class="erp-filter-panel" style="display:<?= ($search !== '' || $statusFilter !== '' || $modeFilter !== '') ? 'block' : 'none' ?>;">
         <form method="GET" class="erp-filter-form">
             <div>
                 <label class="erp-label">Search Order# / Customer</label>
                 <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Order # or customer..." class="erp-input" style="width:220px; border: 1px solid #cbd5e1; border-radius: 6px;">
+            </div>
+            <div>
+                <label class="erp-label">Mode</label>
+                <select name="mode" class="erp-select" style="width:140px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    <option value="">-- All --</option>
+                    <option value="Cash" <?= $modeFilter === 'Cash' ? 'selected' : '' ?>>Cash</option>
+                    <option value="Card" <?= $modeFilter === 'Card' ? 'selected' : '' ?>>Card</option>
+                    <option value="UPI" <?= $modeFilter === 'UPI' ? 'selected' : '' ?>>UPI</option>
+                    <option value="NetBanking" <?= ($modeFilter === 'NetBanking' || $modeFilter === 'Net Banking') ? 'selected' : '' ?>>NetBanking</option>
+                    <option value="Cheque" <?= $modeFilter === 'Cheque' ? 'selected' : '' ?>>Cheque</option>
+                </select>
             </div>
             <div>
                 <label class="erp-label">Status</label>
@@ -238,7 +271,6 @@ $fifteenDaysAgo = date('Y-m-d', strtotime('-15 days'));
         </form>
     </div>
 
-    <!-- TABLE BOX -->
     <div class="table-box">
 
         <table>
@@ -248,6 +280,7 @@ $fifteenDaysAgo = date('Y-m-d', strtotime('-15 days'));
                     <th rowspan="2">Date</th>
                     <th rowspan="2">Order #</th>
                     <th rowspan="2">Customer</th>
+                    <th rowspan="2" style="text-align:center;">Mode</th>
                     <th rowspan="2">Status</th>
                     <th colspan="2" class="th-group-amt">Amount</th>
                     <th rowspan="2" style="text-align:center;">Action</th>
@@ -271,6 +304,21 @@ $fifteenDaysAgo = date('Y-m-d', strtotime('-15 days'));
                                 </a>
                             </td>
                             <td><?= htmlspecialchars($row['customer_name'] ?: 'CASH BILL') ?></td>
+                            <td style="text-align:center; font-weight:600; color:#334155;">
+                                <?php
+                                $pm = trim($paymentModes[$row['id']] ?? $row['paymentMode'] ?? '');
+                                $paid_amt = (float)($row['paidAmountSum'] ?? 0);
+                                if (strcasecmp($pm, 'NetBanking') === 0 || strcasecmp($pm, 'Net Banking') === 0 || strcasecmp($pm, 'NB') === 0) {
+                                    echo 'Net Banking';
+                                } elseif (!empty($pm)) {
+                                    echo htmlspecialchars($pm);
+                                } elseif ($paid_amt > 0) {
+                                    echo 'Cash';
+                                } else {
+                                    echo '<span style="color:#94a3b8; font-weight:600;">—</span>';
+                                }
+                                ?>
+                            </td>
                             <td>
                                 <?php
                                 $st = htmlspecialchars($row['orderStatus'] ?: 'New');
@@ -296,16 +344,15 @@ $fifteenDaysAgo = date('Y-m-d', strtotime('-15 days'));
 
                 <?php else: ?>
                     <tr>
-                        <td colspan="8" style="text-align:center; padding:30px; color:#6c757d;">No Sales Orders Found</td>
+                        <td colspan="9" style="text-align:center; padding:30px; color:#6c757d;">No Sales Orders Found</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
         </table>
 
-        <!-- PAGINATION -->
         <div class="pagination">
             <div>
-                <?php 
+                <?php
                 $startRecord = $totalRows > 0 ? $offset + 1 : 0;
                 $endRecord = min($offset + $limit, $totalRows);
                 ?>
@@ -336,7 +383,6 @@ $fifteenDaysAgo = date('Y-m-d', strtotime('-15 days'));
     </div>
 </div>
 
-<!-- DOWNLOAD REPORT MODAL -->
 <div id="downloadModal" class="dl-modal-overlay">
     <div class="dl-modal-box">
         <div class="dl-modal-header">
@@ -344,7 +390,7 @@ $fifteenDaysAgo = date('Y-m-d', strtotime('-15 days'));
             <button type="button" onclick="closeDownloadModal()" style="background:none; border:none; font-size:18px; cursor:pointer; color:#6c757d;">✕</button>
         </div>
         <div class="dl-modal-body">
-            
+
             <div style="font-size:13px; font-weight:700; color:#475569; margin-bottom:10px;">Select Date Range:</div>
 
             <label class="dl-option-label" onclick="selectRangeOption('15')">
@@ -362,7 +408,6 @@ $fifteenDaysAgo = date('Y-m-d', strtotime('-15 days'));
                 <span>📆 <strong>Custom Date Range</strong></span>
             </label>
 
-            <!-- Custom Date Inputs -->
             <div id="customDateContainer" style="display:none; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:12px;">
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div>
@@ -377,7 +422,7 @@ $fifteenDaysAgo = date('Y-m-d', strtotime('-15 days'));
             </div>
 
             <div style="font-size:13px; font-weight:700; color:#475569; margin-top:14px; margin-bottom:10px;">Select Output Format:</div>
-            
+
             <div style="display:flex; gap:16px;">
                 <label style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; cursor:pointer;">
                     <input type="radio" name="dlFormat" value="pdf" checked style="accent-color:#0d6efd;">
@@ -419,7 +464,7 @@ function toggleCustomDates() {
     let checkedRadio = document.querySelector('input[name="dlRange"]:checked');
     let selRange = checkedRadio ? checkedRadio.value : '15';
     let customWrap = document.getElementById('customDateContainer');
-    
+
     if (selRange === 'custom') {
         customWrap.style.display = 'block';
     } else {
@@ -430,15 +475,16 @@ function toggleCustomDates() {
 function executeReportDownload() {
     let checkedRadio = document.querySelector('input[name="dlRange"]:checked');
     let selRange = checkedRadio ? checkedRadio.value : '15';
-    
+
     let checkedFormat = document.querySelector('input[name="dlFormat"]:checked');
     let selFormat = checkedFormat ? checkedFormat.value : 'pdf';
-    
+
     let fromDate = document.getElementById('dlFromDate').value;
     let toDate = document.getElementById('dlToDate').value;
 
     let search = "<?= addslashes($search) ?>";
     let status = "<?= addslashes($statusFilter) ?>";
+    let mode = "<?= addslashes($modeFilter) ?>";
 
     let url = `download_sales_report.php?range=${selRange}&format=${selFormat}`;
 
@@ -456,13 +502,14 @@ function executeReportDownload() {
 
     if (search) url += `&search=${encodeURIComponent(search)}`;
     if (status) url += `&status=${encodeURIComponent(status)}`;
+    if (mode) url += `&mode=${encodeURIComponent(mode)}`;
 
     if (selFormat === 'csv') {
         window.location.href = url;
     } else {
         window.open(url, '_blank');
     }
-    
+
     closeDownloadModal();
 }
 
@@ -472,3 +519,4 @@ document.getElementById('downloadModal').addEventListener('click', function(e) {
 </script>
 
 <?php include("../includes/footer.php"); ?>
+

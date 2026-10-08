@@ -11,13 +11,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $currentMM = date('m');
     $prefix = "{$currentYY}{$currentMM}J";
 
-    // Strip slashes and spaces from input cardNo; enforce YYMMJ prefix
     $cardNo = str_replace(['/', ' '], '', trim($_POST['cardNo'] ?? ''));
     if (empty($cardNo) || strpos($cardNo, $prefix) !== 0) {
-        $cardNo = ''; // Re-generate cleanly using YYMMJ00001 format
+        $cardNo = '';
     }
 
-    // Parse givenDate into YYYY-MM-DD format for MySQL DATE column
+    $postedToken = trim($_POST['submit_token'] ?? '');
+    if (!empty($postedToken)) {
+        if (empty($_SESSION['jobcard_submit_token']) || $_SESSION['jobcard_submit_token'] !== $postedToken) {
+            $errorMsg = "Invalid jobcard: already submitted";
+            echo "<script>alert('$errorMsg'); window.location.href='create.php?error=" . urlencode($errorMsg) . "';</script>";
+            exit;
+        }
+        unset($_SESSION['jobcard_submit_token']);
+    }
+
+    if (!empty($cardNo)) {
+        $e_chkCard = mysqli_real_escape_string($conn, $cardNo);
+        $checkDup = mysqli_query($conn, "SELECT id FROM jobcard WHERE cardNo = '$e_chkCard' LIMIT 1");
+        if ($checkDup && mysqli_num_rows($checkDup) > 0) {
+            $errorMsg = "Invalid jobcard: already submitted";
+            echo "<script>alert('$errorMsg'); window.location.href='create.php?error=" . urlencode($errorMsg) . "';</script>";
+            exit;
+        }
+    }
+
     $rawDate = trim($_POST['givenDate'] ?? '');
     if (preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $rawDate, $dMatch)) {
         $givenDate = "{$dMatch[3]}-{$dMatch[2]}-{$dMatch[1]}";
@@ -33,7 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $customerName = mysqli_real_escape_string($conn, trim($_POST['customerName'] ?? ''));
     $customerCity = mysqli_real_escape_string($conn, trim($_POST['city'] ?? ''));
 
-    // Customer resolution / auto-create fallback
     if ($customerId > 0) {
         $res = mysqli_query($conn, "SELECT id FROM customer WHERE id = $customerId LIMIT 1");
         if (!$res || mysqli_num_rows($res) === 0) {
@@ -49,7 +66,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if ($customerId === 0 && (!empty($customerPhone) || !empty($customerName))) {
-        // Create basic customer record
         $last_row = mysqli_fetch_assoc(mysqli_query($conn, "SELECT customerId FROM customer WHERE customerId LIKE 'C%' ORDER BY id DESC LIMIT 1"));
         $next_num = 1;
         if ($last_row && preg_match('/(\d+)$/', $last_row['customerId'], $m)) {
@@ -70,13 +86,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $now = date('Y-m-d H:i:s');
     $user = "System Admin";
 
-    // Fallback if cardNo wasn't provided or empty
     if (empty($cardNo)) {
         $cardNo = $_SESSION['draft_jobcard_no'] ?? '';
         $cardNo = str_replace(['/', ' '], '', $cardNo);
     }
 
-    // Atomic Insertion & Concurrency Handling Loop
     $inserted = false;
     $attempts = 0;
     $finalCardNo = $cardNo;
@@ -119,16 +133,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         mysqli_begin_transaction($conn);
 
         try {
-            // Check if cardNo is already taken by another concurrent user
             $checkRes = mysqli_query($conn, "SELECT id FROM jobcard WHERE cardNo = '$e_cardNo' LIMIT 1");
             if ($checkRes && mysqli_num_rows($checkRes) > 0) {
-                // Card number exists, retry with next increment
                 mysqli_rollback($conn);
-                $finalCardNo = '';
-                continue;
+                $errorMsg = "Invalid jobcard: already submitted";
+                echo "<script>alert('$errorMsg'); window.location.href='create.php?error=" . urlencode($errorMsg) . "';</script>";
+                exit;
             }
 
-            // Insert into jobcard table
             $empName = mysqli_real_escape_string($conn, trim($_POST['employeeName'] ?? $_POST['employee'] ?? ''));
             $empIdVal = "NULL";
             if (!empty($empName)) {
@@ -144,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $e_jobCategory = mysqli_real_escape_string($conn, $_POST['jobCategory'] ?? 'Onsite');
             $custVal = ($customerId > 0) ? intval($customerId) : "NULL";
 
-            $jcSql = "INSERT INTO jobcard (cardNo, givenDate, customer, employee, jobStatus, jobCategory, completed, delivered, actualAmountSum, quoteAmountSum, receivedAmountSum, laborCharge, createdBy, createdOn, modifiedBy, modifiedOn) 
+            $jcSql = "INSERT INTO jobcard (cardNo, givenDate, customer, employee, jobStatus, jobCategory, completed, delivered, actualAmountSum, quoteAmountSum, receivedAmountSum, laborCharge, createdBy, createdOn, modifiedBy, modifiedOn)
                       VALUES ('$e_cardNo', '$givenDate', $custVal, $empIdVal, 'New', '$e_jobCategory', 0, 0, 0, 0, 0, 0, '$user', '$now', '$user', '$now')";
 
             if (!mysqli_query($conn, $jcSql)) {
@@ -153,7 +165,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             $jobcardId = mysqli_insert_id($conn);
 
-            // Process photo uploads
             $uploadedPhotos = [];
             $uploadDir = __DIR__ . '/../uploads/jobcards/';
             if (!file_exists($uploadDir)) {
@@ -171,14 +182,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 foreach ($fileNames as $fIdx => $fName) {
                     if (isset($fileErrors[$fIdx]) && $fileErrors[$fIdx] === UPLOAD_ERR_OK && !empty($fileTmpNames[$fIdx])) {
-                        // File size limit 10MB
                         if (isset($fileSizes[$fIdx]) && $fileSizes[$fIdx] > 10 * 1024 * 1024) continue;
 
                         $ext = strtolower(pathinfo($fName, PATHINFO_EXTENSION));
                         if (in_array($ext, $forbiddenExts)) continue;
 
                         if (in_array($ext, $allowedExts)) {
-                            // Validate MIME / Image type safely
                             if (function_exists('mime_content_type')) {
                                 $mime = @mime_content_type($fileTmpNames[$fIdx]);
                                 if ($mime && strpos($mime, 'image/') !== 0) continue;
@@ -216,7 +225,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             $pictureVal = !empty($uploadedPhotos) ? mysqli_real_escape_string($conn, json_encode(array_values(array_unique($uploadedPhotos)))) : '';
 
-            // Insert into jobcarditems table
             $mName = mysqli_real_escape_string($conn, trim($_POST['machineName'] ?? $_POST['machine'] ?? ''));
             $mId = (int)($_POST['machine'] ?? 0);
             if (empty($mName) && $mId > 0) {
@@ -230,9 +238,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $remarks = mysqli_real_escape_string($conn, $_POST['remarks'] ?? '');
 
             $machVal = ($mId > 0) ? $mId : "NULL";
-            $itemSql = "INSERT INTO jobcarditems (id, jobCard, machine, machineName, serialNo, issueDetails, remark, picture, actualAmount, quoteAmount, assembledByUs, deleted, createdBy, createdOn, modifiedBy, modifiedOn) 
+            $itemSql = "INSERT INTO jobcarditems (id, jobCard, machine, machineName, serialNo, issueDetails, remark, picture, actualAmount, quoteAmount, assembledByUs, deleted, createdBy, createdOn, modifiedBy, modifiedOn)
                         VALUES ($jobcardId, $jobcardId, $machVal, '$mName', '$serial', '$wDetails', '$remarks', '$pictureVal', 0, 0, 0, 0, '$user', '$now', '$user', '$now')";
-            
+
             if (!mysqli_query($conn, $itemSql)) {
                 throw new Exception("Error inserting jobcard item: " . mysqli_error($conn));
             }
@@ -248,12 +256,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if ($inserted) {
-        // Clear session reservation after successful save
         unset($_SESSION['draft_jobcard_no']);
         unset($_SESSION['draft_jobcard_year']);
 
-        // Send Admin WhatsApp Notification (job_card_created template)
-        send_job_card_notification(
+        send_job_card_dual_notification(
             $finalCardNo,
             $customerName,
             $customerPhone,
@@ -261,7 +267,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $jobcardId
         );
 
-        echo "<script>alert('Job Card Created successfully! Number: $finalCardNo'); window.location.href='edit.php?id=$jobcardId';</script>";
+        echo "<script>alert('Job Card Created successfully! Number: $finalCardNo'); window.location.href='print_receipt.php?id=$jobcardId&type=intake';</script>";
     } else {
         echo "Error saving job card: " . htmlspecialchars($lastErrorMsg ?? 'Please try again.');
     }

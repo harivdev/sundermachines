@@ -2,7 +2,6 @@
 session_start();
 require_once __DIR__ . '/../config/db.php';
 
-// Auto-generate next Employee ID
 $resCount = mysqli_query($conn, "SELECT MAX(id) as maxId FROM employee");
 $rowC = mysqli_fetch_assoc($resCount);
 $nextNum = intval($rowC['maxId'] ?? 0) + 1;
@@ -13,8 +12,6 @@ include("../includes/header.php");
 
 <div class="page-main-container erp-container" style="width: 100%; padding: 20px;">
 
-    
-    <!-- HEADER BAR -->
     <div class="erp-header-bar" style="margin-bottom: 20px;">
         <div class="erp-header-title">
             <span>👤 Add New Employee</span>
@@ -33,14 +30,16 @@ include("../includes/header.php");
         </div>
     <?php endif; ?>
 
-    <form action="insert.php" method="POST" style="width: 100%;">
-        
-        <!-- SECTION 1: PERSONAL & CONTACT INFO -->
+    <form action="insert.php" method="POST" autocomplete="off" style="width: 100%;">
+
+        <input type="text" style="display:none" aria-hidden="true">
+        <input type="password" style="display:none" aria-hidden="true">
+
         <div class="erp-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
             <div class="erp-card-header" style="font-weight: 700; font-size: 15px; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
                 <span>📋 Personal & Contact Details</span>
             </div>
-            
+
             <div class="erp-form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
                 <div class="form-group">
                     <label class="erp-label">Employee Name <span style="color:#ef4444;">*</span></label>
@@ -79,7 +78,6 @@ include("../includes/header.php");
             </div>
         </div>
 
-        <!-- SECTION 2: ADDRESS DETAILS -->
         <div class="erp-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
             <div class="erp-card-header" style="font-weight: 700; font-size: 15px; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
                 <span>📍 Address Details</span>
@@ -108,7 +106,6 @@ include("../includes/header.php");
             </div>
         </div>
 
-        <!-- SECTION 3: CORPORATE & ERP CREDENTIALS -->
         <div class="erp-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
             <div class="erp-card-header" style="font-weight: 700; font-size: 15px; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
                 <span>🏢 Corporate & User Credentials</span>
@@ -130,9 +127,16 @@ include("../includes/header.php");
                     </select>
                 </div>
 
+                <input type="hidden" name="designation" value="">
                 <div class="form-group">
-                    <label class="erp-label">Designation</label>
-                    <input type="text" name="designation" placeholder="e.g. Service Technician, Manager" class="erp-input" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 12px; height: 38px;">
+                    <label class="erp-label">Allocated Jobs</label>
+                    <div class="erp-input" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 12px; height: 38px; background: #f8fafc; display: flex; align-items: center; justify-content: space-between; color: #94a3b8; font-size: 13px; font-style: italic; cursor: not-allowed;" title="Allocated jobs will appear once job cards are assigned to this employee">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-wrench" style="color: #cbd5e1; font-size: 13px;"></i>
+                            <span>No job cards allocated (New Employee)</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down" style="color: #cbd5e1; font-size: 11px;"></i>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -142,13 +146,13 @@ include("../includes/header.php");
 
                 <div class="form-group">
                     <label class="erp-label">ERP Login Username</label>
-                    <input type="text" name="username" placeholder="Username for system login" class="erp-input" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 12px; height: 38px;">
+                    <input type="text" name="username" placeholder="Username for system login" autocomplete="new-password" class="erp-input" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 12px; height: 38px;">
                 </div>
 
                 <div class="form-group">
                     <label class="erp-label">ERP Login Password</label>
                     <div style="position: relative; display: flex; align-items: center;">
-                        <input type="password" id="addPasswordInput" name="password" placeholder="Password for system login" class="erp-input" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 40px 0 12px; height: 38px; width: 100%;">
+                        <input type="password" id="addPasswordInput" name="password" placeholder="Password for system login" autocomplete="new-password" class="erp-input" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 40px 0 12px; height: 38px; width: 100%;">
                         <button type="button" onclick="togglePasswordVisibility('addPasswordInput', this)" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: #64748b; font-size: 15px; padding: 0; outline: none;">
                             <i class="fa-solid fa-eye"></i>
                         </button>
@@ -179,7 +183,6 @@ include("../includes/header.php");
             </div>
         </div>
 
-        <!-- BOTTOM FORM ACTIONS -->
         <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; flex-wrap: wrap;">
             <a href="list.php" style="background: #e2e8f0; color: #475569; padding: 10px 24px; border-radius: 6px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
                 Cancel
@@ -227,3 +230,4 @@ function togglePasswordVisibility(inputId, btn) {
     }
 }
 </style>
+

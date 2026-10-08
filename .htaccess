@@ -1,0 +1,20 @@
+# ─────────────────────────────────────────────────────────────
+# Sanruth ERP - Shared Hosting & InfinityFree Compatible .htaccess
+# ─────────────────────────────────────────────────────────────
+
+# 1. Block direct HTTP access to .env and sensitive files
+<FilesMatch "^(\.env|\.git|\.htaccess)">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "\.(sql|log|bak|old|tmp)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# 2. Rewrite Engine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^favicon\.ico$ img/logo.png [L]
+</IfModule>

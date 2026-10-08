@@ -21,23 +21,24 @@ $query = "
         st.gstPercentage,
         st.availableQty,
         st.serialNo,
-        sp.id              AS spareId,
-        sp.spareName,
-        sp.partNo,
-        sp.rackNumber,
-        sp.picture,
+        COALESCE(sp.id, '') AS spareId,
+        COALESCE(sp.spareName, st.itemName, 'Item') AS spareName,
+        COALESCE(sp.partNo, '') AS partNo,
+        COALESCE(sp.rackNumber, '') AS rackNumber,
+        COALESCE(sp.picture, '') AS picture,
         'SPR'              AS category
     FROM stock st
     LEFT JOIN spares sp ON st.spare = sp.id
     WHERE st.availableQty > 0
       AND (
             sp.spareName   LIKE '%$t%'
+         OR st.itemName    LIKE '%$t%'
          OR st.barCode     LIKE '%$t%'
          OR sp.partNo      LIKE '%$t%'
          OR sp.rackNumber  LIKE '%$t%'
          OR st.serialNo    LIKE '%$t%'
       )
-    ORDER BY sp.spareName ASC
+    ORDER BY COALESCE(sp.spareName, st.itemName) ASC
     LIMIT 20
 ";
 

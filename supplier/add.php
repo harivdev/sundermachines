@@ -5,11 +5,10 @@ requireAdmin();
 include("../includes/header.php");
 ?>
 
-<div class="page-main-container erp-container" style="padding: 30px 20px; background: #f8fafc; min-height: calc(100vh - 110px);">
+<div class="page-main-container erp-container" style="padding: 30px 20px; background: #f8fafc;">
 
     <div style="width: 100%;">
 
-        <!-- HEADER BAR -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 style="margin: 0; color: #1e293b; font-size: 22px; font-weight: 700;">Add New Supplier</h3>
             <a href="list.php"
@@ -18,12 +17,10 @@ include("../includes/header.php");
             </a>
         </div>
 
-        <!-- MAIN CONTENT CARD -->
         <div style="background: #fff; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04); padding: 35px 40px; border: 1px solid #e2e8f0;">
 
             <form action="insert.php" method="POST">
 
-                <!-- SECTION 1: SUPPLIER INFO HEADER & ACTIVE TOGGLE -->
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;">
                     <span style="font-size: 16px; font-weight: 700; color: #1e293b;">Supplier Information</span>
                     <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
@@ -35,13 +32,11 @@ include("../includes/header.php");
                     </label>
                 </div>
 
-                <!-- NAME FIELD (FULL WIDTH) -->
                 <div class="form-group" style="margin-bottom: 22px;">
                     <label>Supplier Name <span class="required">*</span></label>
                     <input type="text" name="name" required placeholder="Enter supplier or business name">
                 </div>
 
-                <!-- CONTACT FIELDS (3 EQUAL COLUMNS) -->
                 <div class="contact-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-bottom: 30px;">
                     <div class="form-group">
                         <label>Phone # Primary <span class="required">*</span></label>
@@ -57,12 +52,10 @@ include("../includes/header.php");
                     </div>
                 </div>
 
-                <!-- SECTION 2: ADDRESS -->
                 <div style="margin-top: 35px; margin-bottom: 22px; border-top: 2px solid #f1f5f9; padding-top: 22px;">
                     <h3 style="margin: 0; color: #1e293b; font-size: 16px; font-weight: 700;">Address Details</h3>
                 </div>
 
-                <!-- ADDRESS LINES (FULL WIDTH EACH) -->
                 <div class="form-group" style="margin-bottom: 18px;">
                     <label>Address Line 1 <span class="required">*</span></label>
                     <input type="text" name="line1" required placeholder="Street address, building, door no.">
@@ -73,7 +66,6 @@ include("../includes/header.php");
                     <input type="text" name="line2" placeholder="Suite, unit, landmark (optional)">
                 </div>
 
-                <!-- CITY & ZIP CODE (2 EQUAL COLUMNS) -->
                 <div class="location-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 35px;">
                     <div class="form-group">
                         <label>City <span class="required">*</span></label>
@@ -85,7 +77,6 @@ include("../includes/header.php");
                     </div>
                 </div>
 
-                <!-- ACTION BUTTONS -->
                 <div style="margin-top: 35px; border-top: 1px solid #f1f5f9; padding-top: 25px; display: flex; justify-content: flex-end; gap: 12px;">
                     <a href="list.php" class="prime-btn" style="background: #e2e8f0; color: #475569; text-decoration: none; display: inline-flex; align-items: center;">Cancel</a>
                     <button type="reset" class="prime-btn" style="background: #94a3b8; color: #fff;">Reset</button>
@@ -98,7 +89,7 @@ include("../includes/header.php");
 </div>
 
 <style>
-    /* TYPOGRAPHY */
+
     .form-group label {
         display: block;
         font-weight: 700;
@@ -111,7 +102,6 @@ include("../includes/header.php");
         color: #ef4444;
     }
 
-    /* INPUTS */
     .form-group input {
         width: 100%;
         height: 44px;
@@ -125,7 +115,6 @@ include("../includes/header.php");
         box-sizing: border-box;
     }
 
-    /* SWITCH TOGGLE */
     .switch-container {
         width: 44px;
         height: 22px;
@@ -160,7 +149,6 @@ include("../includes/header.php");
         transform: translateX(22px);
     }
 
-    /* BUTTONS */
     .prime-btn {
         padding: 11px 26px;
         border: none;
@@ -176,7 +164,6 @@ include("../includes/header.php");
         opacity: 0.92;
     }
 
-    /* RESPONSIVE */
     @media (max-width: 768px) {
         .contact-grid, .location-grid {
             grid-template-columns: 1fr !important;

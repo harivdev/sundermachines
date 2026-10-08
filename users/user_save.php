@@ -1,5 +1,4 @@
 <?php
-// user_save.php – Create or update admin user in billing_login.user
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -81,7 +80,6 @@ if (isset($_FILES['photo']) && isset($_FILES['photo']['tmp_name']) && is_uploade
     }
 }
 
-// Validate name and username
 if ($name === '') {
     echo json_encode(['success' => false, 'message' => 'Name is required.']);
     exit();
@@ -92,7 +90,6 @@ if (!preg_match('/^[a-zA-Z0-9_]{3,30}$/', $username)) {
     exit();
 }
 
-// Validate password required for new users
 if ($id === 0 && $password === '') {
     echo json_encode(['success' => false, 'message' => 'Password is required for new users.']);
     exit();
@@ -101,7 +98,6 @@ if ($id === 0 && $password === '') {
 $now = date('Y-m-d H:i:s');
 
 if ($id > 0) {
-    // UPDATE existing user
     $setParts = [
         "name = '$name'",
         "username = '$username'",
@@ -127,7 +123,6 @@ if ($id > 0) {
         echo json_encode(['success' => false, 'message' => 'Update failed: ' . $conn_login->error]);
     }
 } else {
-    // INSERT new user – check for duplicate username
     $check = $conn_login->query("SELECT id FROM user WHERE username = '$username'");
     if ($check && $check->num_rows > 0) {
         echo json_encode(['success' => false, 'message' => "Username '$username' already exists."]);
@@ -143,3 +138,4 @@ if ($id > 0) {
         echo json_encode(['success' => false, 'message' => 'Insert failed: ' . $conn_login->error]);
     }
 }
+

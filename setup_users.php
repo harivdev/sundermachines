@@ -1,10 +1,11 @@
 <?php
 require_once("config/db.php");
+require_once("includes/auth.php");
+requireAdmin();
 
 echo "<div style='font-family: sans-serif; padding: 30px; max-width: 600px; margin: 50px auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);'>";
 echo "<h2 style='color: #1e293b; margin-top: 0;'>⚙️ User Table Setup</h2>";
 
-// 1. Create 'user' Table (Requested Name)
 $createTable = "CREATE TABLE IF NOT EXISTS `user` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
@@ -29,7 +30,6 @@ if (mysqli_query($conn_login, $createTable)) {
     echo "<p style='color: #ef4444;'>❌ Error creating table: " . mysqli_error($conn_login) . "</p>";
 }
 
-// 2. Add Default Admin User
 $username = "admin";
 $password = "admin1441";
 $role = "ADMIN";

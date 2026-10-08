@@ -2,24 +2,25 @@
 session_start();
 require_once("config/db.php");
 
-// If already logged in, redirect to dashboard
 if (isset($_SESSION['user_id'])) {
     header("Location: login/dashboard.php");
     exit();
 }
 
-$error = "";
+$error = $_SESSION['login_error'] ?? "";
+unset($_SESSION['login_error']);
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
     if ($username === '' || $password === '') {
-        $error = "Please enter both username/email and password.";
+        $_SESSION['login_error'] = "Please enter both username/email and password.";
+        header("Location: index.php");
+        exit();
     } else {
         $usernameSafe = mysqli_real_escape_string($conn_login, $username);
 
-        // Try admin login first using the main admin table.
         $tableCheck = mysqli_query($conn_login, "SHOW TABLES LIKE 'user'");
         if ($tableCheck && mysqli_num_rows($tableCheck) > 0) {
             $query = "SELECT * FROM user WHERE username = '$usernameSafe' LIMIT 1";
@@ -28,22 +29,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($result && mysqli_num_rows($result) > 0) {
                 $user = mysqli_fetch_assoc($result);
 
-                // Support both hashed and plain-text passwords for admin users.
-                if ((isset($user['password']) && password_verify($password, $user['password'])) || $password === $user['password']) {
-                    $_SESSION['user_id'] = $user['id'];
-                    $_SESSION['username'] = $user['username'];
-                    $_SESSION['role'] = strtoupper($user['role'] ?? 'ADMIN');
-                    if ($_SESSION['role'] !== 'ADMIN') {
-                        $_SESSION['role'] = 'USER';
+                if (isset($user['password'])) {
+                    $matched = false;
+                    if (password_verify($password, $user['password'])) {
+                        $matched = true;
+                        if (password_needs_rehash($user['password'], PASSWORD_BCRYPT)) {
+                            $newHash = password_hash($password, PASSWORD_BCRYPT);
+                            @mysqli_query($conn_login, "UPDATE `user` SET password = '" . mysqli_real_escape_string($conn_login, $newHash) . "' WHERE id = " . intval($user['id']));
+                        }
+                    } elseif ($password === $user['password']) {
+                        $matched = true;
+                        $newHash = password_hash($password, PASSWORD_BCRYPT);
+                        @mysqli_query($conn_login, "UPDATE `user` SET password = '" . mysqli_real_escape_string($conn_login, $newHash) . "' WHERE id = " . intval($user['id']));
                     }
 
-                    header("Location: login/dashboard.php");
-                    exit();
+                    if ($matched) {
+                        $_SESSION['user_id'] = $user['id'];
+                        $_SESSION['username'] = $user['username'];
+                        $_SESSION['role'] = strtoupper($user['role'] ?? 'ADMIN');
+                        if ($_SESSION['role'] !== 'ADMIN') {
+                            $_SESSION['role'] = 'USER';
+                        }
+
+                        header("Location: login/dashboard.php");
+                        exit();
+                    }
                 }
             }
         }
 
-        // Fall back to employee credentials if admin login did not match.
         $userTable = null;
         $res1 = mysqli_query($conn, "SHOW TABLES LIKE 'employee_auth'");
         if ($res1 && mysqli_num_rows($res1) > 0) {
@@ -67,22 +81,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($employeeResult && mysqli_num_rows($employeeResult) > 0) {
                 $employee = mysqli_fetch_assoc($employeeResult);
 
-                if (password_verify($password, $employee['password']) || $password === $employee['password']) {
-                    $_SESSION['user_id'] = $employee['id'];
-                    $_SESSION['username'] = $employee['username'] ?? $employee['email'] ?? $employee['name'];
-                    $_SESSION['employee_name'] = $employee['name'] ?? $_SESSION['username'];
-                    $_SESSION['role'] = strtoupper($employee['role'] ?? 'EMPLOYEE');
-                    if ($_SESSION['role'] !== 'ADMIN') {
-                        $_SESSION['role'] = 'USER';
+                if (isset($employee['password'])) {
+                    $empMatched = false;
+                    if (password_verify($password, $employee['password'])) {
+                        $empMatched = true;
+                        if (password_needs_rehash($employee['password'], PASSWORD_BCRYPT)) {
+                            $newHash = password_hash($password, PASSWORD_BCRYPT);
+                            @mysqli_query($conn, "UPDATE `{$userTable}` SET password = '" . mysqli_real_escape_string($conn, $newHash) . "' WHERE id = " . intval($employee['id']));
+                        }
+                    } elseif ($password === $employee['password']) {
+                        $empMatched = true;
+                        $newHash = password_hash($password, PASSWORD_BCRYPT);
+                        @mysqli_query($conn, "UPDATE `{$userTable}` SET password = '" . mysqli_real_escape_string($conn, $newHash) . "' WHERE id = " . intval($employee['id']));
                     }
 
-                    header("Location: login/dashboard.php");
-                    exit();
+                    if ($empMatched) {
+                        $_SESSION['user_id'] = $employee['id'];
+                        $_SESSION['username'] = $employee['username'] ?? $employee['email'] ?? $employee['name'];
+                        $_SESSION['employee_name'] = $employee['name'] ?? $_SESSION['username'];
+                        $_SESSION['role'] = strtoupper($employee['role'] ?? 'EMPLOYEE');
+                        if ($_SESSION['role'] !== 'ADMIN') {
+                            $_SESSION['role'] = 'USER';
+                        }
+
+                        header("Location: login/dashboard.php");
+                        exit();
+                    }
                 }
             }
         }
 
-        $error = "Invalid username/email or password.";
+        $_SESSION['login_error'] = "Invalid username/email or password.";
+        header("Location: index.php");
+        exit();
     }
 }
 ?>
@@ -92,17 +123,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Sunder Billing</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Sign In | SUNDER MACHNES WORLD</title>
+
+    <link rel="icon" type="image/png" href="img/logo.png">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="img/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
         :root {
-            --primary-color: #FDD017;
-            --primary-hover: #eab308;
+            --primary-gold: #FDD017;
+            --primary-gold-hover: #eab308;
             --brand-accent: #d97706;
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-            --glass-bg: rgba(255, 255, 255, 0.96);
-            --text-main: #1f2937;
+            --text-dark: #1f2937;
             --text-muted: #6b7280;
+            --text-sub: #64748b;
         }
 
         * {
@@ -113,44 +148,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         body {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--bg-gradient);
+            background: linear-gradient(135deg, #ffffff 0%, #fffdf0 30%, #fef3c7 70%, #fde68a 100%);
             background-attachment: fixed;
-            overflow: hidden;
-        }
-
-        .blob {
-            position: absolute;
-            width: 500px;
-            height: 500px;
-            background: rgba(253, 208, 23, 0.12);
-            filter: blur(80px);
-            border-radius: 50%;
-            z-index: -1;
-            animation: move 20s infinite alternate;
-        }
-
-        @keyframes move {
-            from {
-                transform: translate(-10%, -10%);
-            }
-
-            to {
-                transform: translate(10%, 10%);
-            }
-        }
-
-        .login-container {
-            width: 100%;
-            max-width: 420px;
             padding: 20px;
-            animation: fadeIn 0.8s ease-out;
         }
 
-        @keyframes fadeIn {
+        .login-wrapper {
+            width: 100%;
+            max-width: 960px;
+            min-height: 540px;
+            background: #ffffff;
+            border-radius: 24px;
+            border: 1px solid rgba(217, 119, 6, 0.12);
+            box-shadow: -16px -16px 40px rgba(0, 0, 0, 0.2), 16px 20px 45px rgba(0, 0, 0, 0.18);
+            display: flex;
+            overflow: hidden;
+            position: relative;
+            animation: cardAppear 0.5s ease-out;
+        }
+
+        @keyframes cardAppear {
             from {
                 opacity: 0;
                 transform: translateY(20px);
@@ -162,235 +183,300 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
-        .login-card {
-            background: var(--glass-bg);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .left-panel {
+            flex: 1.1;
+            background: linear-gradient(180deg, #fefce8 0%, #fef3c7 100%);
+            padding: 42px 40px 32px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+            border-right: 1px solid #fde68a;
         }
 
-        .logo-section {
-            text-align: center;
-            margin-bottom: 24px;
+        .top-brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 2;
         }
 
-        .logo-container {
-            width: 56px;
+        .top-brand img {
             height: 56px;
-            background: transparent;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .top-brand-title {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #78350f;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            line-height: 1.2;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .illustration-container {
+            width: 100%;
+            max-width: 420px;
+            margin: auto;
+            position: relative;
+            z-index: 2;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 12px;
-            box-shadow: none;
-            border: none;
-            padding: 0;
-            transition: transform 0.25s ease, filter 0.25s ease;
-            cursor: pointer;
         }
 
-        .logo-container:hover {
-            transform: translateY(-2px) scale(1.05);
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12));
-        }
-
-        .logo-container img {
+        .illustration-container img {
             width: 100%;
-            height: 100%;
-            object-fit: contain;
-            mix-blend-mode: multiply;
-            transition: transform 0.25s ease;
+            height: auto;
+            display: block;
         }
 
-        .brand-name {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-main);
+        .right-panel {
+            flex: 1;
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #ffffff;
+        }
+
+        .form-header {
+            margin-bottom: 28px;
+        }
+
+        .form-header h2 {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-dark);
             letter-spacing: -0.5px;
+            margin-bottom: 8px;
         }
 
-        .brand-accent {
-            color: var(--brand-accent);
+        .form-header p {
+            font-size: 13.5px;
+            color: var(--text-sub);
+            font-weight: 500;
+            line-height: 1.5;
         }
 
-        .subtitle {
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-top: 5px;
+        .error-box {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 22px;
         }
 
         .form-label {
             display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-main);
+            font-size: 12px;
+            font-weight: 700;
+            color: #475569;
             margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .input-wrapper {
+        .input-box {
             position: relative;
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 12px 16px;
-            padding-left: 44px;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 15px;
-            color: var(--text-main);
-            transition: all 0.3s ease;
-        }
-
-        .input-field:focus {
-            outline: none;
-            border: 1.5px solid #c9a771 !important;
-            background: #fffdf9 !important;
-            box-shadow: 0 0 0 3px rgba(201, 167, 113, 0.18) !important;
-        }
-
-        input:-webkit-autofill,
-        input:-webkit-autofill:hover, 
-        input:-webkit-autofill:focus, 
-        input:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0 30px #fffdf9 inset !important;
-            -webkit-text-fill-color: #1e293b !important;
-            border-color: #c9a771 !important;
-            transition: background-color 5000s ease-in-out 0s;
+            display: flex;
+            align-items: center;
         }
 
         .input-icon {
             position: absolute;
             left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
             font-size: 18px;
+            color: var(--text-muted);
+            pointer-events: none;
         }
 
-        .error-message {
-            background: #fee2e2;
-            color: #b91c1c;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 13px;
-            margin-bottom: 20px;
-            text-align: center;
-            border: 1px solid #fecaca;
-            display:
-                <?php echo $error ? 'block' : 'none'; ?>
-            ;
-        }
-
-        .login-btn {
+        .form-control {
             width: 100%;
-            padding: 14px;
-            background: #FDD017;
+            padding: 12px 16px 12px 44px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 15px;
+            color: var(--text-dark);
+            background: #f9fafb;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        .form-control:focus {
+            background: #fffdf9;
+            border-color: #c9a771;
+            box-shadow: 0 0 0 3px rgba(201, 167, 113, 0.18);
+        }
+
+        .form-options {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            font-size: 13px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .remember-me input {
+            accent-color: #d97706;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .btn-signin {
+            width: 100%;
+            padding: 14px 24px;
+            background: var(--primary-gold);
             color: #0f172a;
             border: none;
-            border-radius: 12px;
+            border-radius: 30px;
             font-size: 16px;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
             box-shadow: 0 4px 14px rgba(253, 208, 23, 0.4);
+            transition: all 0.25s ease;
         }
 
-        .login-btn:hover {
-            background: #eab308;
+        .btn-signin:hover {
+            background: var(--primary-gold-hover);
             transform: translateY(-1px);
             box-shadow: 0 6px 20px rgba(253, 208, 23, 0.5);
         }
 
-        .show-pass-container {
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .show-pass-container label {
-            font-size: 13px;
-            color: var(--text-muted);
-            cursor: pointer;
-        }
-
-        .footer-text {
+        .copyright-footer {
+            margin-top: 28px;
             text-align: center;
-            margin-top: 25px;
-            font-size: 15px;
-            font-weight: 600;
+            font-size: 1.15rem;
             color: #64748b;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        @media (max-width: 860px) {
+            .login-wrapper {
+                flex-direction: column;
+                max-width: 420px;
+            }
+
+            .left-panel {
+                padding: 24px;
+                min-height: 200px;
+            }
+
+            .illustration-container {
+                max-width: 220px;
+            }
+
+            .right-panel {
+                padding: 32px 24px;
+            }
+
+            .form-header h2 {
+                font-size: 26px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="blob"></div>
 
-    <div class="login-container">
-    
-    
-        <div class="login-card">
-            <div class="logo-section">
-                <div class="logo-container"><img src="img/logo.png" alt="SUNDER MACHNES WORLD Logo"></div>
-                <h1 class="brand-name"><span class="brand-accent">Sunder</span> Billing</h1>
-                <p class="subtitle">Please enter your credentials</p>
+    <div class="login-wrapper">
+
+        <div class="left-panel">
+
+            <div class="top-brand">
+                <img src="img/logo.png" alt="SUNDER MACHINES WORLD Logo">
+                <span class="top-brand-title">SUNDER MACHINES WORLD</span>
             </div>
 
-            <div class="error-message">
-                <?php echo $error; ?>
+            <div class="illustration-container">
+                <img src="img/login_illustration.svg" alt="Sunder Billing Illustration">
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="form-header">
+                <h2>Sign In</h2>
+                <p>Welcome! Please enter your credentials to access your dashboard.</p>
             </div>
 
-            <div style="margin-bottom: 20px; text-align: center; color: var(--text-muted); font-size: 14px;">
-            </div>
+            <?php if (!empty($error)): ?>
+                <div class="error-box">
+                    <span><?= htmlspecialchars($error) ?></span>
+                </div>
+            <?php endif; ?>
 
             <form method="POST" action="">
+
                 <div class="form-group">
-                    <label class="form-label">Username / Email</label>
-                    <div class="input-wrapper">
+                    <label class="form-label">Email / Username</label>
+                    <div class="input-box">
                         <span class="input-icon">👤</span>
-                        <input type="text" name="username" class="input-field" placeholder="Username or Email" required
-                            autofocus>
+                        <input type="text" name="username" class="form-control" placeholder="Enter username or email"
+                            required autofocus>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Password</label>
-                    <div class="input-wrapper">
+                    <div class="input-box">
                         <span class="input-icon">🔒</span>
-                        <input type="password" name="password" id="password" class="input-field" placeholder="Password"
-                            required>
-                    </div>
-                    <div class="show-pass-container">
-                        <input type="checkbox" id="showPass" onclick="togglePass()">
-                        <label for="showPass">Show Password</label>
+                        <input type="password" name="password" id="password" class="form-control"
+                            placeholder="Enter password" required>
                     </div>
                 </div>
 
-                <button type="submit" class="login-btn">Sign In</button>
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" id="showPassCheckbox" onclick="togglePass()">
+                        <span>Show Password</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-signin">Sign In</button>
             </form>
 
-            <script>
-                function togglePass() {
-                    var x = document.getElementById("password");
-                    x.type = x.type === "password" ? "text" : "password";
-                }
-            </script>
-
-            <div class="footer-text">
-                &copy; <?php echo date('Y'); ?> Sanruth Softtech
+            <div class="copyright-footer">
+                &copy; <?= date('Y') ?> Sanruth Softtech
             </div>
         </div>
+
     </div>
+
+    <script>
+        function togglePass() {
+            var passInput = document.getElementById("password");
+            var check = document.getElementById("showPassCheckbox");
+            if (check.checked) {
+                passInput.type = "text";
+            } else {
+                passInput.type = "password";
+            }
+        }
+    </script>
+
 </body>
 
 </html>

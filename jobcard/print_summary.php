@@ -28,7 +28,7 @@ if (!empty($_GET['toDate'])) {
 }
 
 $query = "
-    SELECT 
+    SELECT
         j.id,
         j.cardNo,
         j.jobStatus,
@@ -107,7 +107,7 @@ if ($res) {
         .text-right { text-align: right; }
         .text-left { text-align: left; }
         .font-bold { font-weight: bold; }
-        
+
         @media print {
             body { padding: 0; }
             .no-print { display: none; }
@@ -136,13 +136,12 @@ if ($res) {
             </tr>
         </thead>
         <tbody>
-            <?php 
+            <?php
             if (!empty($jobcards)):
                 $sno = 1;
                 foreach ($jobcards as $row):
                     $cleanCardNo = str_replace(['/', ' '], '', $row['cardNo'] ?? '');
-                    
-                    // Format Status
+
                     $rawSt = $row['jobStatus'] ?? 'New';
                     if ($rawSt === 'New' || $rawSt === 'New Job') {
                         $statusDisp = 'New Job';
@@ -156,22 +155,20 @@ if ($res) {
                         $statusDisp = htmlspecialchars($rawSt);
                     }
 
-                    // Format Given Date
-                    $givDt = (!empty($row['givenDate']) && $row['givenDate'] !== '0000-00-00') 
-                        ? date('d/m/Y', strtotime($row['givenDate'])) 
+                    $givDt = (!empty($row['givenDate']) && $row['givenDate'] !== '0000-00-00')
+                        ? date('d/m/Y', strtotime($row['givenDate']))
                         : '';
 
-                    // Format Delivery / Completion Date
                     $delivDtRaw = !empty($row['deliveryDate']) && $row['deliveryDate'] !== '0000-00-00'
                         ? $row['deliveryDate']
                         : (!empty($row['completedDate']) && $row['completedDate'] !== '0000-00-00' ? $row['completedDate'] : '');
-                    
+
                     if (empty($delivDtRaw) && ($statusDisp === 'Job Completed' || $statusDisp === 'Job Delivered')) {
                         $delivDtRaw = !empty($row['modifiedOn']) ? date('Y-m-d', strtotime($row['modifiedOn'])) : '';
                     }
 
-                    $delivDt = (!empty($delivDtRaw) && $delivDtRaw !== '0000-00-00') 
-                        ? date('d/m/Y', strtotime($delivDtRaw)) 
+                    $delivDt = (!empty($delivDtRaw) && $delivDtRaw !== '0000-00-00')
+                        ? date('d/m/Y', strtotime($delivDtRaw))
                         : '';
 
                     $billed = number_format((float)($row['actualAmountSum'] ?? 0), 2, '.', '');
@@ -187,7 +184,7 @@ if ($res) {
                     <td class="text-right font-bold"><?= $billed ?></td>
                     <td class="text-right font-bold"><?= $paid ?></td>
                 </tr>
-            <?php 
+            <?php
                 endforeach;
             else:
             ?>
@@ -200,3 +197,4 @@ if ($res) {
 
 </body>
 </html>
+

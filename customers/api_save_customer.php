@@ -1,5 +1,4 @@
 <?php
-// customers/api_save_customer.php
 require_once(__DIR__ . "/../config/db.php");
 
 header('Content-Type: application/json');
@@ -9,7 +8,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Support both JSON body and standard $_POST
 $rawInput = file_get_contents('php://input');
 $jsonInput = json_decode($rawInput, true);
 $data = is_array($jsonInput) ? array_merge($_POST, $jsonInput) : $_POST;
@@ -38,7 +36,6 @@ $zipCode = trim($data['zipCode'] ?? '');
 
 $now = date('Y-m-d H:i:s');
 
-// Auto-generate customerId if creating new and none provided
 if ($id === 0 && empty($customerId)) {
     $last_row = mysqli_fetch_assoc(mysqli_query($conn, "SELECT customerId FROM customer WHERE customerId LIKE 'C%' ORDER BY id DESC LIMIT 1"));
     $next_num = 1;
@@ -48,7 +45,6 @@ if ($id === 0 && empty($customerId)) {
     $customerId = 'C' . str_pad($next_num, 7, '0', STR_PAD_LEFT);
 }
 
-// Escape strings
 $e_customerId = mysqli_real_escape_string($conn, $customerId);
 $e_name = mysqli_real_escape_string($conn, $name);
 $e_phoneNo1 = mysqli_real_escape_string($conn, $phoneNo1);
@@ -61,7 +57,6 @@ $e_line2 = mysqli_real_escape_string($conn, $line2);
 $e_city = mysqli_real_escape_string($conn, $city);
 $e_zipCode = mysqli_real_escape_string($conn, $zipCode);
 
-// 1. UPSERT Address
 if ($address_id > 0) {
     $sql_addr = "UPDATE address
                  SET line1 = '$e_line1', line2 = '$e_line2', city = '$e_city', zipCode = '$e_zipCode', modifiedOn = '$now'
@@ -77,7 +72,6 @@ if ($address_id > 0) {
 
 $address_val = ($address_id > 0) ? $address_id : "NULL";
 
-// 2. UPSERT Customer
 if ($id > 0) {
     $sql_cust = "UPDATE customer
                  SET customerId = '$e_customerId',
@@ -103,7 +97,6 @@ if ($id > 0) {
     $id = mysqli_insert_id($conn);
 }
 
-// Fetch saved customer details
 $fetch_sql = "SELECT c.id, c.customerId, c.name, c.phoneNo1, c.phoneNo2, c.whatsAppNo, c.emailId,
                      c.active, a.id AS address_id, a.line1, a.line2, a.city, a.zipCode
               FROM customer c
@@ -127,3 +120,4 @@ echo json_encode([
 ]);
 exit;
 ?>
+

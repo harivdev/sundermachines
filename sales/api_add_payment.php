@@ -1,5 +1,4 @@
 <?php
-// sales/api_add_payment.php
 require_once(__DIR__ . "/../config/db.php");
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -32,7 +31,6 @@ $today = date('Y-m-d');
 $userEmail = $_SESSION['username'] ?? 'System Admin';
 $now = date('Y-m-d H:i:s.') . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
 
-// Validate inputs
 if ($salesId <= 0) {
     echo json_encode(['success' => false, 'error' => 'Invalid sales order ID.']);
     exit;
@@ -53,7 +51,6 @@ if (strtotime($paymentDate) > strtotime($today)) {
     exit;
 }
 
-// Generate UUID for payment.id
 $uuid = sprintf(
     '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
     mt_rand(0, 0xffff), mt_rand(0, 0xffff),
@@ -63,11 +60,9 @@ $uuid = sprintf(
     mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
 );
 
-// ATOMIC TRANSACTION
 mysqli_begin_transaction($conn);
 
 try {
-    // 1. Verify sales order exists and lock row
     $chkSale = mysqli_prepare($conn, "SELECT id, actualAmountSum, paidAmountSum, orderStatus FROM sales WHERE id = ? FOR UPDATE");
     mysqli_stmt_bind_param($chkSale, "i", $salesId);
     mysqli_stmt_execute($chkSale);
@@ -80,7 +75,6 @@ try {
 
     $actualTotal = (float)$sale['actualAmountSum'];
 
-    // 2. Check whether payment already exists in payment table
     $chkPmt = mysqli_prepare($conn, "SELECT id, amount, transactionDate, mode, refNo FROM payment WHERE sales = ? LIMIT 1");
     mysqli_stmt_bind_param($chkPmt, "i", $salesId);
     mysqli_stmt_execute($chkPmt);
@@ -91,12 +85,10 @@ try {
         throw new Exception("Payment has already been added for this sales order.");
     }
 
-    // 3. Validate payment amount does not exceed total
     if ($amount > $actualTotal) {
         throw new Exception("Payment amount (₹" . number_format($amount, 2) . ") cannot exceed total sales order amount (₹" . number_format($actualTotal, 2) . ").");
     }
 
-    // 4. Insert exactly one payment
     $insPmt = mysqli_prepare($conn, "
         INSERT INTO payment
             (id, createdBy, createdOn, modifiedBy, modifiedOn,
@@ -126,7 +118,6 @@ try {
         throw new Exception("Failed to save payment: " . mysqli_stmt_error($insPmt));
     }
 
-    // 5. Update sales order status to 'Invoiced' and set paid amount
     $updSale = mysqli_prepare($conn, "
         UPDATE sales
         SET paidAmountSum = ?,
@@ -139,6 +130,10 @@ try {
 
     if (!mysqli_stmt_execute($updSale)) {
         throw new Exception("Failed to update sales order status: " . mysqli_stmt_error($updSale));
+    }
+
+    if (!empty($paymentMode)) {
+        @mysqli_query($conn, "UPDATE sales SET paymentMode = '" . mysqli_real_escape_string($conn, $paymentMode) . "' WHERE id = $salesId");
     }
 
     mysqli_commit($conn);
@@ -172,3 +167,4 @@ try {
     exit;
 }
 ?>
+

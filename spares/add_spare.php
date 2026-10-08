@@ -14,7 +14,7 @@
     <div class="erp-card">
         <form method="POST" action="insert_spare.php" enctype="multipart/form-data" id="spareForm">
             <div class="erp-form-grid" style="grid-template-columns: 220px 1fr;">
-                <!-- IMAGE -->
+
                 <div>
                     <div class="image-box" onclick="openImageOptions()"
                         style="width:100%; height:180px; border:2px dashed #cbd5e1; display:flex; flex-direction:column; justify-content:center; align-items:center; cursor:pointer; background:#f8fafc; border-radius:12px; overflow:hidden; position:relative;">
@@ -25,7 +25,6 @@
                         </div>
                     </div>
 
-                    <!-- CHOICE BUTTONS -->
                     <div style="margin-top:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                         <button type="button" class="choice-btn" onclick="triggerSpareCamera()"
                             style="padding:10px; background:#fff; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer; display:flex; flex-direction:column; align-items:center; transition:0.2s;">
@@ -43,13 +42,11 @@
                         style="display:none; width:100%; margin-top:10px; padding:10px; border:none; border-radius:8px; background:#fee2e2; color:#ef4444; font-weight:700; font-size:13px; cursor:pointer;">Delete
                         Image</button>
 
-                    <!-- Hidden Inputs -->
                     <input type="file" name="image" id="img" accept="image/*" capture="environment" hidden
                         onchange="preview(event)">
                     <input type="hidden" name="camera_image" id="camera_image">
                 </div>
 
-                <!-- FORM -->
                 <div>
                     <div class="erp-form-group">
                         <label class="erp-label">Spare Name <span class="req">*</span></label>
@@ -73,16 +70,14 @@
                     </div>
 
                     <div style="margin-top:24px; display:flex; gap:12px;">
-                        <button type="submit" class="btn-erp btn-erp-primary" style="flex: 1; padding: 12px 0; text-align: center; justify-content: center;">Submit Spare</button>
-                        <button type="reset" class="btn-erp btn-erp-secondary" onclick="resetFormImage()" style="flex: 1; padding: 12px 0; text-align: center; justify-content: center;">Reset</button>
+                        <button type="reset" class="btn-erp btn-erp-secondary" onclick="resetFormImage()" style="flex: 1; padding: 12px 0; text-align: center; justify-content: center; background: #e2e8f0; color: #475569; border-radius: 8px; font-weight: 600; font-size: 14.5px; cursor: pointer;">Reset</button>
+                        <button type="submit" style="flex: 1; padding: 12px 0; background: #2563eb; color: #ffffff; border: none; border-radius: 8px; font-weight: 700; font-size: 14.5px; cursor: pointer; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);">Submit Spare</button>
                     </div>
                 </div>
             </div>
         </form>
     </div>
 </div>
-
-
 
 <style>
     .container {

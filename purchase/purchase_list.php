@@ -19,7 +19,13 @@ if ($search !== '') {
 
 if ($statusFilter !== '') {
     $safeStatus = mysqli_real_escape_string($conn, $statusFilter);
-    $where .= " AND p.orderStatus = '$safeStatus'";
+    if ($safeStatus === 'Delivered') {
+        $where .= " AND p.orderStatus IN ('Delivered', 'Received', 'Completed')";
+    } else if ($safeStatus === 'Purchased') {
+        $where .= " AND p.orderStatus IN ('Purchased', 'Ordered', 'New')";
+    } else {
+        $where .= " AND p.orderStatus = '$safeStatus'";
+    }
 }
 
 $countRes = mysqli_query($conn, "SELECT COUNT(*) AS total FROM purchase p LEFT JOIN supplier s ON p.supplier = s.id $where");
@@ -39,7 +45,6 @@ $queryString = http_build_query($queryParams);
 
 <div class="erp-container">
 
-    <!-- HEADER BAR -->
     <div class="erp-header-bar">
         <div class="erp-header-title">Purchase Orders</div>
         <div class="erp-header-actions">
@@ -49,13 +54,15 @@ $queryString = http_build_query($queryParams);
             <a href="javascript:void(0)" onclick="location.reload()" class="btn-erp btn-erp-secondary">
                 🔄 Refresh
             </a>
+            <a href="print_summary.php?<?= http_build_query($_GET) ?>" target="_blank" class="btn-erp" style="background:#16a34a; color:#ffffff; text-decoration:none; font-weight:600; font-size:13px; padding:7px 14px; border-radius:6px; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(22,163,74,0.2); transition:all 0.15s ease;">
+                <span style="font-size:13px;">📄</span> Print A4 Summary
+            </a>
             <a href="javascript:void(0)" onclick="document.getElementById('purchaseFilter').style.display = document.getElementById('purchaseFilter').style.display === 'none' ? 'block' : 'none'" class="btn-erp btn-erp-secondary">
                 🔽 Filter
             </a>
         </div>
     </div>
 
-    <!-- FILTER PANEL -->
     <div id="purchaseFilter" class="erp-filter-panel" style="display:<?= ($search !== '' || $statusFilter !== '') ? 'block' : 'none' ?>;">
         <form method="GET" class="erp-filter-form">
             <div>
@@ -66,10 +73,8 @@ $queryString = http_build_query($queryParams);
                 <label class="erp-label">Status</label>
                 <select name="status" class="erp-select" style="width:160px; border: 1px solid #cbd5e1; border-radius: 6px;">
                     <option value="">-- All --</option>
-                    <option value="New" <?= $statusFilter === 'New' ? 'selected' : '' ?>>New</option>
-                    <option value="Ordered" <?= $statusFilter === 'Ordered' ? 'selected' : '' ?>>Ordered</option>
-                    <option value="Received" <?= $statusFilter === 'Received' ? 'selected' : '' ?>>Received</option>
-                    <option value="Completed" <?= $statusFilter === 'Completed' ? 'selected' : '' ?>>Completed</option>
+                    <option value="Purchased" <?= $statusFilter === 'Purchased' ? 'selected' : '' ?>>Purchased</option>
+                    <option value="Delivered" <?= $statusFilter === 'Delivered' ? 'selected' : '' ?>>Delivered</option>
                 </select>
             </div>
             <div class="erp-filter-actions-group">
@@ -79,7 +84,6 @@ $queryString = http_build_query($queryParams);
         </form>
     </div>
 
-    <!-- MAIN TABLE -->
     <div class="erp-table-box">
         <table class="erp-table">
             <thead>
@@ -89,9 +93,7 @@ $queryString = http_build_query($queryParams);
                     <th>Date</th>
                     <th>Supplier</th>
                     <th>Status</th>
-                    <th>Amount</th>
-                    <th>Paid</th>
-                    <th style="text-align:center; width:100px;">Action</th>
+                    <th style="text-align:center; width:100px; padding-right:24px;">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -99,11 +101,9 @@ $queryString = http_build_query($queryParams);
                 if ($totalRows > 0):
                     $i = $offset + 1;
                     while ($row = mysqli_fetch_assoc($res)):
-                        $st = htmlspecialchars($row['orderStatus'] ?? 'New');
-                        $badgeClass = 'erp-badge-info';
-                        if ($st === 'Completed' || $st === 'Received') $badgeClass = 'erp-badge-completed';
-                        else if ($st === 'Ordered') $badgeClass = 'erp-badge-pending';
-                        else if ($st === 'New') $badgeClass = 'erp-badge-new';
+                        $rawSt = $row['orderStatus'] ?? 'Purchased';
+                        $displayStatus = in_array($rawSt, ['Delivered', 'Received', 'Completed']) ? 'Delivered' : 'Purchased';
+                        $badgeClass = ($displayStatus === 'Delivered') ? 'erp-badge-completed' : 'erp-badge-new';
                 ?>
                 <tr>
                     <td style="font-weight:600; text-align:center;"><?= $i++ ?></td>
@@ -115,20 +115,18 @@ $queryString = http_build_query($queryParams);
                     <td><?= htmlspecialchars($row['orderDate'] ?? '-') ?></td>
                     <td style="font-weight:600;"><?= htmlspecialchars($row['supplierName'] ?? 'N/A') ?></td>
                     <td>
-                        <span class="erp-badge <?= $badgeClass ?>"><?= $st ?></span>
+                        <span class="erp-badge <?= $badgeClass ?>"><?= $displayStatus ?></span>
                     </td>
-                    <td style="font-weight:700;">₹<?= number_format(round((float)$row['actualAmountSum'])) ?></td>
-                    <td style="color:#16a34a; font-weight:700;">₹<?= number_format(round((float)$row['paidAmountSum'])) ?></td>
-                    <td style="text-align:center;">
-                        <a href="edit_purchase.php?id=<?= $row['id'] ?>" class="btn-erp btn-erp-warning btn-erp-sm">
-                            ✏️ Edit
+                    <td style="text-align:center; padding-right:24px;">
+                        <a href="print_purchase.php?id=<?= $row['id'] ?>" target="_blank" style="color:#1e293b; font-weight:600; text-decoration:none; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;">
+                            🖨️ Print
                         </a>
                     </td>
                 </tr>
                 <?php endwhile; ?>
                 <?php else: ?>
                 <tr>
-                    <td colspan="8" style="text-align:center; padding:30px; color:#64748b;">
+                    <td colspan="6" style="text-align:center; padding:30px; color:#64748b;">
                         No purchases found.
                     </td>
                 </tr>
@@ -137,10 +135,9 @@ $queryString = http_build_query($queryParams);
         </table>
     </div>
 
-    <!-- PAGINATION -->
     <div class="erp-pagination">
         <div>
-            <?php 
+            <?php
             $startRecord = $totalRows > 0 ? $offset + 1 : 0;
             $endRecord = min($offset + $limit, $totalRows);
             ?>
@@ -171,3 +168,4 @@ $queryString = http_build_query($queryParams);
 </div>
 
 <?php include("../includes/footer.php"); ?>
+

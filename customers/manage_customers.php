@@ -1,5 +1,4 @@
 <?php
-// manage_customers.php
 require_once("../config/db.php");
 require_once("../includes/auth.php");
 requireAdmin();
@@ -53,7 +52,6 @@ while ($row = $result->fetch_assoc()) { $customers[] = $row; }
 $row_start = $total_records > 0 ? $offset + 1 : 0;
 $row_end   = min($offset + $limit, $total_records);
 
-// Auto-generate next sequential Customer ID
 $last_row = $conn->query("SELECT customerId FROM customer ORDER BY id DESC LIMIT 1")->fetch_assoc();
 $next_num = 1;
 if ($last_row && preg_match('/(\d+)$/', $last_row['customerId'], $m)) {
@@ -67,8 +65,12 @@ $next_customer_id = 'C' . str_pad($next_num, 7, '0', STR_PAD_LEFT);
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manage Customers – SUNDER MACHNES WORLD</title>
+
+  <link rel="icon" type="image/png" href="../img/logo.png">
+  <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
+  <link rel="apple-touch-icon" href="../img/logo.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../includes/local_icons.css?v=1.0">
 <style>
 :root {
   --green:#1a7a4a; --green-d:#145f39; --green-l:#e6f4ed;
@@ -79,7 +81,6 @@ $next_customer_id = 'C' . str_pad($next_num, 7, '0', STR_PAD_LEFT);
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-/* HEADER */
 .page-header{background:var(--green);color:#fff;padding:10px 28px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.18);}
 .page-header h1{font-family:'Space Grotesk',sans-serif;font-size:1.35rem;letter-spacing:.5px;}
 .header-actions{display:flex;gap:10px;}
@@ -93,7 +94,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .btn-grey{background:#e2e8e4;color:var(--text);}
 .btn-grey:hover{background:#cdd7d1;}
 
-/* FILTER */
 .filter-panel{display:none;background:var(--white);border-bottom:1.5px solid var(--border);padding:18px 28px;gap:14px;flex-wrap:wrap;align-items:flex-end;}
 .filter-panel.open{display:flex;}
 .filter-group{display:flex;flex-direction:column;gap:4px;min-width:160px;}
@@ -102,7 +102,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .filter-group input:focus,.filter-group select:focus{outline:none;border-color:var(--green);}
 .filter-actions{display:flex;gap:8px;margin-top:4px;}
 
-/* TABLE */
 .table-wrap{padding:20px 28px; overflow-x: auto; -webkit-overflow-scrolling: touch;}
 table{width:100%; min-width: 1050px; border-collapse:collapse;background:var(--white);border-radius:10px;box-shadow:var(--shadow);table-layout:auto;}
 thead{background:var(--green);color:#fff;}
@@ -127,7 +126,6 @@ tbody td{padding:10px 8px;font-size:.83rem;vertical-align:middle;overflow:hidden
 .badge-active{background:#d1f5e0;color:#176b3a;padding:2px 8px;border-radius:20px;font-size:.72rem;font-weight:700;}
 .badge-inactive{background:#fde8e8;color:var(--red);padding:2px 8px;border-radius:20px;font-size:.72rem;font-weight:700;}
 
-/* ACTION BUTTONS */
 .action-cell{display:flex;gap:4px;align-items:center;justify-content:center;flex-wrap:nowrap;}
 .icon-btn{width:26px;height:26px;min-width:26px;max-width:26px;border-radius:5px;border:none;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;font-size:.73rem;line-height:1;flex-shrink:0;transition:all .15s;}
 .icon-btn.id-card{background:#e9f0ff;color:#3b5bdb;}
@@ -137,35 +135,35 @@ tbody td{padding:10px 8px;font-size:.83rem;vertical-align:middle;overflow:hidden
 .icon-btn.edit{background:var(--green-l);color:var(--green);}
 .icon-btn.edit:hover{background:var(--green);color:#fff;}
 
-/* PAGINATION */
 .pagination-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:var(--white);border-top:1.5px solid var(--border);font-size:.875rem;color:var(--muted);}
 .pag-btns{display:flex;gap:6px;}
 .pag-btn{padding:6px 14px;border-radius:var(--radius);border:1.5px solid var(--border);background:var(--white);color:var(--text);cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:500;transition:all .16s;}
 .pag-btn:hover:not(:disabled){background:var(--green);color:#fff;border-color:var(--green);}
 .pag-btn:disabled{opacity:.4;cursor:not-allowed;}
 
-/* MODALS */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,30,15,.45);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;background:rgba(10,30,15,.55);z-index:10000;align-items:center;justify-content:center;backdrop-filter:blur(3px);padding:20px;box-sizing:border-box;overflow-y:auto;}
 .modal-overlay.open{display:flex;}
-.modal{background:var(--white);border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.22);width:90%;max-width:520px;max-height:92vh;overflow-y:auto;animation:slideUp .22s ease;}
-@keyframes slideUp{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.modal-header{padding:18px 22px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal{background:var(--white);border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.25);width:95%;max-width:560px;max-height:90vh;max-height:90dvh;display:flex;flex-direction:column;overflow:hidden;box-sizing:border-box;animation:slideUp .22s ease;margin:auto;}
+@media (max-width:768px){
+  .modal-overlay{align-items:flex-start;padding:70px 10px calc(24px + env(safe-area-inset-bottom, 16px)) 10px;}
+  .modal{max-height:calc(100dvh - 100px);max-height:calc(100vh - 100px);margin:0 auto;}
+}
+.modal > form{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;overflow:hidden;}
+.modal-header{padding:16px 20px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--white);}
 .modal-header h2{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;color:var(--green);}
 .close-btn{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted);line-height:1;}
 .close-btn:hover{color:var(--red);}
-.modal-body{padding:22px;}
-.modal-footer{padding:16px 22px;border-top:1.5px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+.modal-body{padding:20px 20px 28px 20px;flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;}
+.modal-footer{padding:14px 20px calc(14px + env(safe-area-inset-bottom, 0px)) 20px;border-top:1.5px solid var(--border);display:flex;justify-content:flex-end;gap:10px;flex-shrink:0;background:#ffffff;z-index:10;}
 
-/* FORM */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .form-grid .full{grid-column:1/-1;}
 .form-group{display:flex;flex-direction:column;gap:4px;}
-.form-group label{font-size:.8rem;font-weight:600;color:var(--muted);text-transform:uppercase;}
+.form-group label{font-size:.8rem;font-weight:600;color:var(--muted);text-transform:uppercase;margin-top:2px;}
 .form-group input,.form-group select{border:1.5px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-family:inherit;font-size:.9rem;background:var(--bg);transition:border-color .18s;}
 .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--green);}
 .form-group input[readonly]{background:#eef5f1;color:var(--muted);cursor:not-allowed;}
 
-/* Validation states */
 .form-group input.is-invalid,.form-group select.is-invalid{border-color:var(--red)!important;background:#fff8f8;}
 .form-group input.is-valid{border-color:#1a7a4a!important;}
 .field-error{font-size:.72rem;color:var(--red);min-height:14px;margin-top:1px;}
@@ -178,7 +176,6 @@ tbody td{padding:10px 8px;font-size:.83rem;vertical-align:middle;overflow:hidden
 .toggle input:checked+.toggle-slider{background:var(--green);}
 .toggle input:checked+.toggle-slider::before{transform:translateX(20px);}
 
-/* ID CARD */
 .id-card-container{display:flex;justify-content:center;padding:10px 0 20px;}
 .id-card{width:300px;border-radius:16px;overflow:hidden;box-shadow:0 6px 28px rgba(26,122,74,.25);}
 .id-card-top{background:linear-gradient(135deg,#1a7a4a 60%,#25a86a 100%);color:#fff;text-align:center;padding:20px 16px 14px;}
@@ -196,12 +193,10 @@ tbody td{padding:10px 8px;font-size:.83rem;vertical-align:middle;overflow:hidden
 .id-card-bottom strong{display:block;font-size:.95rem;letter-spacing:.5px;}
 .print-btn-wrap{text-align:center;margin-top:14px;}
 
-/* ADDRESS CARD */
 .addr-card{background:var(--green-l);border-radius:10px;padding:18px 20px;font-size:.9rem;line-height:2.2;}
 .addr-card .row{display:flex;gap:8px;align-items:baseline;}
 .addr-card .lbl{font-weight:700;min-width:90px;color:var(--green);}
 
-/* TOAST */
 .toast{position:fixed;bottom:28px;right:28px;background:var(--green);color:#fff;padding:12px 22px;border-radius:8px;font-weight:600;font-size:.9rem;box-shadow:0 4px 16px rgba(0,0,0,.18);z-index:9999;display:none;}
 .toast.error{background:var(--red);}
 .toast.show{display:block;}
@@ -229,7 +224,6 @@ tbody td{padding:10px 8px;font-size:.83rem;vertical-align:middle;overflow:hidden
     </div>
   </div>
 
-  <!-- FILTER -->
   <form method="GET" action="" id="filterForm">
   <div class="erp-filter-panel filter-panel <?= ($filter_id||$filter_name||$filter_phone||$filter_email||$filter_active!==''||$filter_city||$filter_zip)?'open':'' ?>" id="filterPanel">
   <div class="filter-group">
@@ -271,7 +265,6 @@ tbody td{padding:10px 8px;font-size:.83rem;vertical-align:middle;overflow:hidden
 </div>
 </form>
 
-<!-- TABLE -->
 <div class="table-wrap">
   <table>
     <thead>
@@ -311,7 +304,6 @@ tbody td{padding:10px 8px;font-size:.83rem;vertical-align:middle;overflow:hidden
   </table>
 </div>
 
-<!-- PAGINATION -->
 <div class="pagination-bar">
   <span>Showing <?= $row_start ?> – <?= $row_end ?> of <?= $total_records ?> records.</span>
   <div class="pag-btns">
@@ -322,8 +314,8 @@ tbody td{padding:10px 8px;font-size:.83rem;vertical-align:middle;overflow:hidden
     <button class="pag-btn" <?= $page>=$total_pages?'disabled':'' ?> onclick="location.href='<?= $qsp ?>page=<?= $total_pages ?>'">Last ▶|</button>
   </div>
 </div>
+</div>
 
-<!-- ══ ID CARD MODAL ══ -->
 <div class="modal-overlay" id="idCardModal">
   <div class="modal">
     <div class="modal-header">
@@ -356,7 +348,6 @@ tbody td{padding:10px 8px;font-size:.83rem;vertical-align:middle;overflow:hidden
   </div>
 </div>
 
-<!-- ══ ADDRESS MODAL ══ -->
 <div class="modal-overlay" id="addressModal">
   <div class="modal" style="max-width:420px">
     <div class="modal-header">
@@ -377,7 +368,6 @@ tbody td{padding:10px 8px;font-size:.83rem;vertical-align:middle;overflow:hidden
   </div>
 </div>
 
-<!-- ══ EDIT / NEW CUSTOMER MODAL ══ -->
 <div class="modal-overlay" id="editModal">
   <div class="modal" style="max-width:580px">
     <div class="modal-header">
@@ -390,49 +380,42 @@ tbody td{padding:10px 8px;font-size:.83rem;vertical-align:middle;overflow:hidden
         <input type="hidden" name="address_id" id="edit_address_id">
         <div class="form-grid">
 
-          <!-- Customer ID -->
           <div class="form-group">
             <label>Customer ID <span style="color:var(--red)">*</span></label>
-            <input type="text" name="customerId" id="edit_customerId" placeholder="C0001234" maxlength="20">
+            <input type="text" name="customerId" id="edit_customerId" readonly style="background:#eef5f1; cursor:not-allowed;" maxlength="20">
             <span class="field-error" id="err_customerId"></span>
           </div>
 
-          <!-- Name -->
           <div class="form-group">
             <label>Name <span style="color:var(--red)">*</span></label>
             <input type="text" name="name" id="edit_name" placeholder="Full name" maxlength="100">
             <span class="field-error" id="err_name"></span>
           </div>
 
-          <!-- Phone Primary -->
           <div class="form-group">
             <label>Phone # Primary <span style="color:var(--red)">*</span></label>
             <input type="text" name="phoneNo1" id="edit_phoneNo1" placeholder="10-digit number" maxlength="10">
             <span class="field-error" id="err_phoneNo1"></span>
           </div>
 
-          <!-- Phone Secondary -->
           <div class="form-group">
             <label>Phone # Secondary</label>
             <input type="text" name="phoneNo2" id="edit_phoneNo2" placeholder="10-digit number (optional)" maxlength="10">
             <span class="field-error" id="err_phoneNo2"></span>
           </div>
 
-          <!-- WhatsApp -->
           <div class="form-group">
             <label>WhatsApp #</label>
             <input type="text" name="whatsAppNo" id="edit_whatsAppNo" placeholder="10-digit number (optional)" maxlength="10">
             <span class="field-error" id="err_whatsAppNo"></span>
           </div>
 
-          <!-- Email -->
           <div class="form-group">
             <label>Email ID</label>
             <input type="text" name="emailId" id="edit_emailId" placeholder="email@example.com" maxlength="150">
             <span class="field-error" id="err_emailId"></span>
           </div>
 
-          <!-- Active toggle -->
           <div class="form-group full">
             <label>Active</label>
             <div class="toggle-wrap">
@@ -441,33 +424,28 @@ tbody td{padding:10px 8px;font-size:.83rem;vertical-align:middle;overflow:hidden
             </div>
           </div>
 
-          <!-- Address section -->
           <div class="form-group full" style="border-top:1.5px solid var(--border);padding-top:12px;margin-top:4px">
             <label style="color:var(--green);font-size:.85rem">— Address —</label>
           </div>
 
-          <!-- Line 1 -->
           <div class="form-group full">
             <label>Line 1</label>
             <input type="text" name="line1" id="edit_line1" placeholder="Street / Area" maxlength="200">
             <span class="field-error" id="err_line1"></span>
           </div>
 
-          <!-- Line 2 -->
           <div class="form-group full">
             <label>Line 2</label>
             <input type="text" name="line2" id="edit_line2" placeholder="Landmark / etc." maxlength="200">
             <span class="field-error" id="err_line2"></span>
           </div>
 
-          <!-- City -->
           <div class="form-group">
             <label>City</label>
             <input type="text" name="city" id="edit_city" placeholder="City" maxlength="100">
             <span class="field-error" id="err_city"></span>
           </div>
 
-          <!-- Zip Code -->
           <div class="form-group">
             <label>Zip Code</label>
             <input type="text" name="zipCode" id="edit_zipCode" placeholder="6-digit PIN" maxlength="6">
@@ -491,9 +469,7 @@ var nextCustomerId = <?= json_encode($next_customer_id) ?>;
 </script>
 
 <script>
-/* ═══════════════════════════════════════════
-   HELPERS
-═══════════════════════════════════════════ */
+
 function toggleFilter(){document.getElementById('filterPanel').classList.toggle('open');}
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){
@@ -504,13 +480,6 @@ document.querySelectorAll('.modal-overlay').forEach(function(o){
   o.addEventListener('click',function(e){if(e.target===o){o.classList.remove('open');clearFormErrors();}});
 });
 
-/* ═══════════════════════════════════════════
-   FILTER VALIDATION
-   Rules:
-     phoneNo1  → digits only, exactly 10 if filled
-     zipCode   → digits only, exactly 6 if filled
-     emailId   → basic email format if filled
-═══════════════════════════════════════════ */
 function submitFilter(){
   var ok = true;
 
@@ -547,7 +516,6 @@ function clearFilterError(fieldId){
   el.title = '';
 }
 
-/* Allow only digits in filter phone / zip */
 document.getElementById('f_phoneNo1').addEventListener('input', function(){
   this.value = this.value.replace(/\D/g,'');
 });
@@ -555,19 +523,6 @@ document.getElementById('f_zipCode').addEventListener('input', function(){
   this.value = this.value.replace(/\D/g,'');
 });
 
-/* ═══════════════════════════════════════════
-   FORM VALIDATION — EDIT / NEW MODAL
-   Rules:
-     customerId → required, letters+digits only
-     name       → required, letters/spaces/dots/hyphens only, 2–100 chars
-     phoneNo1   → required, exactly 10 digits
-     phoneNo2   → optional, exactly 10 digits if filled
-     whatsAppNo → optional, exactly 10 digits if filled
-     emailId    → optional, valid email format if filled
-     city       → optional, letters/spaces only if filled
-     zipCode    → optional, exactly 6 digits if filled
-     line1/line2→ optional, no special script chars
-═══════════════════════════════════════════ */
 var RULES = {
   edit_customerId: {
     required: true,
@@ -631,14 +586,12 @@ var RULES = {
   }
 };
 
-/* Restrict phone/whatsapp/zip input to digits only */
 ['edit_phoneNo1','edit_phoneNo2','edit_whatsAppNo','edit_zipCode'].forEach(function(id){
   document.getElementById(id).addEventListener('input', function(){
     this.value = this.value.replace(/\D/g,'');
   });
 });
 
-/* Restrict name / city to letters/spaces */
 ['edit_name','edit_city'].forEach(function(id){
   document.getElementById(id).addEventListener('input', function(){
     this.value = this.value.replace(/[^A-Za-z\s.\-']/g,'');
@@ -687,13 +640,11 @@ function clearFormErrors(){
   });
 }
 
-/* Live validation on blur */
 Object.keys(RULES).forEach(function(id){
   var el = document.getElementById(id);
   if(el){
     el.addEventListener('blur', function(){ validateField(id); });
     el.addEventListener('input', function(){
-      // clear error while typing
       var err = document.getElementById('err_' + id.replace('edit_',''));
       el.classList.remove('is-invalid');
       if(err) err.textContent = '';
@@ -701,7 +652,6 @@ Object.keys(RULES).forEach(function(id){
   }
 });
 
-/* Full form validation on submit */
 function submitEditForm(e){
   e.preventDefault();
   var valid = true;
@@ -709,12 +659,10 @@ function submitEditForm(e){
     if(!validateField(id)) valid = false;
   });
   if(!valid){
-    // scroll to first error
     var first = document.querySelector('#editModal .is-invalid');
     if(first) first.scrollIntoView({behavior:'smooth', block:'center'});
     return false;
   }
-  // Build and POST form data
   var fd = new FormData();
   fd.append('id',          document.getElementById('edit_id').value);
   fd.append('address_id',  document.getElementById('edit_address_id').value);
@@ -742,9 +690,6 @@ function submitEditForm(e){
   return false;
 }
 
-/* ═══════════════════════════════════════════
-   ID CARD
-═══════════════════════════════════════════ */
 function showIdCard(c){
   document.getElementById('ic_name').textContent=(c.name||'').toUpperCase();
   document.getElementById('ic_id').textContent=c.customerId||'—';
@@ -801,9 +746,6 @@ function printIdCard(){
   setTimeout(function(){w.print();w.close();},600);
 }
 
-/* ═══════════════════════════════════════════
-   ADDRESS
-═══════════════════════════════════════════ */
 function showAddress(c){
   document.getElementById('ad_name').textContent=c.name||'—';
   document.getElementById('ad_line1').textContent=c.line1||'—';
@@ -814,18 +756,15 @@ function showAddress(c){
   openModal('addressModal');
 }
 
-/* ═══════════════════════════════════════════
-   EDIT existing
-═══════════════════════════════════════════ */
 function openEdit(c){
   document.getElementById('editModalTitle').innerHTML='<i class="fa fa-pen" style="margin-right:8px"></i>Edit Customer';
   clearFormErrors();
   document.getElementById('edit_id').value=c.id||'';
   document.getElementById('edit_address_id').value=c.address_id||'';
   document.getElementById('edit_customerId').value=c.customerId||'';
-  document.getElementById('edit_customerId').readOnly=false;
-  document.getElementById('edit_customerId').style.background='';
-  document.getElementById('edit_customerId').style.cursor='';
+  document.getElementById('edit_customerId').readOnly=true;
+  document.getElementById('edit_customerId').style.background='#eef5f1';
+  document.getElementById('edit_customerId').style.cursor='not-allowed';
   document.getElementById('edit_name').value=c.name||'';
   document.getElementById('edit_phoneNo1').value=c.phoneNo1||'';
   document.getElementById('edit_phoneNo2').value=c.phoneNo2||'';
@@ -840,9 +779,6 @@ function openEdit(c){
   openModal('editModal');
 }
 
-/* ═══════════════════════════════════════════
-   NEW customer
-═══════════════════════════════════════════ */
 function openNewCustomer(){
   document.getElementById('editModalTitle').innerHTML='<i class="fa fa-plus" style="margin-right:8px"></i>New Customer';
   document.getElementById('editForm').reset();
@@ -866,6 +802,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
 document.getElementById('edit_active').addEventListener('change',function(){
   document.getElementById('activeLabel').textContent=this.checked?'Active':'Inactive';
+});
+</script>
+<script src="customer_phone_check.js?v=<?= time() ?>"></script>
+<script>
+setupCustomerPhoneCheck({
+  input: '#edit_phoneNo1',
+  apiPath: 'api_check_customer_phone.php',
+  getExcludeId: function () {
+    return document.getElementById('edit_id').value;
+  },
+  onUseExisting: function (customer) {
+    openEdit(customer);
+  },
+  onTryAnother: function () {
+    var input = document.getElementById('edit_phoneNo1');
+    input.value = '';
+    var err = document.getElementById('err_phoneNo1');
+    if (err) err.textContent = '';
+    input.classList.remove('is-invalid');
+    input.focus();
+  }
 });
 </script>
 </body>

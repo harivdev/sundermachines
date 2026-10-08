@@ -11,7 +11,14 @@ $currentYY = date('y');
 $currentMM = date('m');
 $currentYearVal = intval(date('Y'));
 
-// Generate Card # in format YYMMJ00001 (e.g. 2608J00001)
+if (!empty($_SESSION['draft_jobcard_no'])) {
+    $curDraft = mysqli_real_escape_string($conn, str_replace(['/', ' '], '', $_SESSION['draft_jobcard_no']));
+    $chkExist = mysqli_query($conn, "SELECT id FROM jobcard WHERE cardNo = '$curDraft' LIMIT 1");
+    if ($chkExist && mysqli_num_rows($chkExist) > 0) {
+        unset($_SESSION['draft_jobcard_no']);
+    }
+}
+
 if (empty($_SESSION['draft_jobcard_no']) || ($_SESSION['draft_jobcard_year'] ?? 0) !== $currentYearVal) {
     $lastSql = "SELECT cardNo FROM jobcard WHERE cardNo IS NOT NULL AND cardNo != '' ORDER BY id DESC LIMIT 100";
     $cardResult = mysqli_query($conn, $lastSql);
@@ -45,16 +52,41 @@ if (empty($_SESSION['draft_jobcard_no']) || ($_SESSION['draft_jobcard_year'] ?? 
 
 $tempCardNo = $_SESSION['draft_jobcard_no'];
 
-// Fetch Machines for dropdown
-$machines = mysqli_query($conn, "SELECT id, machineName FROM machine WHERE active = 1");
+if (empty($_SESSION['jobcard_submit_token'])) {
+    $_SESSION['jobcard_submit_token'] = bin2hex(random_bytes(16));
+}
+$submitToken = $_SESSION['jobcard_submit_token'];
 
-// Fetch Employees / Technicians
-$employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1 ORDER BY name ASC");
+$errorMsg = isset($_GET['error']) ? trim($_GET['error']) : '';
+
+$last_cust = mysqli_fetch_assoc(mysqli_query($conn, "SELECT customerId FROM customer WHERE customerId LIKE 'C%' ORDER BY id DESC LIMIT 1"));
+$next_cust_num = 1;
+if ($last_cust && preg_match('/(\d+)$/', $last_cust['customerId'], $m)) {
+    $next_cust_num = (int)$m[1] + 1;
+}
+$nextCustomerId = 'C' . str_pad($next_cust_num, 7, '0', STR_PAD_LEFT);
+
+$machinesRes = mysqli_query($conn, "SELECT id, machineName FROM machine WHERE active = 1 ORDER BY machineName ASC");
+$machinesList = [];
+if ($machinesRes) {
+    while ($mRow = mysqli_fetch_assoc($machinesRes)) {
+        if (!empty(trim($mRow['machineName'] ?? ''))) {
+            $machinesList[] = $mRow;
+        }
+    }
+}
+
+$empListRes = mysqli_query($conn, "SELECT id, name, role FROM employee WHERE (active = 1 OR active IS NULL) AND name IS NOT NULL AND TRIM(name) != '' ORDER BY name ASC");
+$employeesList = [];
+if ($empListRes) {
+    while ($empRow = mysqli_fetch_assoc($empListRes)) {
+        $employeesList[] = $empRow;
+    }
+}
 ?>
 
 <div class="erp-container">
 
-    <!-- HEADER BAR -->
     <div class="erp-header-bar">
         <div class="erp-header-title">Job Card</div>
         <div class="erp-header-actions">
@@ -64,12 +96,19 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
         </div>
     </div>
 
-    <!-- MAIN CARD -->
+    <div id="jobcardAlertBanner" style="display: <?= !empty($errorMsg) ? 'flex' : 'none' ?>; background: #fee2e2; border: 1px solid #f87171; color: #991b1b; padding: 12px 20px; border-radius: 8px; font-weight: 700; font-size: 14px; margin-bottom: 20px; align-items: center; justify-content: space-between; gap: 10px; box-shadow: 0 1px 4px rgba(239, 68, 68, 0.1);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 18px;">⚠️</span>
+            <span id="jobcardAlertText"><?= htmlspecialchars($errorMsg ?: 'Invalid jobcard: already submitted') ?></span>
+        </div>
+        <button type="button" onclick="document.getElementById('jobcardAlertBanner').style.display='none'" style="background: transparent; border: none; color: #991b1b; font-size: 20px; font-weight: 700; cursor: pointer; line-height: 1;">&times;</button>
+    </div>
+
     <div class="erp-card" style="border-radius: 0 0 12px 12px; border-top: none;">
 
         <form id="jobCardForm" action="insert_jobcard.php" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="submit_token" value="<?= htmlspecialchars($submitToken) ?>">
 
-            <!-- CARD INFO -->
             <div class="erp-form-grid-3" style="margin-bottom: 24px;">
                 <div class="erp-form-group">
                     <label class="erp-label">Card #</label>
@@ -89,58 +128,55 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
                 </div>
             </div>
 
-            <!-- CUSTOMER INFO SECTION -->
             <div class="erp-card" style="margin-bottom: 24px;">
                 <div class="erp-card-header">
                     <span>Customer Info:</span>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button type="button" onclick="openCustomerLookupModal()" class="btn-erp btn-erp-primary btn-erp-sm">
-                            🔍 Search Customer
-                        </button>
-                        <button type="button" onclick="clearCustomer()" class="btn-erp btn-erp-warning btn-erp-sm">
-                            Clear Customer Info
-                        </button>
-                    </div>
                 </div>
 
                 <input type="hidden" name="customerId" id="customerId" value="">
                 <div class="erp-form-grid-3">
                     <div class="erp-form-group">
                         <label class="erp-label">Phone # Primary <span class="req">*</span></label>
-                        <input type="text" name="customerPhone" id="customerPhone" class="erp-input" placeholder="Click or type to search customer..." autocomplete="off" onfocus="openCustomerLookupModal(this.value)" onclick="openCustomerLookupModal(this.value)">
+                        <input type="text" name="customerPhone" id="customerPhone" class="erp-input" placeholder="Click to search customer..." autocomplete="off" onfocus="openCustomerLookupModal()" onclick="openCustomerLookupModal()" readonly style="background: #f1f5f9; cursor: pointer;">
                     </div>
                     <div class="erp-form-group">
                         <label class="erp-label">Name <span class="req">*</span></label>
-                        <input type="text" name="customerName" id="customerName" class="erp-input" placeholder="Customer Name">
+                        <input type="text" name="customerName" id="customerName" class="erp-input" placeholder="Customer Name" readonly style="background: #f1f5f9; cursor: not-allowed; pointer-events: none;">
                     </div>
                     <div class="erp-form-group">
                         <label class="erp-label">City</label>
-                        <input type="text" name="city" id="city" class="erp-input" placeholder="City">
+                        <input type="text" name="city" id="city" class="erp-input" placeholder="City" readonly style="background: #f1f5f9; cursor: not-allowed; pointer-events: none;">
                     </div>
+                </div>
+                
+                <div style="margin-top: 15px; display: flex; justify-content: flex-end;">
+                    <button type="button" onclick="clearCustomer()" class="btn-erp btn-erp-warning btn-erp-sm">
+                        Clear Customer Info
+                    </button>
                 </div>
             </div>
 
-            <div class="erp-form-grid jobcard-2col-grid">
-                <!-- JOB DETAIL SECTION -->
+            <div class="jobcard-item-logo-grid">
+
                 <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px;">
-                    <h4 style="margin-bottom: 25px; color: #334155; font-size: 16px; font-weight: 700;">Job Card Item #: 1</h4>
+                    <h4 style="margin-bottom: 25px; color: #334155; font-size: 16px; font-weight: 700;">Job Card Item</h4>
 
                     <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 25px;">
-                        <!-- Photo Upload & Preview Section -->
-                        <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+
+                        <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; align-items: center;">
                             <div id="photoPreviewContainer" style="display: flex; gap: 10px; flex-wrap: wrap; width: 100%; align-items: center; justify-content: center;">
-                                <div id="noPhotoPlaceholder" style="width: 100%; height: 130px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 12px; font-weight: 600; text-align: center; padding: 10px; box-sizing: border-box;">
+                                <div id="noPhotoPlaceholder" style="max-width: 340px; width: 100%; height: 120px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 12px; font-weight: 600; text-align: center; padding: 10px; box-sizing: border-box; margin: 0 auto;">
                                     <span style="font-size: 28px; margin-bottom: 4px;">🖼️</span>
                                     <span>No Photo</span>
                                 </div>
                             </div>
-                            
-                            <div style="display: flex; gap: 10px; width: 100%; flex-wrap: wrap;">
-                                <button type="button" onclick="openErpCamera(function(dataUrl, file){ if(file){ try { let c = new DataTransfer(); c.items.add(file); const inp = document.getElementById('createCameraInput'); inp.files = c.files; previewPhotos(inp); } catch(e){} } })" style="flex: 1; min-width: 140px; background: #2563eb; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box;">
+
+                            <div class="photo-btn-row" style="display: flex; gap: 10px; width: 100%; max-width: 340px; justify-content: center; align-items: center; margin: 4px auto 0 auto; box-sizing: border-box;">
+                                <button type="button" onclick="openErpCamera(function(dataUrl, file){ if(file){ try { let c = new DataTransfer(); c.items.add(file); const inp = document.getElementById('createCameraInput'); inp.files = c.files; previewPhotos(inp); } catch(e){} } })" style="flex: 1 1 0; max-width: 160px; min-width: 0; background: #2563eb; color: #fff; border: none; padding: 9px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15); transition: all 0.2s; white-space: nowrap; text-align: center;">
                                     📷 Take Photo
                                 </button>
-                                <button type="button" onclick="document.getElementById('createGalleryInput').click()" style="flex: 1; min-width: 140px; background: #475569; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box;">
-                                    📁 Choose From Device
+                                <button type="button" onclick="document.getElementById('createGalleryInput').click()" style="flex: 1 1 0; max-width: 160px; min-width: 0; background: #475569; color: #fff; border: none; padding: 9px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box; box-shadow: 0 2px 4px rgba(71, 85, 105, 0.15); transition: all 0.2s; white-space: nowrap; text-align: center;">
+                                    📁 Choose File
                                 </button>
                             </div>
 
@@ -151,8 +187,35 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
                         <div style="width: 100%; display: flex; flex-direction: column; gap: 15px;">
                             <div class="jobcard-2col-grid">
                                 <div class="form-group">
-                                    <label>Machine <span class="required">*</span></label>
-                                    <input type="text" name="machineName" placeholder="Enter Machine Name" required style="width: 100%; height: 42px; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 0 12px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                        <label style="margin: 0; font-size: 13px; font-weight: 600;">Machine <span class="required">*</span></label>
+                                        <button type="button" id="btnToggleMachineInput" onclick="toggleMachineMode()" style="background: none; border: none; color: #2563eb; font-size: 12px; font-weight: 600; cursor: pointer; padding: 0; display: inline-flex; align-items: center; gap: 4px;">
+                                            <span id="machineToggleIcon">✏️</span> <span id="machineToggleText">+ Type New</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Dropdown to select available machines (like Technician) -->
+                                    <div id="machineSelectBox">
+                                        <select id="machineSelect" name="machineName" required style="width: 100%; height: 42px; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 0 12px; background: #fff; font-size: 14px; color: #1e293b; box-sizing: border-box;" onchange="checkMachineSelect(this)">
+                                            <option value="">-- Select Machine --</option>
+                                            <?php foreach ($machinesList as $m): ?>
+                                                <option value="<?= htmlspecialchars($m['machineName']) ?>">
+                                                    <?= htmlspecialchars($m['machineName']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                            <option value="__NEW__" style="color: #2563eb; font-weight: 700;">+ Enter New Machine Name...</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Text input to type new named machine -->
+                                    <div id="machineTextBox" style="display: none;">
+                                        <input type="text" id="machineTextInput" list="availableMachinesList" placeholder="Enter Machine Name" style="width: 100%; height: 42px; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 0 12px; font-size: 14px; color: #1e293b; box-sizing: border-box;">
+                                    </div>
+                                    <datalist id="availableMachinesList">
+                                        <?php foreach ($machinesList as $m): ?>
+                                            <option value="<?= htmlspecialchars($m['machineName']) ?>">
+                                        <?php endforeach; ?>
+                                    </datalist>
                                 </div>
                                 <div class="form-group">
                                     <label>Serial #</label>
@@ -165,16 +228,30 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
                                   <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end;">
                                       <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600;">Work Details</label>
                                       <select name="workDetails" style="width: 100%; height: 42px; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 0 12px;">
-                                          <option value="Service">Service</option>
-                                          <option value="Repair">Repair</option>
-                                          <option value="Replacement">Replacement</option>
+                                          <option value="Total Checkup">Total Checkup</option>
+                                          <option value="Free Service">Free Service</option>
+                                          <option value="Minor Work">Minor Work</option>
+                                          <option value="Service Full">Service Full</option>
                                       </select>
                                   </div>
                                   <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end;">
-                                       <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600;" title="Technician / Employee Allocated">Technician / Employee</label>
-                                       <input type="text" name="employeeName" placeholder="Enter Technician Name" style="width: 100%; height: 42px; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 0 12px;">
+                                       <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600;" title="Technician / Employee Allocated">Technician</label>
+                                       <select name="employeeName" style="width: 100%; max-width: 100%; height: 42px; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 0 12px; background: #fff; font-size: 14px; color: #1e293b; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; box-sizing: border-box;">
+                                            <option value="">-- Select Technician --</option>
+                                            <?php foreach ($employeesList as $emp): 
+                                                $fullName = trim($emp['name'] ?? '');
+                                                $role = !empty($emp['role']) ? ' (' . trim($emp['role']) . ')' : '';
+                                                $fullLabel = $fullName . $role;
+                                                $maxLen = 25;
+                                                $displayLabel = (mb_strlen($fullLabel) > $maxLen) ? mb_substr($fullLabel, 0, $maxLen - 3) . '...' : $fullLabel;
+                                            ?>
+                                                <option value="<?= htmlspecialchars($fullName) ?>" title="<?= htmlspecialchars($fullLabel) ?>">
+                                                    <?= htmlspecialchars($displayLabel) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
                                    </div>
-                             </div>          
+                             </div>
                         </div>
                     </div>
 
@@ -184,22 +261,20 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
                     </div>
                 </div>
 
-                <!-- RIGHT SIDE (LOGO PLACEHOLDER) -->
-                <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 10px;">
-                    <img src="../img/logo.png" alt="SUNDER MACHNES WORLD" style="max-width: 100%; height: auto; border-radius: 10px; max-height: 280px; object-fit: contain;">
+                <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 25px; box-sizing: border-box;">
+                    <img src="../img/logo.png" alt="SUNDER MACHNES WORLD" style="max-width: 175px; width: 100%; height: auto; max-height: 175px; object-fit: contain; display: block; margin: 0 auto;">
                 </div>
             </div>
 
-            <div style="margin-top: 50px; display: flex; justify-content: flex-end; gap: 15px;">
-                <button type="submit" style="background: #3b82f6; color: white; padding: 12px 35px; border: none; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer;">Submit</button>
-                <button type="reset" style="background: #64748b; color: white; padding: 12px 35px; border: none; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer;">Reset</button>
+            <div class="action-bar" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 15px;">
+                <button type="reset" class="btn-res" style="background: #64748b; color: white; padding: 12px 35px; border: none; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer;">Reset</button>
+                <button type="submit" class="btn-sub" style="background: #3b82f6; color: white; padding: 12px 35px; border: none; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer;">Submit</button>
             </div>
 
         </form>
     </div>
 </div>
 
-<!-- CUSTOMER LOOKUP MODAL -->
 <div id="customerLookupModal" class="modal-overlay">
     <div class="modal-content" style="max-width: 1050px; width: 95%;">
         <div class="modal-header" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
@@ -207,25 +282,25 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
                 <h3 style="margin: 0; color: #0f172a; font-size: 17px; font-weight: 700; white-space: nowrap;">Customer Lookup</h3>
                 <input type="text" id="modalSearchInput" placeholder="search..." autocomplete="off" oninput="triggerModalSearch(this.value)" style="flex: 1; min-width: 150px; max-width: 450px; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 0 12px; font-size: 13px;">
             </div>
-            <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-left: auto;">
                 <button type="button" onclick="openNewCustomerModal()" style="background: #16a34a; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; white-space: nowrap;">
                     + New Customer
                 </button>
-                <button type="button" onclick="closeCustomerLookupModal()" style="background: transparent; border: none; font-size: 24px; color: #64748b; cursor: pointer; line-height: 1;">&times;</button>
+                <button type="button" onclick="closeCustomerLookupModal()" style="background: transparent; border: none; font-size: 14px; font-weight: 700; color: #dc2626; cursor: pointer; padding: 6px 12px; line-height: 1; white-space: nowrap; margin-left: auto;">Close</button>
             </div>
         </div>
-        <div class="modal-body" style="padding: 0; overflow-y: auto; max-height: 65vh;">
-            <table class="cust-table" style="width: 100%; border-collapse: collapse;">
+        <div class="modal-body" style="padding: 0; overflow-y: auto; overflow-x: auto; max-height: 65vh; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; overscroll-behavior-x: contain;">
+            <table class="cust-table" style="width: 100%; border-collapse: collapse; min-width: 760px;">
                 <thead>
                     <tr style="background: #f8fafc; color: #475569; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0;">
-                        <th style="padding: 12px 14px;">Customer ID</th>
-                        <th style="padding: 12px 14px;">Customer Name</th>
-                        <th style="padding: 12px 14px;">Address</th>
-                        <th style="padding: 12px 14px;">Contact Number</th>
-                        <th style="padding: 12px 14px;">WhatsApp Number</th>
-                        <th style="padding: 12px 14px; text-align: center;">Active Status</th>
-                        <th style="padding: 12px 14px; text-align: center; width: 80px;">Choose</th>
-                        <th style="padding: 12px 14px; text-align: center; width: 80px;">Edit</th>
+                        <th style="padding: 12px 14px; white-space: nowrap;">Customer ID</th>
+                        <th style="padding: 12px 14px; white-space: nowrap;">Customer Name</th>
+                        <th style="padding: 12px 14px; white-space: nowrap;">Address</th>
+                        <th style="padding: 12px 14px; white-space: nowrap;">Contact Number</th>
+                        <th style="padding: 12px 14px; white-space: nowrap;">WhatsApp Number</th>
+                        <th style="padding: 12px 14px; text-align: center; white-space: nowrap;">Active Status</th>
+                        <th style="padding: 12px 14px; text-align: center; width: 80px; white-space: nowrap;">Choose</th>
+                        <th style="padding: 12px 14px; text-align: center; width: 80px; white-space: nowrap;">Edit</th>
                     </tr>
                 </thead>
                 <tbody id="modalCustTbody">
@@ -238,7 +313,6 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
     </div>
 </div>
 
-<!-- CUSTOMER EDIT / NEW MODAL -->
 <div id="customerEditModal" class="modal-overlay" style="z-index: 10000; overflow-y: auto;">
     <div class="modal-content" style="max-width: 650px; width: 90%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;">
         <div class="modal-header">
@@ -246,14 +320,14 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
             <button type="button" onclick="closeCustomerEditModal()" style="background: transparent; border: none; font-size: 24px; color: #64748b; cursor: pointer; line-height: 1;">&times;</button>
         </div>
         <form id="customerEditForm" onsubmit="saveCustomerAjax(event)" style="display: flex; flex-direction: column; overflow: hidden; flex: 1; margin: 0;">
-            <div class="modal-body" style="padding: 20px; overflow-y: auto; max-height: calc(85vh - 120px); -webkit-overflow-scrolling: touch; flex: 1; touch-action: pan-y;">
+            <div class="modal-body" style="padding: 20px; overflow-y: auto; max-height: calc(85vh - 120px); -webkit-overflow-scrolling: touch; flex: 1; touch-action: pan-x pan-y;">
                 <input type="hidden" name="id" id="edit_id" value="0">
                 <input type="hidden" name="address_id" id="edit_address_id" value="0">
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                     <div class="form-group">
                         <label style="font-size: 12px;">Customer ID</label>
-                        <input type="text" name="customerId" id="edit_customerId" placeholder="Auto-generated if empty" style="height: 38px;">
+                        <input type="text" name="customerId" id="edit_customerId" readonly style="height: 38px; background: #eef5f1; cursor: not-allowed;">
                     </div>
                     <div class="form-group">
                         <label style="font-size: 12px;">Customer Name <span class="required">*</span></label>
@@ -318,6 +392,19 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
 </div>
 
 <style>
+    .jobcard-item-logo-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.95fr) minmax(0, 1fr);
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 992px) {
+        .jobcard-item-logo-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
     .form-group label {
         display: block;
         font-weight: 700;
@@ -353,7 +440,6 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
-    /* MODAL STYLES */
     .modal-overlay {
         position: fixed;
         top: 0;
@@ -388,6 +474,34 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
         justify-content: space-between;
     }
 
+    .cust-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 760px;
+    }
+
+    .cust-table th {
+        padding: 12px 14px;
+        background: #ffffff;
+        color: #475569;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e2e8f0;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        white-space: nowrap;
+    }
+
+    .cust-table td {
+        padding: 10px 14px;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
     .cust-table tbody tr {
         border-bottom: 1px solid #f1f5f9;
         transition: background 0.15s;
@@ -417,6 +531,47 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
         display: inline-block;
     }
 
+    @media (max-width: 768px) {
+        .modal-overlay {
+            padding: 70px 10px calc(24px + env(safe-area-inset-bottom, 16px)) 10px !important;
+            align-items: flex-start !important;
+            justify-content: center !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            box-sizing: border-box !important;
+        }
+
+        .modal-content {
+            width: 98% !important;
+            max-width: 100% !important;
+            margin: 0 auto !important;
+            border-radius: 12px !important;
+            max-height: calc(100vh - 100px) !important;
+            max-height: calc(100dvh - 100px) !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .modal-body {
+            flex: 1 1 auto !important;
+            overflow-x: auto !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            touch-action: pan-x pan-y !important;
+            overscroll-behavior-x: contain !important;
+        }
+
+        .cust-table {
+            min-width: 760px !important;
+            touch-action: pan-x pan-y !important;
+            width: max-content !important;
+        }
+
+        .cust-table th, .cust-table td {
+            white-space: nowrap !important;
+        }
+    }
+
     @keyframes fadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
@@ -427,6 +582,10 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
     let fetchedCustomers = [];
     let searchDebounceTimer = null;
 
+    function setCustomerFieldsReadOnly(isReadOnly) {
+        // Obsolete, fields are always readonly now.
+    }
+
     function clearCustomer() {
         ['customerId', 'customerPhone', 'customerName', 'city'].forEach(id => {
             const el = document.getElementById(id);
@@ -434,7 +593,6 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
         });
     }
 
-    // Modal Control Functions
     function openCustomerLookupModal(initialValue = '') {
         const modal = document.getElementById('customerLookupModal');
         const input = document.getElementById('modalSearchInput');
@@ -483,19 +641,19 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
                 fetchedCustomers = resData.data;
                 tbody.innerHTML = resData.data.map((c, idx) => `
                     <tr>
-                        <td style="padding: 12px 14px; font-weight: 600; color: #334155; font-size: 13px;">${escapeHtml(c.customerId || 'C-' + c.id)}</td>
-                        <td style="padding: 12px 14px; font-weight: 700; color: #0f172a; font-size: 13.5px;">${escapeHtml(c.name || '-')}</td>
-                        <td style="padding: 12px 14px; color: #475569; font-size: 12.5px;">${escapeHtml(c.fullAddress || '-')}</td>
-                        <td style="padding: 12px 14px; font-weight: 600; color: #2563eb; font-size: 13px;">${escapeHtml(c.phoneNo1 || '-')}</td>
-                        <td style="padding: 12px 14px; color: #475569; font-size: 12.5px;">${escapeHtml(c.whatsAppNo || '-')}</td>
-                        <td style="padding: 12px 14px; text-align: center;">
+                        <td style="padding: 12px 14px; font-weight: 600; color: #334155; font-size: 13px; white-space: nowrap;">${escapeHtml(c.customerId || 'C-' + c.id)}</td>
+                        <td style="padding: 12px 14px; font-weight: 700; color: #0f172a; font-size: 13.5px; white-space: nowrap;">${escapeHtml(c.name || '-')}</td>
+                        <td style="padding: 12px 14px; color: #475569; font-size: 12.5px; white-space: nowrap;">${escapeHtml(c.fullAddress || '-')}</td>
+                        <td style="padding: 12px 14px; font-weight: 600; color: #2563eb; font-size: 13px; white-space: nowrap;">${escapeHtml(c.phoneNo1 || '-')}</td>
+                        <td style="padding: 12px 14px; color: #475569; font-size: 12.5px; white-space: nowrap;">${escapeHtml(c.whatsAppNo || '-')}</td>
+                        <td style="padding: 12px 14px; text-align: center; white-space: nowrap;">
                             <span class="${c.active ? 'badge-active' : 'badge-inactive'}">${c.active ? 'Active' : 'Inactive'}</span>
                         </td>
-                        <td style="padding: 12px 14px; text-align: center;">
-                            <button type="button" onclick="chooseCustomer(${idx})" style="background: #2563eb; color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; transition: 0.15s;">Choose</button>
+                        <td style="padding: 12px 14px; text-align: center; white-space: nowrap;">
+                            <button type="button" onclick="chooseCustomer(${idx})" style="background: #2563eb; color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; transition: 0.15s; white-space: nowrap;">Choose</button>
                         </td>
-                        <td style="padding: 12px 14px; text-align: center;">
-                            <button type="button" onclick="openEditCustomerModal(${idx})" style="background: #f59e0b; color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; transition: 0.15s;">Edit</button>
+                        <td style="padding: 12px 14px; text-align: center; white-space: nowrap;">
+                            <button type="button" onclick="openEditCustomerModal(${idx})" style="background: #f59e0b; color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; transition: 0.15s; white-space: nowrap;">Edit</button>
                         </td>
                     </tr>
                 `).join('');
@@ -513,16 +671,18 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
         document.getElementById('customerPhone').value = c.phoneNo1 || '';
         document.getElementById('customerName').value = c.name || '';
         document.getElementById('city').value = c.city || '';
+        
+        setCustomerFieldsReadOnly(true);
 
         closeCustomerLookupModal();
     }
 
-    // New / Edit Customer Modal
     function openNewCustomerModal(initialPhoneOrName = '') {
         document.getElementById('editModalTitle').textContent = 'New Customer';
         document.getElementById('customerEditForm').reset();
         document.getElementById('edit_id').value = '0';
         document.getElementById('edit_address_id').value = '0';
+        document.getElementById('edit_customerId').value = '<?= $nextCustomerId ?>';
         document.getElementById('edit_active').checked = true;
 
         if (initialPhoneOrName) {
@@ -588,17 +748,16 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
             const savedCust = resData.customer;
             closeCustomerEditModal();
 
-            // Refresh search modal
             const currentSearch = document.getElementById('modalSearchInput').value;
             fetchModalCustomers(currentSearch);
 
-            // If it was a new customer or the current selected customer, auto select into jobcard form!
             const currentFormCustId = document.getElementById('customerId').value;
             if (savedCust && (document.getElementById('edit_id').value === '0' || currentFormCustId == savedCust.id)) {
                 document.getElementById('customerId').value = savedCust.id;
                 document.getElementById('customerPhone').value = savedCust.phoneNo1 || '';
                 document.getElementById('customerName').value = savedCust.name || '';
                 document.getElementById('city').value = savedCust.city || '';
+                setCustomerFieldsReadOnly(true);
                 closeCustomerLookupModal();
             }
         })
@@ -621,14 +780,13 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
         const container = document.getElementById('photoPreviewContainer');
         if (!input.files || input.files.length === 0) return;
 
-        // Clear empty placeholder if present
         const noPhotoDiv = container.querySelector('div');
         if (noPhotoDiv && container.textContent.includes('No Photo')) {
             container.innerHTML = '';
         }
 
         const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const maxFileSize = 10 * 1024 * 1024;
 
         Array.from(input.files).forEach(file => {
             const ext = file.name.split('.').pop().toLowerCase();
@@ -679,8 +837,8 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
                 removeBtn.style.display = 'flex';
                 removeBtn.style.alignItems = 'center';
                 removeBtn.style.justifyContent = 'center';
-                removeBtn.onclick = function() { 
-                    wrapper.remove(); 
+                removeBtn.onclick = function() {
+                    wrapper.remove();
                     if (container.children.length === 0) {
                         container.innerHTML = `
                             <div style="width: 90px; height: 90px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 11px; font-weight: 600; text-align: center; padding: 4px;">
@@ -699,7 +857,6 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
         });
     }
 
-    // DEDICATED CAMERA PHOTO CAPTURE LOGIC FOR JOBCARD
     let jobcardPhotoStream = null;
     let jobcardPhotoRunning = false;
 
@@ -721,7 +878,6 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
         startJobcardPhotoCamera();
     }
 
-    // KEYBOARD FIELD NAVIGATION (ENTER & ARROW KEYS)
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('jobCardForm');
         if (!form) return;
@@ -735,7 +891,6 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
             const index = inputs.indexOf(target);
             if (index === -1) return;
 
-            // Enter Key or Down Arrow -> Move to Next Field
             if (e.key === 'Enter' || e.key === 'ArrowDown') {
                 if (target.tagName === 'SELECT' && e.key === 'ArrowDown') return;
                 e.preventDefault();
@@ -750,7 +905,6 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
                     if (submitBtn) submitBtn.focus();
                 }
             }
-            // Up Arrow -> Move to Previous Field
             else if (e.key === 'ArrowUp') {
                 if (target.tagName === 'SELECT') return;
                 e.preventDefault();
@@ -762,7 +916,6 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
                     }
                 }
             }
-            // Right Arrow -> Move to Next Field (when cursor at end of input string)
             else if (e.key === 'ArrowRight') {
                 if (target.tagName === 'SELECT') return;
                 if (typeof target.selectionEnd === 'number' && target.selectionEnd === target.value.length) {
@@ -776,7 +929,6 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
                     }
                 }
             }
-            // Left Arrow -> Move to Previous Field (when cursor at start of input string)
             else if (e.key === 'ArrowLeft') {
                 if (target.tagName === 'SELECT') return;
                 if (typeof target.selectionStart === 'number' && target.selectionStart === 0) {
@@ -793,6 +945,117 @@ $employees = mysqli_query($conn, "SELECT id, name FROM employee WHERE active = 1
         });
     });
 
+    function toggleMachineMode() {
+        const selectBox = document.getElementById('machineSelectBox');
+        const textBox = document.getElementById('machineTextBox');
+        const selectEl = document.getElementById('machineSelect');
+        const textEl = document.getElementById('machineTextInput');
+        const toggleIcon = document.getElementById('machineToggleIcon');
+        const toggleText = document.getElementById('machineToggleText');
+
+        if (!selectBox || !textBox) return;
+
+        if (selectBox.style.display !== 'none') {
+            // Switch to text input mode
+            selectBox.style.display = 'none';
+            textBox.style.display = 'block';
+            selectEl.removeAttribute('name');
+            selectEl.removeAttribute('required');
+            textEl.setAttribute('name', 'machineName');
+            textEl.setAttribute('required', 'required');
+            if (selectEl.value && selectEl.value !== '__NEW__') {
+                textEl.value = selectEl.value;
+            }
+            if (toggleIcon) toggleIcon.innerText = '📋';
+            if (toggleText) toggleText.innerText = 'Select from List';
+            textEl.focus();
+        } else {
+            // Switch to select dropdown mode
+            textBox.style.display = 'none';
+            selectBox.style.display = 'block';
+            textEl.removeAttribute('name');
+            textEl.removeAttribute('required');
+            selectEl.setAttribute('name', 'machineName');
+            selectEl.setAttribute('required', 'required');
+            if (toggleIcon) toggleIcon.innerText = '✏️';
+            if (toggleText) toggleText.innerText = '+ Type New';
+            selectEl.focus();
+        }
+    }
+
+    function checkMachineSelect(sel) {
+        if (sel.value === '__NEW__') {
+            toggleMachineMode();
+            const textEl = document.getElementById('machineTextInput');
+            if (textEl) {
+                textEl.value = '';
+                textEl.focus();
+            }
+        }
+    }
+
+    let isJobcardSubmitting = false;
+
+    function showJobcardAlert(msg) {
+        const banner = document.getElementById('jobcardAlertBanner');
+        const text = document.getElementById('jobcardAlertText');
+        if (banner && text) {
+            text.innerText = msg;
+            banner.style.display = 'flex';
+            banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        alert(msg);
+    }
+
+    const jcForm = document.getElementById('jobCardForm');
+    if (jcForm) {
+        jcForm.addEventListener('submit', function (e) {
+            if (isJobcardSubmitting) {
+                e.preventDefault();
+                showJobcardAlert('Invalid jobcard: already submitted');
+                return false;
+            }
+
+            if (!jcForm.checkValidity()) {
+                return;
+            }
+
+            isJobcardSubmitting = true;
+            const submitBtn = jcForm.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.7';
+                submitBtn.style.cursor = 'not-allowed';
+                submitBtn.innerText = 'Submitting...';
+            }
+        });
+    }
+
+</script>
+<script src="../customers/customer_phone_check.js?v=<?= time() ?>"></script>
+<script>
+    setupCustomerPhoneCheck({
+        input: '#edit_phoneNo1',
+        apiPath: '../customers/api_check_customer_phone.php',
+        getExcludeId: function () {
+            return document.getElementById('edit_id').value;
+        },
+        onUseExisting: function (c) {
+            closeCustomerEditModal();
+            document.getElementById('customerId').value = c.id || '';
+            document.getElementById('customerPhone').value = c.phoneNo1 || '';
+            document.getElementById('customerName').value = c.name || '';
+            document.getElementById('city').value = c.city || '';
+            closeCustomerLookupModal();
+        },
+        onTryAnother: function () {
+            const input = document.getElementById('edit_phoneNo1');
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+        }
+    });
 </script>
 
 <?php include("../includes/footer.php"); ?>

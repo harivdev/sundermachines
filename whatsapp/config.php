@@ -1,39 +1,22 @@
 <?php
-/**
- * Sanruth ERP — Meta WhatsApp Cloud API Helper & Notification Engine
- * Location: whatsapp/config.php
- * 
- * Supports:
- * - Admin-Only notifications & customer notification readiness
- * - Central payload builder & HTTPS transport
- * - Database logging in `whatsapp_notification_log`
- * - Idempotency & Duplicate Protection
- * - Parameter sanitization (Strips invalid newlines & tabs to prevent Meta Error 132018)
- * - Automatic language fallback (en_US / en)
- * - 5 Event-Specific Wrappers:
- *   1. job_card_created
- *   2. stock_reorder_alert
- *   3. sales_order_created
- *   4. purchase_order_created
- *   5. daily_sales_report
- */
-
+// Sanruth ERP — WhatsApp Cloud API Notification Helper
+// Handles template delivery for Admin & Customers with Permanent System User Token.
 require_once(__DIR__ . '/../config/db.php');
 
 if (!defined('META_PHONE_NUMBER_ID')) {
-    define('META_PHONE_NUMBER_ID', '1299438076594870');
+    define('META_PHONE_NUMBER_ID', getenv('META_PHONE_NUMBER_ID') ?: ($_ENV['META_PHONE_NUMBER_ID'] ?? ''));
 }
 
 if (!defined('META_ACCESS_TOKEN')) {
-    define('META_ACCESS_TOKEN', 'EAAUOp13OCZCkBSWZAHILBBvGeghV7rl9flff3RTK8uKfeMEeLR5Cg8ffn9i6Qg3ec4lPnwwbuspNArZAqT0MuuCO65zLSa2OV0eiakueC5fkyMwoWmUOwx5i3s1XGQw0r2WdGMdtj5VSkiDfMRUxmVQepaaFbwrCJkmyL942HehOrHBZAfCGHaN6gaZCCZAfWk6QZDZD');
+    define('META_ACCESS_TOKEN', getenv('META_ACCESS_TOKEN') ?: ($_ENV['META_ACCESS_TOKEN'] ?? ''));
 }
 
 if (!defined('ADMIN_WHATSAPP_NUMBER')) {
-    define('ADMIN_WHATSAPP_NUMBER', '917418735076');
+    define('ADMIN_WHATSAPP_NUMBER', getenv('ADMIN_WHATSAPP_NUMBER') ?: ($_ENV['ADMIN_WHATSAPP_NUMBER'] ?? ''));
 }
 
 if (!defined('META_API_VERSION')) {
-    define('META_API_VERSION', 'v20.0');
+    define('META_API_VERSION', getenv('META_API_VERSION') ?: ($_ENV['META_API_VERSION'] ?? 'v20.0'));
 }
 
 /**
@@ -44,7 +27,7 @@ function meta_whatsapp_http_post($url, $payload, $accessToken) {
     $response = false;
     $httpCode = 0;
 
-    // 1. Try PHP cURL Extension
+    // 1. Try PHP cURL Extension if available
     if (function_exists('curl_init')) {
         $ch = curl_init($url);
         curl_setopt_array($ch, [
@@ -94,7 +77,9 @@ function meta_whatsapp_http_post($url, $payload, $accessToken) {
                 $code = (int)$m[1];
             }
         }
-        return [$code, $response];
+        if ($code > 0 && !empty($response)) {
+            return [$code, $response];
+        }
     }
 
     // 3. Fallback to Windows System curl.exe
@@ -122,7 +107,6 @@ function meta_whatsapp_http_post($url, $payload, $accessToken) {
 
 /**
  * Master Central WhatsApp Template Sender
- * Performs duplicate suppression, HTTPS transport, and database logging.
  */
 function send_whatsapp_template(
     $templateName,
@@ -132,10 +116,8 @@ function send_whatsapp_template(
     $docId = null,
     $docNumber = null,
     $idempotencyKey = null,
-    $langCode = 'en_US'
+    $langCode = 'en'
 ) {
-    global $conn;
-
     try {
         // 1. Resolve Recipient Phone Number
         $targetPhone = !empty($recipientPhone) ? $recipientPhone : ADMIN_WHATSAPP_NUMBER;
@@ -144,41 +126,23 @@ function send_whatsapp_template(
             $cleanPhone = '91' . $cleanPhone;
         }
 
-        // 2. Resolve Idempotency Key (default to event_code + docId/docNumber + recipient)
-        if (empty($idempotencyKey)) {
-            $idempotencyKey = $eventCode . '_' . ($docId ?? $docNumber ?? date('Ymd')) . '_' . $cleanPhone;
-        }
-
-        // 3. Check for Existing Successful Log Entry (Duplicate Protection)
-        if (isset($conn) && $conn) {
-            $e_idempotency = mysqli_real_escape_string($conn, $idempotencyKey);
-            $checkSql = "SELECT id, status, whatsapp_message_id FROM whatsapp_notification_log WHERE idempotency_key = '$e_idempotency' AND status = 'SENT' LIMIT 1";
-            $res = mysqli_query($conn, $checkSql);
-            if ($res && mysqli_num_rows($res) > 0) {
-                $row = mysqli_fetch_assoc($res);
-                return [
-                    'success'            => true,
-                    'status'             => 'skipped',
-                    'message'            => 'Duplicate notification suppressed',
-                    'whatsapp_message_id' => $row['whatsapp_message_id'] ?? null
-                ];
-            }
-        }
-
-        // 4. Build Meta API Parameters Component & Sanitize Input
+        // 2. Build Meta API Parameters Component & Sanitize Input
         $bodyParams = [];
         foreach ($parameters as $param) {
             $paramStr = (string)($param ?? '');
             if (trim($paramStr) === '') {
-                $paramStr = 'N/A'; // Safe fallback for empty optional parameters
+                $paramStr = 'N/A';
             }
-            // Sanitize parameter text: Meta API forbids newlines (\n) or tabs (\t) in template parameters (Error 132018)
-            $paramStr = str_replace(["\r\n", "\r", "\n", "\t"], [" • ", " ", " • ", " "], $paramStr);
-            $paramStr = preg_replace('/\s+/', ' ', $paramStr); // Collapse multiple spaces
+            $paramStr = preg_replace('/[\r\n\t\x00-\x1F\x7F]+/u', ' ', $paramStr);
+            $paramStr = preg_replace('/\s+/', ' ', $paramStr);
+            $paramStr = trim($paramStr);
+            if ($paramStr === '') {
+                $paramStr = 'N/A';
+            }
 
             $bodyParams[] = [
                 'type' => 'text',
-                'text' => trim($paramStr)
+                'text' => $paramStr
             ];
         }
 
@@ -189,17 +153,20 @@ function send_whatsapp_template(
             'type'              => 'template',
             'template'          => [
                 'name'     => $templateName,
-                'language' => [ 'code' => $langCode ],
-                'components' => [
-                    [
-                        'type'       => 'body',
-                        'parameters' => $bodyParams
-                    ]
-                ]
+                'language' => [ 'code' => $langCode ]
             ]
         ];
 
-        // 5. Send POST to Meta Graph API
+        if (!empty($bodyParams)) {
+            $payload['template']['components'] = [
+                [
+                    'type'       => 'body',
+                    'parameters' => $bodyParams
+                ]
+            ];
+        }
+
+        // 3. Send POST to Meta Graph API
         $phoneId = META_PHONE_NUMBER_ID;
         $accessToken = META_ACCESS_TOKEN;
         $apiVersion = META_API_VERSION;
@@ -207,9 +174,9 @@ function send_whatsapp_template(
 
         list($httpCode, $responseBody) = meta_whatsapp_http_post($url, $payload, $accessToken);
 
-        // Auto-fallback: If Meta returns 132001 for 'en_US', retry with 'en' (or vice-versa)
+        // Auto-fallback: if language code differs (en vs en_US), retry
         if (($httpCode === 404 || $httpCode === 400) && strpos($responseBody, '132001') !== false) {
-            $fallbackLang = ($langCode === 'en_US') ? 'en' : 'en_US';
+            $fallbackLang = ($langCode === 'en') ? 'en_US' : 'en';
             $payload['template']['language']['code'] = $fallbackLang;
             list($retryCode, $retryBody) = meta_whatsapp_http_post($url, $payload, $accessToken);
             if ($retryCode >= 200 && $retryCode < 300) {
@@ -218,7 +185,7 @@ function send_whatsapp_template(
             }
         }
 
-        // 6. Parse Meta API Response
+        // 4. Parse Meta API Response
         $success = false;
         $wamid = null;
         $errorMsg = null;
@@ -237,42 +204,14 @@ function send_whatsapp_template(
             } else {
                 $errorMsg = "HTTP {$httpCode}: " . substr($responseBody, 0, 255);
             }
-        }
-
-        // 7. Write to `whatsapp_notification_log` Table
-        if (isset($conn) && $conn) {
-            $statusStr   = $success ? 'SENT' : 'FAILED';
-            $e_eventCode = mysqli_real_escape_string($conn, $eventCode);
-            $e_docId     = $docId ? (int)$docId : "NULL";
-            $e_docNo     = $docNumber ? "'" . mysqli_real_escape_string($conn, $docNumber) . "'" : "NULL";
-            $e_phone     = mysqli_real_escape_string($conn, $cleanPhone);
-            $e_tpl       = mysqli_real_escape_string($conn, $templateName);
-            $e_params    = mysqli_real_escape_string($conn, json_encode($parameters));
-            $e_wamid     = $wamid ? "'" . mysqli_real_escape_string($conn, $wamid) . "'" : "NULL";
-            $e_error     = $errorMsg ? "'" . mysqli_real_escape_string($conn, $errorMsg) . "'" : "NULL";
-            $e_idem      = mysqli_real_escape_string($conn, $idempotencyKey);
-            $sentAt      = $success ? "NOW()" : "NULL";
-
-            $logSql = "INSERT INTO whatsapp_notification_log 
-                (event_code, document_id, document_number, recipient_phone, template_name, parameters_json, status, whatsapp_message_id, error_message, attempt_count, idempotency_key, created_at, sent_at, last_attempt_at)
-                VALUES
-                ('$e_eventCode', $e_docId, $e_docNo, '$e_phone', '$e_tpl', '$e_params', '$statusStr', $e_wamid, $e_error, 1, '$e_idem', NOW(), $sentAt, NOW())
-                ON DUPLICATE KEY UPDATE 
-                    status = VALUES(status),
-                    whatsapp_message_id = VALUES(whatsapp_message_id),
-                    error_message = VALUES(error_message),
-                    attempt_count = attempt_count + 1,
-                    sent_at = VALUES(sent_at),
-                    last_attempt_at = NOW()";
-
-            @mysqli_query($conn, $logSql);
+            error_log("WhatsApp Notification Failure [$templateName -> $cleanPhone]: $errorMsg");
         }
 
         return [
-            'success'            => $success,
-            'status'             => $success ? 'sent' : 'failed',
+            'success'             => $success,
+            'status'              => $success ? 'sent' : 'failed',
             'whatsapp_message_id' => $wamid,
-            'error'              => $errorMsg
+            'error'               => $errorMsg
         ];
 
     } catch (Exception $e) {
@@ -285,34 +224,8 @@ function send_whatsapp_template(
     }
 }
 
-/* ════════════════════════════════════════════════════════════
-   EVENT-SPECIFIC WRAPPER FUNCTIONS (ADMIN-ONLY NOTIFICATIONS)
-   ════════════════════════════════════════════════════════════ */
-
-/**
- * Helper to try primary event template with language fallback (en_US / en).
- * Direct template delivery only — NO hello_world sample message fallback.
- */
-function send_template_with_fallback($primaryTpl, array $params, $recipient, $eventCode, $docId = null, $docNo = null, $idemKey = null, $primaryLang = 'en_US') {
-    // 1. Attempt Primary Specific Template (e.g. purchase_order_created) with primaryLang
-    $res = send_whatsapp_template($primaryTpl, $params, $recipient, $eventCode, $docId, $docNo, $idemKey, $primaryLang);
-    
-    // 2. If Meta returns 132001 (language code mismatch), retry with alternate language (en vs en_US)
-    if (!$res['success'] && strpos($res['error'] ?? '', '132001') !== false) {
-        $altLang = ($primaryLang === 'en_US') ? 'en' : 'en_US';
-        $altIdem = ($idemKey ?: ($eventCode . '_' . ($docId ?: $docNo))) . '_ALT_LANG';
-        $res = send_whatsapp_template($primaryTpl, $params, $recipient, $eventCode, $docId, $docNo, $altIdem, $altLang);
-    }
-    
-    return $res;
-}
-
-/**
- * 1. JOB CARD CREATED
- * Template: job_card_created
- * Parameters: {{1}} CardNo, {{2}} Customer Name, {{3}} Phone, {{4}} City
- */
-function send_job_card_notification($jobCardNumber, $customerName, $primaryPhone, $city = null, $jobCardId = null) {
+// 1. Job Card Created (Single Recipient)
+function send_job_card_notification($jobCardNumber, $customerName, $primaryPhone, $city = null, $jobCardId = null, $recipientPhone = null) {
     $safeCity = !empty($city) ? $city : 'Not provided';
     $parameters = [
         (string)$jobCardNumber,
@@ -321,143 +234,44 @@ function send_job_card_notification($jobCardNumber, $customerName, $primaryPhone
         (string)$safeCity
     ];
 
-    return send_template_with_fallback(
-        'job_card_created',
+    $target = !empty($recipientPhone) ? $recipientPhone : ADMIN_WHATSAPP_NUMBER;
+
+    return send_whatsapp_template(
+        'job_card_registered',
         $parameters,
-        ADMIN_WHATSAPP_NUMBER,
-        'JOB_CARD_CREATED',
+        $target,
+        'JOB_CARD_REGISTERED',
         $jobCardId,
         $jobCardNumber,
         null,
-        'en_US'
-    );
-}
-
-/**
- * 2. STOCK REORDER REMINDER
- * Template: stock_reorder_alert
- * Parameters: {{1}} Item Name, {{2}} Barcode, {{3}} Current Stock, {{4}} Reorder Level
- */
-function send_stock_reorder_notification($itemName, $barcode, $currentStock, $reorderLevel, $stockId = null) {
-    $parameters = [
-        (string)$itemName,
-        (string)($barcode ?: 'N/A'),
-        (string)$currentStock . ' Pcs',
-        (string)$reorderLevel . ' Pcs'
-    ];
-
-    $idempotencyKey = "STOCK_REORDER_" . ($stockId ?: preg_replace('/[^A-Za-z0-9]/', '', $barcode ?: $itemName)) . "_QTY" . $currentStock;
-
-    return send_template_with_fallback(
-        'stock_reorder_alert',
-        $parameters,
-        ADMIN_WHATSAPP_NUMBER,
-        'STOCK_REORDER',
-        $stockId,
-        $barcode,
-        $idempotencyKey,
-        'en_US'
-    );
-}
-
-/**
- * 3. SALES ORDER CREATED
- * Template: sales_order_created
- * Parameters: {{1}} Order ID, {{2}} Customer Name, {{3}} Phone, {{4}} WhatsApp, {{5}} Total Amount
- */
-function send_sales_order_notification($orderId, $customerName, $primaryPhone, $whatsappNumber, $totalAmount, $salesId = null) {
-    $formattedAmount = number_format((float)$totalAmount, 2, '.', '');
-    $safePhone = !empty($primaryPhone) ? $primaryPhone : 'N/A';
-    $safeWhatsApp = !empty($whatsappNumber) ? $whatsappNumber : $safePhone;
-
-    $parameters = [
-        (string)$orderId,
-        (string)($customerName ?: 'Customer'),
-        (string)$safePhone,
-        (string)$safeWhatsApp,
-        (string)$formattedAmount
-    ];
-
-    return send_template_with_fallback(
-        'sales_order_created',
-        $parameters,
-        ADMIN_WHATSAPP_NUMBER,
-        'SALES_ORDER_CREATED',
-        $salesId,
-        $orderId,
-        null,
-        'en_US'
-    );
-}
-
-/**
- * 4. PURCHASE ORDER CREATED
- * Template: purchase_order_created
- * Parameters: {{1}} Order ID, {{2}} Supplier Name, {{3}} Product Summary, {{4}} Total Amount
- */
-function send_purchase_notification($orderId, $supplierName, $productSummary, $totalAmount, $purchaseId = null) {
-    $formattedAmount = number_format((float)$totalAmount, 2, '.', '');
-    $parameters = [
-        (string)$orderId,
-        (string)($supplierName ?: 'Supplier'),
-        (string)($productSummary ?: 'Purchase Items'),
-        (string)$formattedAmount
-    ];
-
-    return send_template_with_fallback(
-        'purchase_order_created',
-        $parameters,
-        ADMIN_WHATSAPP_NUMBER,
-        'PURCHASE_ORDER_CREATED',
-        $purchaseId,
-        $orderId,
-        null,
-        'en_US'
-    );
-}
-
-/**
- * 5. DAILY SALES REPORT
- * Template: daily_sales_report
- * Parameters: {{1}} Date, {{2}} Orders, {{3}} Total Sales, {{4}} Cost, {{5}} Gross Profit
- */
-function send_daily_sales_report_notification($reportDate, $orderCount, $totalSales, $cost, $grossProfit) {
-    $formattedDate = date('d M Y', strtotime($reportDate));
-    $parameters = [
-        (string)$formattedDate,
-        (string)$orderCount,
-        number_format((float)$totalSales, 2, '.', ''),
-        number_format((float)$cost, 2, '.', ''),
-        number_format((float)$grossProfit, 2, '.', '')
-    ];
-
-    $idempotencyKey = "DAILY_SALES_REPORT_" . date('Y-m-d', strtotime($reportDate)) . "_" . ADMIN_WHATSAPP_NUMBER;
-
-    return send_template_with_fallback(
-        'daily_sales_report',
-        $parameters,
-        ADMIN_WHATSAPP_NUMBER,
-        'DAILY_SALES_REPORT',
-        null,
-        $formattedDate,
-        $idempotencyKey,
         'en'
     );
 }
 
-/**
- * 6. JOB CARD DELIVERED
- * Template: job_card_delivered
- * Parameters:
- * {{1}} Job Card No
- * {{2}} Customer Name
- * {{3}} Phone
- * {{4}} City
- * {{5}} Machine Type
- * {{6}} Serial No
- * {{7}} Total Amount
- * {{8}} Paid Amount
- */
+// 1b. Job Card Created Dual Dispatch (Admin + Customer at the same time)
+function send_job_card_dual_notification($jobCardNumber, $customerName, $primaryPhone, $city = null, $jobCardId = null) {
+    $cleanAdmin = preg_replace('/[^0-9]/', '', ADMIN_WHATSAPP_NUMBER);
+    $cleanCust = preg_replace('/[^0-9]/', '', (string)$primaryPhone);
+    if (strlen($cleanCust) === 10) {
+        $cleanCust = '91' . $cleanCust;
+    }
+
+    // 1. Send to Admin
+    $adminRes = send_job_card_notification($jobCardNumber, $customerName, $primaryPhone, $city, $jobCardId, $cleanAdmin);
+    
+    // 2. Send to Customer (if valid phone provided)
+    $custRes = null;
+    if (!empty($cleanCust) && strlen($cleanCust) >= 10 && $cleanCust !== $cleanAdmin) {
+        $custRes = send_job_card_notification($jobCardNumber, $customerName, $cleanCust, $city, $jobCardId, $cleanCust);
+    }
+
+    return [
+        'admin'    => $adminRes,
+        'customer' => $custRes
+    ];
+}
+
+// 2. Job Card Delivered (Single Recipient)
 function send_job_card_delivered_notification(
     $jobCardNumber,
     $customerName,
@@ -470,11 +284,11 @@ function send_job_card_delivered_notification(
     $jobCardId = null,
     $recipientPhone = null
 ) {
-    $safeCity = !empty($city) ? $city : 'Not provided';
-    $safeMachine = !empty($machineType) ? $machineType : 'N/A';
-    $safeSerial = !empty($serialNo) ? $serialNo : 'N/A';
+    $safeCity       = !empty($city) ? $city : 'Not provided';
+    $safeMachine    = !empty($machineType) ? $machineType : 'N/A';
+    $safeSerial     = !empty($serialNo) ? $serialNo : 'N/A';
     $formattedTotal = number_format((float)$totalAmount, 2, '.', '');
-    $formattedPaid = number_format((float)$paidAmount, 2, '.', '');
+    $formattedPaid  = number_format((float)$paidAmount, 2, '.', '');
 
     $parameters = [
         (string)$jobCardNumber,
@@ -487,38 +301,330 @@ function send_job_card_delivered_notification(
         (string)$formattedPaid
     ];
 
-    $targetPhone = !empty($recipientPhone) ? $recipientPhone : ADMIN_WHATSAPP_NUMBER;
+    $target = !empty($recipientPhone) ? $recipientPhone : ADMIN_WHATSAPP_NUMBER;
 
-    return send_template_with_fallback(
-        'job_card_delivered',
+    return send_whatsapp_template(
+        'jobcard_delivered',
         $parameters,
-        $targetPhone,
+        $target,
         'JOB_CARD_DELIVERED',
         $jobCardId,
         $jobCardNumber,
+        null,
+        'en'
+    );
+}
+
+// 2b. Job Card Delivered Dual Dispatch (Admin + Customer at the same time)
+function send_job_card_delivered_dual_notification(
+    $jobCardNumber,
+    $customerName,
+    $primaryPhone,
+    $city = null,
+    $machineType = null,
+    $serialNo = null,
+    $totalAmount = 0,
+    $paidAmount = 0,
+    $jobCardId = null
+) {
+    $cleanAdmin = preg_replace('/[^0-9]/', '', ADMIN_WHATSAPP_NUMBER);
+    $cleanCust = preg_replace('/[^0-9]/', '', (string)$primaryPhone);
+    if (strlen($cleanCust) === 10) {
+        $cleanCust = '91' . $cleanCust;
+    }
+
+    // 1. Send to Admin
+    $adminRes = send_job_card_delivered_notification(
+        $jobCardNumber,
+        $customerName,
+        $primaryPhone,
+        $city,
+        $machineType,
+        $serialNo,
+        $totalAmount,
+        $paidAmount,
+        $jobCardId,
+        $cleanAdmin
+    );
+
+    // 2. Send to Customer (if valid phone provided)
+    $custRes = null;
+    if (!empty($cleanCust) && strlen($cleanCust) >= 10 && $cleanCust !== $cleanAdmin) {
+        $custRes = send_job_card_delivered_notification(
+            $jobCardNumber,
+            $customerName,
+            $cleanCust,
+            $city,
+            $machineType,
+            $serialNo,
+            $totalAmount,
+            $paidAmount,
+            $jobCardId,
+            $cleanCust
+        );
+    }
+
+    return [
+        'admin'    => $adminRes,
+        'customer' => $custRes
+    ];
+}
+
+// 3. Stock Reorder / Low Stock (Admin Alert)
+function send_stock_reorder_notification($itemName, $barcode, $currentStock, $reorderLevel, $stockId = null) {
+    $parameters = [
+        (string)$itemName,
+        (string)($barcode ?: 'N/A'),
+        (string)$currentStock . ' Pcs',
+        (string)$reorderLevel . ' Pcs'
+    ];
+
+    return send_whatsapp_template(
+        'stock_reorder_alert',
+        $parameters,
+        ADMIN_WHATSAPP_NUMBER,
+        'STOCK_REORDER',
+        $stockId,
+        $barcode,
         null,
         'en_US'
     );
 }
 
+// 4. Sales Order Created (Admin Alert)
+function send_sales_order_notification($orderId, $customerName, $customerPhone, $sparesSummary, $totalAmount, $salesId = null) {
+    $formattedAmount = number_format((float)$totalAmount, 2, '.', '');
+    $safeSpares      = (!empty($sparesSummary) && !is_numeric($sparesSummary)) ? $sparesSummary : 'Purchased Spares';
+    $safePhone       = !empty($customerPhone) ? $customerPhone : 'N/A';
 
-/**
- * Backward compatibility wrapper for generic legacy calls
- */
-function send_erp_whatsapp_notification($eventType, $docNumber, $details, $recipientPhone = null) {
     $parameters = [
-        (string)$eventType,
-        (string)$docNumber,
-        (string)$details
+        (string)$orderId,
+        (string)($customerName ?: 'Customer'),
+        (string)$safePhone,
+        (string)$safeSpares,
+        (string)$formattedAmount
     ];
 
-    return send_whatsapp_template('erp_alerts', $parameters, $recipientPhone, 'GENERIC_ALERT', null, $docNumber, null, 'en');
+    return send_whatsapp_template(
+        'sales_order_created',
+        $parameters,
+        ADMIN_WHATSAPP_NUMBER,
+        'SALES_ORDER_CREATED_ADMIN',
+        $salesId,
+        $orderId,
+        null,
+        'en_US'
+    );
+}
+
+// 5. Purchase Order Created (Admin Alert)
+function send_purchase_notification($orderId, $supplierName, $productSummary, $totalAmount, $purchaseId = null) {
+    $formattedAmount = number_format((float)$totalAmount, 2, '.', '');
+    $parameters = [
+        (string)$orderId,
+        (string)($supplierName ?: 'Supplier'),
+        (string)$productSummary ?: 'Purchase Items',
+        (string)$formattedAmount
+    ];
+
+    return send_whatsapp_template(
+        'purchase_order_created',
+        $parameters,
+        ADMIN_WHATSAPP_NUMBER,
+        'PURCHASE_ORDER_CREATED_ADMIN',
+        $purchaseId,
+        $orderId,
+        null,
+        'en_US'
+    );
+}
+
+// 6. Daily Sales Report (Admin Alert)
+function send_daily_sales_report_notification($reportDate, $orderCount, $totalSales, $cost, $grossProfit) {
+    $formattedDate = date('d M Y', strtotime($reportDate));
+    $parameters = [
+        (string)$formattedDate,
+        (string)$orderCount,
+        number_format((float)$totalSales, 2, '.', ''),
+        number_format((float)$cost, 2, '.', ''),
+        number_format((float)$grossProfit, 2, '.', '')
+    ];
+
+    return send_whatsapp_template(
+        'daily_sales_report',
+        $parameters,
+        ADMIN_WHATSAPP_NUMBER,
+        'DAILY_SALES_REPORT',
+        null,
+        $formattedDate,
+        null,
+        'en'
+    );
 }
 
 /**
- * Pre-approved hello_world template fallback for instant connection check
+ * Build Formatted WhatsApp Message String for Job Card Intake / Registration
  */
-function send_whatsapp_hello_world($recipientPhone = null) {
-    $res = send_whatsapp_template('hello_world', [], $recipientPhone, 'TEST_HELLO_WORLD', null, 'HELLO_WORLD', null, 'en_US');
-    return $res['success'];
+function get_job_card_intake_formatted_message($jobCardNumber, $customerName, $primaryPhone, $city = null, $machineName = null, $serialNo = null, $workDetails = null, $remarks = null, $jobStatus = null) {
+    $cNo = str_replace(['/', ' '], '', $jobCardNumber);
+    $cName = $customerName ?: 'Customer';
+    $phone = $primaryPhone ?: 'N/A';
+    $safeCity = $city ?: 'Not provided';
+    $machine = $machineName ?: 'N/A';
+    $serial = $serialNo ?: 'N/A';
+    $work = $workDetails ?: 'Service';
+    $statusText = $jobStatus ?: 'New (Received for Service)';
+
+    $icBuilding = mb_chr(0x1F3E2, 'UTF-8');
+    $icReceipt  = mb_chr(0x1F9FE, 'UTF-8');
+    $icClip     = mb_chr(0x1F4CB, 'UTF-8');
+    $icId       = mb_chr(0x1F194, 'UTF-8');
+    $icCal      = mb_chr(0x1F4C5, 'UTF-8');
+    $icRefresh  = mb_chr(0x1F504, 'UTF-8');
+    $icUser     = mb_chr(0x1F464, 'UTF-8');
+    $icPhone    = mb_chr(0x1F4DE, 'UTF-8');
+    $icCity     = mb_chr(0x1F3D9, 'UTF-8') . mb_chr(0xFE0F, 'UTF-8');
+    $icGear     = mb_chr(0x2699, 'UTF-8')  . mb_chr(0xFE0F, 'UTF-8');
+    $icNum      = mb_chr(0x1F522, 'UTF-8');
+    $icTools    = mb_chr(0x1F6E0, 'UTF-8') . mb_chr(0xFE0F, 'UTF-8');
+    $icMemo     = mb_chr(0x1F4DD, 'UTF-8');
+    $icPin      = mb_chr(0x1F4CD, 'UTF-8');
+    $icInbox    = mb_chr(0x1F4E5, 'UTF-8');
+    $icWarn     = mb_chr(0x26A0, 'UTF-8')  . mb_chr(0xFE0F, 'UTF-8');
+    $icPray     = mb_chr(0x1F64F, 'UTF-8');
+    $icThread   = mb_chr(0x1F9F6, 'UTF-8');
+    $icNeedle   = mb_chr(0x1FAA1, 'UTF-8');
+
+    $lines = [];
+    $lines[] = "{$icBuilding} *SUNDER MACHNES WORLD*";
+    $lines[] = "{$icClip} *JOB CARD INTAKE RECEIPT*";
+    $lines[] = "─────────────────";
+    $lines[] = "*{$icClip} JOB CARD DETAILS*";
+    $lines[] = "Job Card No: {$cNo}";
+    $lines[] = "Date & Time: " . date('d/m/Y h:i A');
+    $lines[] = "Status: {$statusText}";
+    $lines[] = "";
+    $lines[] = "*{$icUser} CUSTOMER DETAILS*";
+    $lines[] = "Customer Name: {$cName}";
+    $lines[] = "Phone Number: {$phone}";
+    $lines[] = "City / Location: {$safeCity}";
+    $lines[] = "";
+    $lines[] = "*{$icGear} MACHINE & SERVICE DETAILS*";
+    $lines[] = "Machine Model: {$machine}";
+    $lines[] = "Serial No: {$serial}";
+    $lines[] = "Work Details: {$work}";
+    if (!empty($remarks) && $remarks !== '—') {
+        $lines[] = "Remarks: {$remarks}";
+    }
+    $lines[] = "─────────────────";
+    $lines[] = "*{$icPin} IMPORTANT NOTICE*";
+    $lines[] = "Your machine has been received safely for service.";
+    $lines[] = "Goods cannot be claimed without presenting job card receipt.";
+    $lines[] = "─────────────────";
+    $lines[] = "{$icPray} *Thank you for choosing Sunder Machnes World!*";
+    $lines[] = "{$icThread} *Sunder Machines World* {$icNeedle}";
+
+    return implode("\n", $lines);
 }
+
+/**
+ * Build Formatted WhatsApp Message String for Job Card Service Delivery & Bill
+ */
+function get_job_card_delivered_formatted_message(
+    $jobCardNumber,
+    $customerName,
+    $primaryPhone,
+    $city = null,
+    $machineName = null,
+    $serialNo = null,
+    $workDetails = null,
+    array $spares = [],
+    $laborCharge = 0,
+    $grandTotal = 0,
+    $paidAmount = 0,
+    $jobStatus = null
+) {
+    $cNo = str_replace(['/', ' '], '', $jobCardNumber);
+    $cName = $customerName ?: 'Customer';
+    $phone = $primaryPhone ?: 'N/A';
+    $safeCity = $city ?: 'Not provided';
+    $machine = $machineName ?: 'N/A';
+    $serial = $serialNo ?: 'N/A';
+    $work = $workDetails ?: 'Service';
+    $statusText = $jobStatus ?: 'Service Delivered';
+
+    $icBuilding = mb_chr(0x1F3E2, 'UTF-8');
+    $icReceipt  = mb_chr(0x1F9FE, 'UTF-8');
+    $icClip     = mb_chr(0x1F4CB, 'UTF-8');
+    $icId       = mb_chr(0x1F194, 'UTF-8');
+    $icCal      = mb_chr(0x1F4C5, 'UTF-8');
+    $icRefresh  = mb_chr(0x1F504, 'UTF-8');
+    $icUser     = mb_chr(0x1F464, 'UTF-8');
+    $icPhone    = mb_chr(0x1F4DE, 'UTF-8');
+    $icCity     = mb_chr(0x1F3D9, 'UTF-8') . mb_chr(0xFE0F, 'UTF-8');
+    $icGear     = mb_chr(0x2699, 'UTF-8')  . mb_chr(0xFE0F, 'UTF-8');
+    $icNum      = mb_chr(0x1F522, 'UTF-8');
+    $icTools    = mb_chr(0x1F6E0, 'UTF-8') . mb_chr(0xFE0F, 'UTF-8');
+    $icBolt     = mb_chr(0x1F529, 'UTF-8');
+    $icBullet   = mb_chr(0x1F539, 'UTF-8');
+    $icCard     = mb_chr(0x1F4B3, 'UTF-8');
+    $icMoney    = mb_chr(0x1F4B5, 'UTF-8');
+    $icGreen    = mb_chr(0x1F7E2, 'UTF-8');
+    $icPin      = mb_chr(0x1F4CD, 'UTF-8');
+    $icPray     = mb_chr(0x1F64F, 'UTF-8');
+    $icThread   = mb_chr(0x1F9F6, 'UTF-8');
+    $icNeedle   = mb_chr(0x1FAA1, 'UTF-8');
+
+    $lines = [];
+    $lines[] = "{$icBuilding} *SUNDER MACHNES WORLD*";
+    $lines[] = "{$icReceipt} *JOB CARD SERVICE BILL & DELIVERY RECEIPT*";
+    $lines[] = "─────────────────";
+    $lines[] = "*{$icClip} JOB CARD DETAILS*";
+    $lines[] = "Job Card Bill No: {$cNo}";
+    $lines[] = "Date & Time: " . date('d/m/Y h:i A');
+    $lines[] = "Status: {$statusText}";
+    $lines[] = "";
+    $lines[] = "*{$icUser} CUSTOMER DETAILS*";
+    $lines[] = "Customer Name: {$cName}";
+    $lines[] = "Phone Number: {$phone}";
+    $lines[] = "City / Location: {$safeCity}";
+    $lines[] = "";
+    $lines[] = "*{$icGear} MACHINE DETAILS*";
+    $lines[] = "Machine Model: {$machine}";
+    $lines[] = "Serial No: {$serial}";
+    $lines[] = "Work Details: {$work}";
+    $lines[] = "";
+    $lines[] = "*{$icBolt} SPARES & LABOUR CHARGES*";
+
+    if (!empty($spares)) {
+        $idx = 1;
+        foreach ($spares as $sp) {
+            $name = htmlspecialchars_decode($sp['itemName'] ?? 'Spare Item');
+            $qty = (int)($sp['quantity'] ?? 1);
+            $total = (float)($sp['totalPrice'] ?? ($qty * (float)($sp['pricePerQty'] ?? 0)));
+            $lines[] = "{$idx}. {$name} × {$qty} = ₹ " . number_format($total, 2);
+            $idx++;
+        }
+    }
+    if ((float)$laborCharge > 0) {
+        $lines[] = "Labour Charge: ₹ " . number_format((float)$laborCharge, 2);
+    }
+
+    $lines[] = "";
+    $lines[] = "*{$icCard} PAYMENT SUMMARY*";
+    $lines[] = "Grand Total: ₹ " . number_format((float)$grandTotal, 2);
+    $lines[] = "Paid Amount: ₹ " . number_format((float)$paidAmount, 2);
+
+    $balance = max(0, (float)$grandTotal - (float)$paidAmount);
+    if ($balance > 0) {
+        $lines[] = "Balance Due: ₹ " . number_format($balance, 2);
+    }
+    $lines[] = "─────────────────";
+    $lines[] = "{$icPray} *Thank you for your business!*";
+    $lines[] = "{$icThread} *Sunder Machines World* {$icNeedle}";
+
+    return implode("\n", $lines);
+}
+
+
+

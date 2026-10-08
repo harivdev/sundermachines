@@ -10,14 +10,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ADMIN') {
   exit();
 }
 
-// ================= VALIDATE ID =================
 if (!isset($_GET['id']) || empty(trim($_GET['id']))) {
   die("Invalid Access");
 }
 
 $id = mysqli_real_escape_string($conn, trim($_GET['id']));
 
-// ================= FETCH STOCK DATA =================
 $query = "
     SELECT st.*,
            s.spareName, s.partNo, s.rackNumber, s.picture,
@@ -41,7 +39,6 @@ if (!$result || mysqli_num_rows($result) == 0) {
 
 $data = mysqli_fetch_assoc($result);
 
-// ================= UPDATE =================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   $oldQty = intval($data['availableQty'] ?? 0);
@@ -67,14 +64,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $sellingUnit = floatval($_POST['sellingPricePerUnit'] ?? 0);
   $gstPct = floatval($_POST['gstPercentage'] ?? 0);
 
-  // Image upload handling for 'picture' or 'image'
-  $fileObj = isset($_FILES['picture']) ? $_FILES['picture'] : (isset($_FILES['image']) ? $_FILES['image'] : null);
-  if ($fileObj && $fileObj['error'] === UPLOAD_ERR_OK) {
+  $fileObj = null;
+  if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) {
+      $fileObj = $_FILES['picture'];
+  } elseif (isset($_FILES['picture_gallery']) && $_FILES['picture_gallery']['error'] === UPLOAD_ERR_OK) {
+      $fileObj = $_FILES['picture_gallery'];
+  } elseif (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+      $fileObj = $_FILES['image'];
+  }
+  if ($fileObj) {
       $fileTmp = $fileObj['tmp_name'];
       $fileName = $fileObj['name'];
       $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
       $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-      
+
       if (in_array($fileExt, $allowed)) {
           $uploadDir = '../uploads/stock/';
           if (!is_dir($uploadDir)) {
@@ -83,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           $itemCode = !empty($data['partNo']) ? preg_replace('/[^a-zA-Z0-9_-]/', '', $data['partNo']) : ('STK' . $id);
           $relPath = 'uploads/stock/' . $itemCode . '_' . time() . '_1.' . $fileExt;
           $destination = '../' . $relPath;
-          
+
           if (move_uploaded_file($fileTmp, $destination)) {
               $spareIdToUpdate = intval($data['spare']);
               if ($spareIdToUpdate > 0) {
@@ -96,7 +99,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
   }
 
-  // Re-calculate derived fields
   $selledUnit = round($sellingUnit + ($sellingUnit * $gstPct / 100), 4);
   $actualQty = round($actualUnit * $newQty, 4);
   $sellingQty = round($sellingUnit * $newQty, 4);
@@ -132,7 +134,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     die("Prepare failed: " . mysqli_error($conn));
   }
 
-  // 18 params: i i d d d d d d i i s i i s i i i s
   mysqli_stmt_bind_param(
     $stmt,
     "iiddddddiisiisiiis",
@@ -341,39 +342,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     gap: 12px;
   }
 
-  /* ── Spare image ── */
-  .spare-image-box {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    height: 210px;
-    overflow: hidden;
-    background: var(--input-bg);
+  .image-box, .spare-image-box {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+    position: relative;
+    box-sizing: border-box;
   }
 
-  .spare-image-box img {
-    max-width: 100%;
-    max-height: 100%;
+  .image-box img, .spare-image-box img {
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    border-radius: 10px;
   }
 
-  .spare-image-box .no-img {
-    text-align: center;
-    color: #94a3b8;
-  }
-
-  .spare-image-box .no-img .icon {
-    font-size: 40px;
-    margin-bottom: 6px;
-  }
-
-  .spare-image-box .no-img span {
-    font-size: 11px;
-    font-weight: 600;
+  .image-box .placeholder-svg, .spare-image-box .placeholder-svg {
+    width: 70px;
+    height: 70px;
+    fill: #94a3b8;
+    margin: auto;
     display: block;
+  }
+
+  .main-stock-photo-wrap {
+    width: 100%;
+    max-width: 250px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .photo-btn-row {
+    display: flex;
+    gap: 6px;
+    flex-direction: row;
+    margin-top: 6px;
+    width: 100%;
+  }
+
+  .photo-btn-row button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 7px 4px;
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    box-sizing: border-box;
   }
 
   .img-label {
@@ -388,7 +412,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     padding: 4px 8px;
   }
 
-  /* ── Top bar ── */
   .top-bar {
     display: flex;
     justify-content: flex-end;
@@ -446,7 +469,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     transform: translateX(18px);
   }
 
-  /* ── Section divider ── */
   .section-divider {
     font-size: 11px;
     font-weight: 700;
@@ -458,7 +480,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     margin-bottom: 14px;
   }
 
-  /* ── Barcode ── */
   .barcode-field {
     font-family: 'DM Mono', monospace;
     text-align: center;
@@ -475,7 +496,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     text-align: center;
   }
 
-  /* ── Action Buttons ── */
   .action-bar {
     display: flex;
     justify-content: flex-end;
@@ -531,11 +551,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 
   @media (max-width: 768px) {
+    .main-grid {
+      grid-template-columns: 1fr !important;
+      gap: 14px;
+    }
+    .main-stock-photo-wrap {
+      max-width: 250px !important;
+      margin: 0 auto 10px auto !important;
+      text-align: center;
+    }
+    .image-box, .spare-image-box {
+      max-width: 250px !important;
+      height: 190px !important;
+      aspect-ratio: auto !important;
+      margin: 0 auto !important;
+    }
+    .photo-btn-row {
+      max-width: 250px !important;
+      margin: 6px auto 0 auto !important;
+    }
+    .photo-btn-row button {
+      padding: 7px 4px !important;
+      font-size: 11.5px !important;
+      gap: 4px !important;
+      white-space: nowrap !important;
+    }
     .stock-stats-grid {
       grid-template-columns: 1fr 1fr;
     }
     .grid-3 {
       grid-template-columns: 1fr;
+    }
+    .action-bar {
+      display: flex !important;
+      flex-direction: row !important;
+      gap: 8px !important;
+      width: 100% !important;
+    }
+    .action-bar .btn {
+      flex: 1 1 0 !important;
+      width: auto !important;
+      padding: 10px 14px !important;
+      text-align: center !important;
+      justify-content: center !important;
     }
   }
 
@@ -559,7 +617,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <div class="card">
 
-    <!-- Selled toggle -->
     <div class="top-bar">
       <div class="toggle-row">
         <label class="toggle" style="margin:0;">
@@ -571,18 +628,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <form method="POST" id="editForm" enctype="multipart/form-data" onsubmit="return validateEditStockForm(event)">
-      <!-- pass selled value via hidden (checkbox outside form) -->
+
       <input type="hidden" name="selled" id="selledHidden" value="<?= $data['selled'] ? '1' : '0' ?>">
 
       <div class="main-grid">
 
-        <!-- LEFT: Spare Image -->
-        <div>
-          <div class="spare-image-box" style="position: relative; cursor: pointer;" onclick="if(document.getElementById('editSpareImg').src) openStockLightbox(document.getElementById('editSpareImg').src)">
+        <div class="main-stock-photo-wrap">
+          <div class="image-box" id="imageBox" style="position: relative; cursor: pointer;" onclick="if(document.getElementById('editSpareImg').src && document.getElementById('editSpareImg').style.display !== 'none') openStockLightbox(document.getElementById('editSpareImg').src)">
             <?php
             $picPath = '';
             if (!empty($data['picture'])) {
-              // Try common path patterns
               $candidates = [
                 "../uploads/spares/" . $data['picture'],
                 "../uploads/" . $data['picture'],
@@ -597,29 +652,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               }
             }
             ?>
-            <img id="editSpareImg" src="<?= htmlspecialchars($picPath ? $picPath : '') ?>" alt="<?= htmlspecialchars($data['spareName']) ?>" style="max-width:100%; max-height:100%; object-fit:contain; display: <?= $picPath ? 'block' : 'none' ?>;">
-            <div id="noImgBox" class="no-img" style="display: <?= $picPath ? 'none' : 'flex' ?>;">
-              <div class="icon">📦</div>
-              <span>No Image</span>
-            </div>
+            <img id="editSpareImg" src="<?= htmlspecialchars($picPath ? $picPath : '') ?>" alt="<?= htmlspecialchars($data['spareName']) ?>" style="display: <?= $picPath ? 'block' : 'none' ?>;" onerror="this.style.display='none'; document.getElementById('editImgSvg').style.display='block';">
+            <svg id="editImgSvg" class="placeholder-svg" viewBox="0 0 16 16" style="display: <?= $picPath ? 'none' : 'block' ?>;">
+              <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+              <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+            </svg>
           </div>
           <div class="img-label" style="font-weight: 700; margin-top: 6px; text-align: center; color: #1e293b;"><?= htmlspecialchars($data['spareName'] ?? '—') ?></div>
 
-          <!-- Dual Camera & Gallery Photo Upload Buttons for Edit Stock -->
-          <div style="display: flex; gap: 8px; flex-direction: column; margin-top: 12px;">
-            <button type="button" onclick="openErpCamera(function(dataUrl, file){ const img = document.getElementById('editSpareImg'); const noImg = document.getElementById('noImgBox'); if (img) { img.src = dataUrl; img.style.display = 'block'; } if (noImg) noImg.style.display = 'none'; if (file) { try { let c = new DataTransfer(); c.items.add(file); document.getElementById('editStockCamera').files = c.files; } catch(e){} } })" style="background: #2563eb; color: #ffffff; border: none; padding: 9px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              📷 Take Photo (Camera)
+          <div class="photo-btn-row" style="display: flex; gap: 6px; flex-direction: row; margin-top: 6px;">
+            <button type="button" id="btnEditStockCamera" onclick="triggerEditStockCamera()" style="flex: 1 1 0; background: #2563eb; color: #ffffff; border: none; padding: 7px 4px; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+              <span style="font-size: 13px;">📷</span> Take Photo
             </button>
-            <button type="button" onclick="document.getElementById('editStockGallery').click()" style="background: #475569; color: #ffffff; border: none; padding: 9px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              📁 Choose File (System)
+            <button type="button" id="btnEditStockGallery" onclick="triggerEditStockGallery()" style="flex: 1 1 0; background: #475569; color: #ffffff; border: none; padding: 7px 4px; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+              <span style="font-size: 13px;">📁</span> Choose File
             </button>
           </div>
 
           <input type="file" name="picture" id="editStockCamera" accept="image/*" capture="environment" style="display: none;" onchange="previewEditStockImage(this)">
-          <input type="file" name="picture" id="editStockGallery" accept="image/*" style="display: none;" onchange="previewEditStockImage(this)">
+          <input type="file" name="picture_gallery" id="editStockGallery" accept="image/*" style="display: none;" onchange="previewEditStockImage(this)">
         </div>
 
-        <!-- CENTER: Item Data -->
         <div>
 
           <div class="form-group">
@@ -638,7 +691,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
           </div>
 
-          <!-- Brand dropdown (editable) -->
           <div class="grid-2 form-group">
             <div>
               <label>Brand <span style="color:var(--red)">*</span></label>
@@ -688,8 +740,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               placeholder="Optional">
           </div>
 
-          <!-- Reorder / Stocked / Warranty -->
-          <!-- Stock Thresholds -->
           <div class="grid-3 form-group">
             <div>
               <label>Min Qty</label>
@@ -705,7 +755,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
           </div>
 
-          <!-- Stocked / Warranty -->
           <div class="grid-3 form-group">
             <div>
               <label>Stocked Qty</label>
@@ -726,7 +775,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         </div>
 
-        <!-- RIGHT: Pricing -->
         <div>
           <div class="section-divider">Price Per Quantity</div>
 
@@ -767,7 +815,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
           </div>
 
-          <!-- Barcode display -->
           <div class="barcode-box">
             <svg id="barcodeSvg" style="max-width:100%;"></svg>
             <div id="barcodeTextDisplay" style="font-size:11px; color:var(--label); margin-top:4px; font-family:'DM Mono',monospace; font-weight:700;">
@@ -782,10 +829,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
       </div>
 
-      <!-- Action Bar -->
       <div class="action-bar">
-        <button type="submit" class="btn btn-submit">Submit</button>
         <button type="button" class="btn btn-reset" onclick="resetToOriginal()">Reset</button>
+        <button type="submit" class="btn btn-submit">Submit</button>
       </div>
 
     </form>
@@ -801,6 +847,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     selling: <?= floatval($data['sellingPricePerUnit']) ?>,
     gst: <?= floatval($data['gstPercentage'] ?? 0) ?>
   };
+
+  // ── Camera and Gallery Triggers ──
+  function triggerEditStockCamera() {
+    openErpCamera(function(dataUrl, file) {
+      let img = document.getElementById("editSpareImg");
+      let svg = document.getElementById("editImgSvg");
+      if (img) {
+        img.src = dataUrl;
+        img.style.display = "block";
+      }
+      if (svg) svg.style.display = "none";
+
+      if (file) {
+        try {
+          let container = new DataTransfer();
+          container.items.add(file);
+          let fileInput = document.getElementById("editStockCamera");
+          if (fileInput) fileInput.files = container.files;
+        } catch(e) {}
+      }
+    });
+  }
+
+  function triggerEditStockGallery() {
+    let fileInput = document.getElementById("editStockGallery");
+    if (fileInput) {
+      fileInput.click();
+    }
+  }
+
+  // ── Preview uploaded photo ──
+  function previewEditStockImage(input) {
+    if (input.files && input.files[0]) {
+      let reader = new FileReader();
+      reader.onload = function (e) {
+        let img = document.getElementById("editSpareImg");
+        let svg = document.getElementById("editImgSvg");
+        if (img) {
+          img.src = e.target.result;
+          img.style.display = "block";
+        }
+        if (svg) svg.style.display = "none";
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
 
   // ── Selled toggle sync ──
   document.getElementById('selledToggle').addEventListener('change', function () {

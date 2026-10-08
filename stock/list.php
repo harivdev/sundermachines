@@ -10,19 +10,17 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ADMIN') {
     exit();
 }
 
-// ================= PAGINATION =================
-$limit = 10;
+$limit = isset($_GET['limit']) ? max(1, (int)$_GET['limit']) : 50;
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 if ($page < 1)
     $page = 1;
 $offset = ($page - 1) * $limit;
 
-// ================= FILTER =================
 $where = "WHERE 1=1";
 
 if (!empty($_GET['item'])) {
     $item = mysqli_real_escape_string($conn, $_GET['item']);
-    $where .= " AND s.spareName LIKE '%$item%'";
+    $where .= " AND (s.spareName LIKE '%$item%' OR st.itemName LIKE '%$item%')";
 }
 
 if (!empty($_GET['part'])) {
@@ -35,24 +33,60 @@ if (!empty($_GET['barcode'])) {
     $where .= " AND st.barCode LIKE '%$barcode%'";
 }
 
-// ================= COUNT =================
-$countQuery = "SELECT COUNT(*) as total 
-FROM stock st 
-LEFT JOIN spares s ON st.spare=s.id 
+$brandFilter = isset($_GET['brand']) ? trim($_GET['brand']) : '';
+if ($brandFilter !== '') {
+    $safeBrand = mysqli_real_escape_string($conn, $brandFilter);
+    if (ctype_digit($brandFilter)) {
+        $where .= " AND (st.brand = '$safeBrand' OR b.brandName LIKE '%$safeBrand%')";
+    } else {
+        $where .= " AND b.brandName LIKE '%$safeBrand%'";
+    }
+}
+
+$modelFilter = isset($_GET['model']) ? trim($_GET['model']) : '';
+if ($modelFilter !== '') {
+    $safeModel = mysqli_real_escape_string($conn, $modelFilter);
+    if (ctype_digit($modelFilter)) {
+        $where .= " AND (st.model = '$safeModel' OR m.model LIKE '%$safeModel%')";
+    } else {
+        $where .= " AND m.model LIKE '%$safeModel%'";
+    }
+}
+
+$countQuery = "SELECT COUNT(*) as total
+FROM stock st
+LEFT JOIN spares s ON st.spare = s.id
+LEFT JOIN brand b ON st.brand = b.id
+LEFT JOIN model m ON st.model = m.id
 $where";
 
 $countResult = mysqli_query($conn, $countQuery);
 $totalRows = (int)mysqli_fetch_assoc($countResult)['total'];
 $totalPages = $totalRows > 0 ? ceil($totalRows / $limit) : 1;
 
-// ================= DATA =================
+$allBrands = [];
+$bRes = mysqli_query($conn, "SELECT id, brandName FROM brand ORDER BY brandName ASC");
+if ($bRes) {
+    while ($bRow = mysqli_fetch_assoc($bRes)) {
+        $allBrands[] = $bRow;
+    }
+}
+
+$allModels = [];
+$mRes = mysqli_query($conn, "SELECT id, model FROM model ORDER BY model ASC");
+if ($mRes) {
+    while ($mRow = mysqli_fetch_assoc($mRes)) {
+        $allModels[] = $mRow;
+    }
+}
+
 $query = "
-SELECT 
-    st.*, 
-    s.spareName, 
-    s.partNo, 
+SELECT
+    st.*,
+    COALESCE(s.spareName, st.itemName) AS spareName,
+    s.partNo,
     s.rackNumber,
-    b.brandName, 
+    b.brandName,
     m.model as modelName
 FROM stock st
 LEFT JOIN spares s ON st.spare = s.id
@@ -70,7 +104,6 @@ while ($r = mysqli_fetch_assoc($result)) {
     $rows[] = $r;
 }
 
-// ================= QUERY STRING =================
 $queryParams = $_GET;
 unset($queryParams['page']);
 $queryString = http_build_query($queryParams);
@@ -151,6 +184,7 @@ $queryString = http_build_query($queryParams);
 
     .barcode-cell svg {
         max-width: 100px;
+        width: 100px;
         height: 28px;
         display: block;
         margin: 0 auto;
@@ -205,13 +239,178 @@ $queryString = http_build_query($queryParams);
         justify-content: space-between;
         align-items: center;
         font-size: 13.5px;
-        color: #6c757d;
+        color: #64748b;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .pagination-info-group {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .pagination-records {
+        white-space: nowrap;
+    }
+
+    .pagination-sep-desktop {
+        color: #cbd5e1;
+    }
+
+    .pagination-page-size-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        white-space: nowrap;
+    }
+
+    .pagination-page-indicator {
+        font-weight: 500;
+        color: #475569;
+        white-space: nowrap;
+    }
+
+    .pagination-limit-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        white-space: nowrap;
+        color: #475569;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .pagination-limit-label span {
+        white-space: nowrap;
+    }
+
+    .pagination-select {
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        background: #fff;
+        color: #1e293b;
+    }
+
+    .pagination-buttons {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+
+    .pag-nav-btn {
+        padding: 6px 12px;
+        border-radius: 5px;
+        font-size: 13px;
+        text-decoration: none;
+        display: inline-block;
+        white-space: nowrap;
+    }
+    .pag-nav-btn.disabled {
+        background: #e2e8f0;
+        color: #94a3b8;
+        cursor: not-allowed;
+    }
+    .pag-nav-btn.link {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+    .pag-nav-btn.link:hover {
+        background: #cbd5e1;
+    }
+    .pag-nav-btn.active {
+        background: #0d6efd;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+        .pagination {
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 10px !important;
+            width: 100% !important;
+            padding: 10px 4px !important;
+            box-sizing: border-box !important;
+        }
+
+        .pagination-info-group {
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+            gap: 8px !important;
+        }
+
+        .pagination-records {
+            font-size: 12.5px !important;
+            color: #64748b !important;
+            text-align: center !important;
+            white-space: nowrap !important;
+            width: 100% !important;
+        }
+
+        .pagination-sep-desktop {
+            display: none !important;
+        }
+
+        .pagination-page-size-group {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            width: 100% !important;
+            max-width: 330px !important;
+            padding: 0 4px !important;
+            box-sizing: border-box !important;
+            gap: 8px !important;
+        }
+
+        .pagination-page-indicator {
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            color: #334155 !important;
+            white-space: nowrap !important;
+        }
+
+        .pagination-limit-label {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            font-size: 12.5px !important;
+            white-space: nowrap !important;
+            color: #475569 !important;
+            flex-shrink: 0 !important;
+        }
+
+        .pagination-limit-label span {
+            white-space: nowrap !important;
+        }
+
+        .pagination-buttons {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            flex-wrap: wrap !important;
+            gap: 4px !important;
+            width: 100% !important;
+        }
+
+        .pag-nav-btn {
+            padding: 5px 9px !important;
+            font-size: 12px !important;
+        }
     }
 </style>
 
 <div class="erp-container">
 
-    <!-- PAGE HEADER BAR -->
     <div class="erp-header-bar">
         <div class="erp-header-title">Manage Stocks</div>
         <div class="erp-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
@@ -224,8 +423,7 @@ $queryString = http_build_query($queryParams);
         </div>
     </div>
 
-    <!-- FILTER FORM -->
-    <div id="filterDrawer" class="erp-filter-panel" style="display:<?= (!empty($_GET['item']) || !empty($_GET['part']) || !empty($_GET['barcode'])) ? 'block' : 'none' ?>;">
+    <div id="filterDrawer" class="erp-filter-panel" style="display:<?= (!empty($_GET['item']) || !empty($_GET['part']) || !empty($_GET['barcode']) || $brandFilter !== '' || $modelFilter !== '') ? 'block' : 'none' ?>;">
         <form method="GET" class="erp-filter-form">
             <div>
                 <label class="erp-label">Item Name</label>
@@ -239,6 +437,28 @@ $queryString = http_build_query($queryParams);
                 <label class="erp-label">Barcode</label>
                 <input type="text" name="barcode" value="<?= htmlspecialchars($_GET['barcode'] ?? '') ?>" class="erp-input" style="width:140px; border: 1px solid #cbd5e1; border-radius: 6px;">
             </div>
+            <div>
+                <label class="erp-label">Brand</label>
+                <select name="brand" class="erp-input erp-select" style="width:150px; border: 1px solid #cbd5e1; border-radius: 6px; height: 38px; background: #fff;">
+                    <option value="">-- All Brands --</option>
+                    <?php foreach ($allBrands as $b): ?>
+                        <option value="<?= $b['id'] ?>" <?= ($brandFilter === (string)$b['id'] || $brandFilter === $b['brandName']) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($b['brandName']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div>
+                <label class="erp-label">Model</label>
+                <select name="model" class="erp-input erp-select" style="width:160px; border: 1px solid #cbd5e1; border-radius: 6px; height: 38px; background: #fff;">
+                    <option value="">-- All Models --</option>
+                    <?php foreach ($allModels as $m): ?>
+                        <option value="<?= $m['id'] ?>" <?= ($modelFilter === (string)$m['id'] || $modelFilter === $m['model']) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($m['model']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
             <div class="erp-filter-actions-group">
                 <button type="submit" class="btn-erp btn-erp-apply">Apply</button>
                 <a href="list.php" class="btn-erp btn-erp-clear">Clear</a>
@@ -246,7 +466,6 @@ $queryString = http_build_query($queryParams);
         </form>
     </div>
 
-    <!-- TABLE BOX -->
     <div class="erp-table-box">
 
         <table>
@@ -254,7 +473,7 @@ $queryString = http_build_query($queryParams);
                 <tr>
                     <th rowspan="2">#</th>
                     <th rowspan="2">Barcode</th>
-                    <!-- <th rowspan="2">Serial No</th> -->
+
                     <th rowspan="2">Item Name</th>
                     <th rowspan="2">Part #</th>
                     <th rowspan="2">Rack #</th>
@@ -286,7 +505,7 @@ $queryString = http_build_query($queryParams);
 
                             <!-- <td><?= htmlspecialchars($row['serialNo'] ?? '') ?></td> -->
 
-                            <td>
+                            <td style="max-width: 250px; word-break: break-word; white-space: normal;">
                                 <a href="edit_stock.php?id=<?= urlencode($row['id']) ?>" class="item-link">
                                     <?= htmlspecialchars($row['spareName'] ?? '') ?>
                                 </a>
@@ -306,8 +525,8 @@ $queryString = http_build_query($queryParams);
                             <td><?= ($row['selled']) ? 'Yes' : 'No' ?></td>
 
                             <td style="text-align:center;">
-                                <a href="edit_stock.php?id=<?= urlencode($row['id']) ?>" class="edit-btn" title="Edit">
-                                    ✏️
+                                <a href="print_barcode.php?id=<?= urlencode($row['id']) ?>" target="_blank" class="edit-btn" title="Print Barcode">
+                                    🖨️
                                 </a>
                             </td>
                         </tr>
@@ -321,33 +540,54 @@ $queryString = http_build_query($queryParams);
             </tbody>
         </table>
 
-        <!-- PAGINATION -->
         <div class="pagination">
-            <div>
-                <?php 
+            <div class="pagination-info-group">
+                <?php
                 $startRecord = $totalRows > 0 ? $offset + 1 : 0;
                 $endRecord = min($offset + $limit, $totalRows);
                 ?>
-                Showing <?= $startRecord ?>–<?= $endRecord ?> of <?= $totalRows ?> records. &nbsp;|&nbsp; Page <?= $page ?> of <?= $totalPages ?>
+                <span class="pagination-records">Showing <?= $startRecord ?>–<?= $endRecord ?> of <?= $totalRows ?> records.</span>
+                <span class="pagination-sep-desktop">&nbsp;|&nbsp;</span>
+
+                <div class="pagination-page-size-group">
+                    <span class="pagination-page-indicator">Page <?= $page ?> of <?= $totalPages ?></span>
+
+                    <label class="pagination-limit-label">
+                        <span>Items per page:</span>
+                        <?php
+                        $limitParams = $_GET;
+                        unset($limitParams['page']);
+                        unset($limitParams['limit']);
+                        $limitQuery = http_build_query($limitParams);
+                        ?>
+                        <select class="pagination-select" onchange="window.location.href='?<?= $limitQuery ? $limitQuery . '&' : '' ?>limit=' + this.value">
+                            <option value="10" <?= $limit == 10 ? 'selected' : '' ?>>10</option>
+                            <option value="25" <?= $limit == 25 ? 'selected' : '' ?>>25</option>
+                            <option value="50" <?= $limit == 50 ? 'selected' : '' ?>>50</option>
+                            <option value="100" <?= $limit == 100 ? 'selected' : '' ?>>100</option>
+                            <option value="250" <?= $limit == 250 ? 'selected' : '' ?>>250</option>
+                        </select>
+                    </label>
+                </div>
             </div>
 
-            <div style="display:flex; gap:5px; align-items:center;">
+            <div class="pagination-buttons">
                 <?php if ($page <= 1): ?>
-                    <span style="padding:6px 12px; background:#e2e8f0; border-radius:5px; color:#94a3b8; cursor:not-allowed;">First</span>
-                    <span style="padding:6px 12px; background:#e2e8f0; border-radius:5px; color:#94a3b8; cursor:not-allowed;">Previous</span>
+                    <span class="pag-nav-btn disabled">First</span>
+                    <span class="pag-nav-btn disabled">Previous</span>
                 <?php else: ?>
-                    <a href="?<?= $queryString ? $queryString . '&' : '' ?>page=1" style="padding:6px 12px; background:#e2e8f0; border-radius:5px; text-decoration:none; color:#1e293b;">First</a>
-                    <a href="?<?= $queryString ? $queryString . '&' : '' ?>page=<?= $page - 1 ?>" style="padding:6px 12px; background:#e2e8f0; border-radius:5px; text-decoration:none; color:#1e293b;">Previous</a>
+                    <a href="?<?= $queryString ? $queryString . '&' : '' ?>page=1" class="pag-nav-btn link">First</a>
+                    <a href="?<?= $queryString ? $queryString . '&' : '' ?>page=<?= $page - 1 ?>" class="pag-nav-btn link">Previous</a>
                 <?php endif; ?>
 
-                <a style="padding:6px 12px; background:#0d6efd; color:#fff; border-radius:5px; text-decoration:none; font-weight:bold;"><?= $page ?></a>
+                <a class="pag-nav-btn active"><?= $page ?></a>
 
                 <?php if ($page >= $totalPages): ?>
-                    <span style="padding:6px 12px; background:#e2e8f0; border-radius:5px; color:#94a3b8; cursor:not-allowed;">Next</span>
-                    <span style="padding:6px 12px; background:#e2e8f0; border-radius:5px; color:#94a3b8; cursor:not-allowed;">Last</span>
+                    <span class="pag-nav-btn disabled">Next</span>
+                    <span class="pag-nav-btn disabled">Last</span>
                 <?php else: ?>
-                    <a href="?<?= $queryString ? $queryString . '&' : '' ?>page=<?= $page + 1 ?>" style="padding:6px 12px; background:#e2e8f0; border-radius:5px; text-decoration:none; color:#1e293b;">Next</a>
-                    <a href="?<?= $queryString ? $queryString . '&' : '' ?>page=<?= $totalPages ?>" style="padding:6px 12px; background:#e2e8f0; border-radius:5px; text-decoration:none; color:#1e293b;">Last</a>
+                    <a href="?<?= $queryString ? $queryString . '&' : '' ?>page=<?= $page + 1 ?>" class="pag-nav-btn link">Next</a>
+                    <a href="?<?= $queryString ? $queryString . '&' : '' ?>page=<?= $totalPages ?>" class="pag-nav-btn link">Last</a>
                 <?php endif; ?>
             </div>
         </div>
@@ -355,7 +595,6 @@ $queryString = http_build_query($queryParams);
     </div>
 </div>
 
-<!-- BARCODE SCANNER MODAL -->
 <style>
     .barcode-modal-backdrop {
         position: fixed;
@@ -683,7 +922,6 @@ $queryString = http_build_query($queryParams);
     }
 </style>
 
-<!-- PAGE SVG BARCODE RENDERING -->
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -784,7 +1022,7 @@ $queryString = http_build_query($queryParams);
 
         let w = window.open('', '_blank');
         let labelHtml = `<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px; font-family: sans-serif;">`;
-        
+
         items.forEach((item, idx) => {
             if (!item.code) return;
             labelHtml += `

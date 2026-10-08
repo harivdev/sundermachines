@@ -36,19 +36,26 @@ if ($page > $totalPages && $totalPages > 0) {
     $offset = ($page - 1) * $limit;
 }
 
+$chkCol = @mysqli_query($conn, "SHOW COLUMNS FROM jobcard LIKE 'paymentMode'");
+if ($chkCol && mysqli_num_rows($chkCol) === 0) {
+    @mysqli_query($conn, "ALTER TABLE jobcard ADD COLUMN paymentMode VARCHAR(50) DEFAULT 'Cash'");
+}
+@mysqli_query($conn, "UPDATE jobcard SET paymentMode = 'Cash' WHERE paymentMode IS NULL OR paymentMode = ''");
+
 $query = "
-    SELECT 
+    SELECT
         j.id,
         j.cardNo,
         j.jobStatus,
         j.givenDate,
-        j.completed,
+        (j.completed + 0) AS completed,
         j.completedDate,
-        j.delivered,
+        (j.delivered + 0) AS delivered,
         j.deliveryDate,
         j.laborCharge,
         j.actualAmountSum,
         j.receivedAmountSum,
+        j.paymentMode,
         j.modifiedOn,
         c.name AS customerName,
         c.phoneNo1,
@@ -60,7 +67,7 @@ $query = "
     LEFT JOIN jobcarditems ji ON j.id = ji.jobCard
     LEFT JOIN machine m ON ji.machine = m.id
     $where
-    GROUP BY j.id, j.cardNo, j.jobStatus, j.givenDate, j.completed, j.completedDate, j.delivered, j.deliveryDate, j.laborCharge, j.actualAmountSum, j.receivedAmountSum, j.modifiedOn, c.name, c.phoneNo1, emp.name
+    GROUP BY j.id, j.cardNo, j.jobStatus, j.givenDate, j.completed, j.completedDate, j.delivered, j.deliveryDate, j.laborCharge, j.actualAmountSum, j.receivedAmountSum, j.paymentMode, j.modifiedOn, c.name, c.phoneNo1, emp.name
     ORDER BY j.id DESC
     LIMIT $limit OFFSET $offset
 ";
@@ -75,9 +82,21 @@ unset($queryParams['page']);
 $queryString = http_build_query($queryParams);
 ?>
 
-<div class="page-main-container erp-container" style="padding: 20px; background: #f8fafc; min-height: calc(100vh - 110px);">
-    
-    <!-- HEADER BAR -->
+<style>
+    .jobcard-link {
+        color: #0d6efd;
+        text-decoration: underline;
+        font-weight: 700;
+        transition: color 0.15s ease-in-out;
+    }
+    .jobcard-link:hover {
+        color: #0b5ed7;
+        text-decoration: underline;
+    }
+</style>
+
+<div class="page-main-container erp-container" style="padding: 20px; background: #f8fafc;">
+
     <div class="list-header-bar" style="background: #ffffff; display: flex; align-items: center; justify-content: space-between; border-radius: 8px 8px 0 0; padding: 15px 20px; border: 1px solid #e2e8f0; border-bottom: none; flex-wrap: wrap; gap: 10px;">
         <div class="list-header-title" style="color: #1e293b; font-weight: 700; font-size: 20px;">Job Card Bills</div>
         <div class="list-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
@@ -96,7 +115,6 @@ $queryString = http_build_query($queryParams);
         </div>
     </div>
 
-    <!-- FILTER PANEL -->
     <div id="jobcardFilter" style="display:<?= ($search !== '' || $statusFilter !== '') ? 'block' : 'none' ?>; background:#ffffff; padding:15px 20px; border:1px solid #e2e8f0; border-bottom:none;">
         <form method="GET" style="display:flex; gap:15px; align-items:flex-end; flex-wrap:wrap;">
             <div>
@@ -120,9 +138,8 @@ $queryString = http_build_query($queryParams);
         </form>
     </div>
 
-    <!-- MAIN LIST -->
     <div style="background: #fff; border-radius: 0 0 12px 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 0; border: 1px solid #e2e8f0; overflow-x: auto;">
-        
+
         <table style="width: 100%; border-collapse: collapse; text-align: left; min-width: 1350px; white-space: nowrap;">
             <thead>
                 <tr style="background: #f8fafc;">
@@ -133,13 +150,14 @@ $queryString = http_build_query($queryParams);
                     <th rowspan="2" style="padding: 12px 15px; border-bottom: 2px solid #e2e8f0; font-size: 14px; color: #1e293b;">Allocated To</th>
                     <th rowspan="2" style="padding: 12px 15px; border-bottom: 2px solid #e2e8f0; font-size: 14px; color: #1e293b;">Machine</th>
                     <th colspan="2" style="text-align: center; padding: 12px 15px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #1e293b;">Customer</th>
+                    <th rowspan="2" style="text-align: center; padding: 12px 12px; border-bottom: 2px solid #e2e8f0; font-size: 14px; color: #1e293b; background: #f8fafc; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">Mode</th>
                     <th colspan="3" style="text-align: center; padding: 12px 15px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #1e293b;">Date</th>
                     <th colspan="3" style="text-align: center; padding: 12px 15px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #1e293b; background: #dcfce7; border-left: 1px solid #e2e8f0;">Amount</th>
                     <th rowspan="2" style="padding: 12px 15px; border-bottom: 2px solid #e2e8f0; font-size: 14px; color: #1e293b; text-align: center;">Action</th>
                 </tr>
                 <tr style="background: #f8fafc;">
                     <th style="padding: 12px 15px; border-bottom: 2px solid #e2e8f0; font-size: 14px; color: #1e293b; border-right: 1px solid #e2e8f0;">Name</th>
-                    <th style="padding: 12px 15px; border-bottom: 2px solid #e2e8f0; font-size: 14px; color: #1e293b;">Contact #</th>
+                    <th style="padding: 12px 15px; border-bottom: 2px solid #e2e8f0; font-size: 14px; color: #1e293b; border-right: 1px solid #e2e8f0;">Contact #</th>
                     <th style="padding: 12px 15px; border-bottom: 2px solid #e2e8f0; font-size: 14px; color: #1e293b; border-right: 1px solid #e2e8f0;">Given</th>
                     <th style="padding: 12px 15px; border-bottom: 2px solid #e2e8f0; font-size: 14px; color: #1e293b; background: #bfdbfe; border-right: 1px solid #e2e8f0;">Completed</th>
                     <th style="padding: 12px 15px; border-bottom: 2px solid #e2e8f0; font-size: 14px; color: #1e293b; background: #bfdbfe;">Delivered</th>
@@ -149,21 +167,28 @@ $queryString = http_build_query($queryParams);
                 </tr>
             </thead>
             <tbody>
-                <?php 
+                <?php
                 if ($totalRows > 0):
                     $counter = $offset + 1;
-                    while($row = mysqli_fetch_assoc($result)): 
+                    while($row = mysqli_fetch_assoc($result)):
                         $rowBg = ($counter % 2 == 0) ? '#f8fafc' : '#ffffff';
-                        
-                        // Format Card No without slashes or spaces
+
                         $cleanCardNo = str_replace(['/', ' '], '', $row['cardNo'] ?? '');
 
-                        // Format Dates
                         $givenDate = (!empty($row['givenDate']) && $row['givenDate'] !== '0000-00-00') ? htmlspecialchars($row['givenDate']) : '-';
-                        
+
+                        $rawSt = trim($row['jobStatus'] ?? 'New');
+                        $stClean = strtolower($rawSt);
+
+                        $isDelivered = (
+                            strpos($stClean, 'deliver') !== false ||
+                            (!empty($row['delivered']) && ($row['delivered'] == 1 || ord((string)$row['delivered']) === 1)) ||
+                            (!empty($row['deliveryDate']) && $row['deliveryDate'] !== '0000-00-00')
+                        );
+
                         $completedRaw = $row['completedDate'] ?? '';
                         if (empty($completedRaw) || $completedRaw === '0000-00-00') {
-                            if ($row['jobStatus'] === 'Completed' || $row['jobStatus'] === 'Delivered' || (!empty($row['completed']) && $row['completed'] != '0')) {
+                            if (strpos($stClean, 'complete') !== false || $isDelivered || (!empty($row['completed']) && ($row['completed'] == 1 || ord((string)$row['completed']) === 1))) {
                                 $completedRaw = !empty($row['modifiedOn']) ? date('Y-m-d', strtotime($row['modifiedOn'])) : date('Y-m-d');
                             }
                         }
@@ -171,35 +196,32 @@ $queryString = http_build_query($queryParams);
 
                         $deliveredRaw = $row['deliveryDate'] ?? '';
                         if (empty($deliveredRaw) || $deliveredRaw === '0000-00-00') {
-                            if ($row['jobStatus'] === 'Delivered' || (!empty($row['delivered']) && $row['delivered'] != '0')) {
+                            if ($isDelivered) {
                                 $deliveredRaw = !empty($row['modifiedOn']) ? date('Y-m-d', strtotime($row['modifiedOn'])) : date('Y-m-d');
                             }
                         }
                         $delivered = (!empty($deliveredRaw) && $deliveredRaw !== '0000-00-00') ? htmlspecialchars($deliveredRaw) : '-';
-                        
-                        // Format Amounts
+
                         $labor = number_format(round((float)$row['laborCharge']));
                         $billed = number_format(round((float)$row['actualAmountSum']));
                         $paid = number_format(round((float)($row['receivedAmountSum'] ?? 0)));
-                        
-                        // Format Status with Color Scheme
-                        $rawSt = $row['jobStatus'] ?? 'New';
-                        $statusBg = '#e11d48';
+
+                        $statusBg = '#16a34a';
                         $statusDisplay = 'New<br>Job';
 
                         if ($rawSt === 'New' || $rawSt === 'New Job') {
-                            $statusBg = '#e11d48';
+                            $statusBg = '#16a34a'; // green
                             $statusDisplay = 'New<br>Job';
-                        } elseif ($rawSt === 'In Progress' || $rawSt === 'Job Progress') {
-                            $statusBg = '#6b21a8';
+                        } elseif (strpos($stClean, 'progress') !== false) {
+                            $statusBg = '#8b5cf6'; // violet
                             $statusDisplay = 'Job<br>Progress';
-                        } elseif ($rawSt === 'Completed' || $rawSt === 'Job Completed') {
-                            $statusBg = '#00b4d8';
-                            $statusDisplay = 'Job<br>Completed';
-                        } elseif ($rawSt === 'Delivered' || $rawSt === 'Job Delivered') {
-                            $statusBg = '#38a169';
+                        } elseif ($isDelivered) {
+                            $statusBg = '#dc2626'; // red
                             $statusDisplay = 'Job<br>Delivered';
-                        } elseif ($rawSt === 'Cancelled') {
+                        } elseif (strpos($stClean, 'complete') !== false) {
+                            $statusBg = '#eab308'; // yellow
+                            $statusDisplay = 'Job<br>Completed';
+                        } elseif (strpos($stClean, 'cancel') !== false) {
                             $statusBg = '#64748b';
                             $statusDisplay = 'Cancelled';
                         } else {
@@ -209,8 +231,10 @@ $queryString = http_build_query($queryParams);
                 <tr style="background: <?= $rowBg ?>; border-bottom: 1px solid #e2e8f0; transition: 0.2s;">
                     <td style="padding: 12px 15px; font-size: 14px; color: #334155;"><?= $counter++ ?></td>
                     <td style="padding: 12px 15px; font-size: 14px; color: #334155;">Offsite</td>
-                    <td style="padding: 12px 15px; font-size: 14px;">
-                        <a href="edit.php?id=<?= $row['id'] ?>" style="color: #2563eb; text-decoration: underline; font-weight: 700;"><?= htmlspecialchars($cleanCardNo) ?></a>
+                    <td style="padding: 12px 15px; font-size: 14px; font-weight: 700;">
+                        <a href="edit.php?id=<?= urlencode($row['id']) ?>" class="jobcard-link" title="Click to edit job card">
+                            <?= htmlspecialchars($cleanCardNo) ?>
+                        </a>
                     </td>
                     <td style="padding: 0; font-size: 13.5px; text-align: center; vertical-align: middle;">
                         <div style="background: <?= $statusBg ?>; color: #ffffff; padding: 10px 6px; height: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; font-weight: 700; line-height: 1.2; box-sizing: border-box;">
@@ -220,41 +244,64 @@ $queryString = http_build_query($queryParams);
                     <td style="padding: 12px 15px; font-size: 14px; color: #334155; font-weight: 600;"><?= htmlspecialchars($row['allocatedTo'] ?? '-') ?></td>
                     <td style="padding: 12px 15px; font-size: 14px; color: #334155;"><?= htmlspecialchars($row['machineName'] ?? '-') ?></td>
                     <td style="padding: 12px 15px; font-size: 14px; color: #334155; border-right: 1px solid #e2e8f0;"><?= htmlspecialchars($row['customerName'] ?? '-') ?></td>
-                    <td style="padding: 12px 15px; font-size: 14px; color: #334155;"><?= htmlspecialchars($row['phoneNo1'] ?? '-') ?></td>
+                    <td style="padding: 12px 15px; font-size: 14px; color: #334155; border-right: 1px solid #e2e8f0;"><?= htmlspecialchars($row['phoneNo1'] ?? '-') ?></td>
+                    <td style="padding: 12px 15px; font-size: 13.5px; text-align: center; border-right: 1px solid #e2e8f0; font-weight: 700; color: #1e293b;">
+                        <?php
+                        $curMode = trim($row['paymentMode'] ?? '');
+                        if (empty($curMode)) {
+                            $curMode = ((float)($row['receivedAmountSum'] ?? 0) > 0 || $isDelivered) ? 'Cash' : '';
+                        }
+
+                        $modeDisplay = $curMode;
+                        if (strcasecmp($curMode, 'NetBanking') === 0 || strcasecmp($curMode, 'Net Banking') === 0 || strcasecmp($curMode, 'NB') === 0) {
+                            $modeDisplay = 'Net Banking';
+                        } elseif (strcasecmp($curMode, 'UPI') === 0) {
+                            $modeDisplay = 'UPI';
+                        } elseif (strcasecmp($curMode, 'Cash') === 0) {
+                            $modeDisplay = 'Cash';
+                        } elseif (strcasecmp($curMode, 'Card') === 0) {
+                            $modeDisplay = 'Card';
+                        } elseif (strcasecmp($curMode, 'Cheque') === 0) {
+                            $modeDisplay = 'Cheque';
+                        }
+
+                        if (!empty($modeDisplay) && ((float)($row['receivedAmountSum'] ?? 0) > 0 || $isDelivered)):
+                        ?>
+                            <?= htmlspecialchars($modeDisplay) ?>
+                        <?php else: ?>
+                            <span style="color: #94a3b8; font-weight: 600;">—</span>
+                        <?php endif; ?>
+                    </td>
                     <td style="padding: 12px 15px; font-size: 14px; color: #334155; border-right: 1px solid #e2e8f0;"><?= $givenDate ?></td>
                     <td style="padding: 12px 15px; font-size: 14px; color: #334155; background: #bfdbfe; border-right: 1px solid #e2e8f0;"><?= $completed ?></td>
                     <td style="padding: 12px 15px; font-size: 14px; color: #334155; background: #bfdbfe;"><?= $delivered ?></td>
                     <td style="padding: 12px 15px; font-size: 14px; color: #334155; background: #dcfce7; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;"><?= $labor ?></td>
                     <td style="padding: 12px 15px; font-size: 14px; color: #334155; background: #dcfce7; border-right: 1px solid #e2e8f0;"><?= $billed ?></td>
                     <td style="padding: 12px 15px; font-size: 14px; color: #166534; background: #bbf7d0; font-weight: 700;"><?= $paid ?></td>
-                    <td style="padding: 12px 15px; text-align: center; white-space: nowrap;">
-                        <a href="edit.php?id=<?= $row['id'] ?>" class="btn btn-warning btn-sm" style="background: #f59e0b; color: #ffffff; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; text-decoration: none; font-size: 12px; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                            <i class="fa fa-edit"></i> Edit
-                        </a>
+                    <td style="padding: 12px 15px; text-align: center; white-space: nowrap; display: flex; gap: 6px; justify-content: center;">
                         <a href="print_receipt.php?id=<?= $row['id'] ?>" target="_blank" class="btn btn-info btn-sm" style="background: #2563eb; color: #ffffff; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; text-decoration: none; font-size: 12px; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             <i class="fa fa-print"></i> Print
                         </a>
                     </td>
                 </tr>
                 <?php endwhile; ?>
-                
+
                 <?php else: ?>
                 <tr>
-                    <td colspan="14" style="padding: 30px; text-align: center; color: #64748b; font-size: 15px;">
+                    <td colspan="15" style="padding: 30px; text-align: center; color: #64748b; font-size: 15px;">
                         No Job Cards Found.
                     </td>
                 </tr>
                 <?php endif; ?>
-                
+
             </tbody>
         </table>
-        
+
     </div>
 
-    <!-- PAGINATION -->
     <div class="list-pagination-bar" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; font-size:14px; color:#64748b; flex-wrap:wrap; gap:10px;">
         <div class="pagination-info">
-            <?php 
+            <?php
             $startRecord = $totalRows > 0 ? $offset + 1 : 0;
             $endRecord = min($offset + $limit, $totalRows);
             ?>
@@ -290,4 +337,38 @@ $queryString = http_build_query($queryParams);
     }
 </style>
 
+<script>
+function updateJobcardPayMode(jobcardId, mode, selectEl) {
+    selectEl.disabled = true;
+    var prevBg = selectEl.style.backgroundColor;
+
+    fetch('api_update_payment_mode.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobcardId: jobcardId, mode: mode })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        selectEl.disabled = false;
+        if (data.success) {
+            selectEl.style.borderColor = '#16a34a';
+            selectEl.style.backgroundColor = '#dcfce7';
+            setTimeout(function() {
+                selectEl.style.borderColor = '#cbd5e1';
+                selectEl.style.backgroundColor = '#ffffff';
+            }, 1000);
+        } else {
+            alert('Failed to update payment mode: ' + (data.error || 'Unknown error'));
+            selectEl.style.borderColor = '#ef4444';
+        }
+    })
+    .catch(function(err) {
+        selectEl.disabled = false;
+        selectEl.style.borderColor = '#ef4444';
+        alert('Network error while updating payment mode.');
+    });
+}
+</script>
+
 <?php include("../includes/footer.php"); ?>
+

@@ -1,5 +1,4 @@
 <?php
-// manage_users.php
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
@@ -29,7 +28,9 @@ function ensureUserProfileColumns($conn_login)
     'dob' => 'DATE NULL',
     'address' => 'TEXT NULL',
     'gender' => 'VARCHAR(50) NULL',
-    'photo' => 'VARCHAR(255) NULL'
+    'photo' => 'VARCHAR(255) NULL',
+    'role' => "VARCHAR(255) DEFAULT 'ADMIN'",
+    'createdOn' => 'DATETIME DEFAULT CURRENT_TIMESTAMP'
   ];
 
   foreach ($definitions as $column => $definition) {
@@ -48,12 +49,13 @@ $offset = ($page - 1) * $limit;
 $filter_username = isset($_GET['username']) ? trim($_GET['username']) : '';
 $f_username = $conn_login->real_escape_string($filter_username);
 
-$where = "WHERE 1=1";
+$where = "UPPER(role) = 'ADMIN'";
 if ($f_username !== '') {
-  $where .= " AND username LIKE '%$f_username%'";
+  $where .= " AND (username LIKE '%$f_username%' OR name LIKE '%$f_username%')";
 }
 
-$count_res = $conn_login->query("SELECT COUNT(*) AS total FROM user $where");
+// We only fetch from the dedicated `user` table to avoid conflicts
+$count_res = $conn_login->query("SELECT COUNT(*) AS total FROM user WHERE $where");
 $total_records = $count_res ? (int)$count_res->fetch_assoc()['total'] : 0;
 $total_pages = $total_records > 0 ? ceil($total_records / $limit) : 1;
 if ($page > $total_pages && $total_pages > 0) {
@@ -61,13 +63,18 @@ if ($page > $total_pages && $total_pages > 0) {
   $offset = ($page - 1) * $limit;
 }
 
-$sql = "SELECT id, name, username, phone_number, phone_number_2, email, dob, address, gender, photo, role, createdOn FROM user $where ORDER BY id ASC LIMIT $limit OFFSET $offset";
+$sql = "SELECT id, name, username, phone_number, phone_number_2, email, dob, address, gender, photo, role, createdOn, 'user' as source FROM user WHERE $where ORDER BY createdOn DESC LIMIT $limit OFFSET $offset";
 $result = $conn_login->query($sql);
 $users = [];
 if ($result) {
   while ($row = $result->fetch_assoc()) {
     $users[] = $row;
   }
+} else {
+    // This will print exactly why the query is failing on your live DB!
+    echo "<div style='background: #fee2e2; color: #dc2626; padding: 15px; margin: 20px; border-radius: 8px; font-weight: bold;'>";
+    echo "SQL Database Error: " . htmlspecialchars($conn_login->error);
+    echo "</div>";
 }
 
 $queryParams = $_GET;
@@ -81,10 +88,14 @@ $queryString = http_build_query($queryParams);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manage Users – SUNDER MACHNES WORLD</title>
+
+  <link rel="icon" type="image/png" href="../img/logo.png">
+  <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
+  <link rel="apple-touch-icon" href="../img/logo.png">
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Grotesk:wght@700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../includes/local_icons.css?v=1.0">
   <style>
     :root {
       --green: #1a7a4a;
@@ -115,7 +126,6 @@ $queryString = http_build_query($queryParams);
       min-height: 100vh;
     }
 
-    /* HEADER */
     .page-header {
       background: var(--green);
       color: #fff;
@@ -188,7 +198,6 @@ $queryString = http_build_query($queryParams);
       background: #cdd7d1;
     }
 
-    /* FILTER */
     .filter-panel {
       display: none;
       background: var(--white);
@@ -241,18 +250,19 @@ $queryString = http_build_query($queryParams);
       margin-top: 4px;
     }
 
-    /* TABLE */
     .table-wrap {
       padding: 20px 28px;
+      overflow-x: auto; /* Responsive scroll for mobile */
     }
 
     table {
       width: 100%;
+      min-width: 1000px; /* Forces scroll on small screens so data isn't squished */
       border-collapse: collapse;
       background: var(--white);
       border-radius: 10px;
       box-shadow: var(--shadow);
-      table-layout: fixed;
+      table-layout: auto;
     }
 
     thead {
@@ -261,35 +271,20 @@ $queryString = http_build_query($queryParams);
     }
 
     thead th {
-      padding: 11px 8px;
+      padding: 11px 12px;
       font-size: .76rem;
       font-weight: 600;
       text-align: left;
       text-transform: uppercase;
       letter-spacing: .5px;
-      overflow: hidden;
       white-space: nowrap;
     }
 
-    thead th:nth-child(1) {
-      width: 60px;
-    }
-
-    thead th:nth-child(2) {
-      width: 250px;
-    }
-
-    thead th:nth-child(3) {
-      width: 180px;
-    }
-
-    thead th:nth-child(4) {
-      width: 220px;
-    }
-
-    thead th:nth-child(5) {
-      width: 120px;
-    }
+    /* Fixed sensible widths for specific columns */
+    thead th:nth-child(1) { width: 50px; } /* # */
+    thead th:nth-child(2) { width: 80px; } /* Photo */
+    thead th:nth-child(7) { width: 100px; } /* Role */
+    thead th:nth-child(9) { width: 90px; text-align: center; } /* Actions */
 
     tbody tr {
       border-bottom: 1px solid var(--border);
@@ -305,12 +300,10 @@ $queryString = http_build_query($queryParams);
     }
 
     tbody td {
-      padding: 10px 8px;
-      font-size: .83rem;
+      padding: 12px;
+      font-size: .85rem;
       vertical-align: middle;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      white-space: nowrap; /* Keeps content on one line to force scroll */
     }
 
     .badge-role {
@@ -333,7 +326,6 @@ $queryString = http_build_query($queryParams);
       color: #374151;
     }
 
-    /* ACTION BUTTONS */
     .action-cell {
       display: flex;
       gap: 6px;
@@ -375,7 +367,6 @@ $queryString = http_build_query($queryParams);
       color: #fff;
     }
 
-    /* MODALS */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -453,7 +444,6 @@ $queryString = http_build_query($queryParams);
       gap: 10px;
     }
 
-    /* FORM */
     .form-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -571,7 +561,6 @@ $queryString = http_build_query($queryParams);
       margin-top: 1px;
     }
 
-    /* TOAST */
     .toast {
       position: fixed;
       bottom: 28px;
@@ -621,7 +610,6 @@ $queryString = http_build_query($queryParams);
       </div>
     </div>
 
-    <!-- FILTER -->
     <form method="GET" action="" id="filterForm">
       <div class="erp-filter-panel filter-panel <?= ($filter_username !== '') ? 'open' : '' ?>" id="filterPanel">
       <div class="filter-group">
@@ -636,7 +624,6 @@ $queryString = http_build_query($queryParams);
     </div>
   </form>
 
-  <!-- TABLE -->
   <div class="table-wrap">
     <table>
       <thead>
@@ -646,6 +633,7 @@ $queryString = http_build_query($queryParams);
           <th>Name</th>
           <th>Username</th>
           <th>Email</th>
+          <th>Phone</th>
           <th>Role</th>
           <th>Created On</th>
           <th style="text-align:center">Actions</th>
@@ -674,6 +662,7 @@ $queryString = http_build_query($queryParams);
               <td><?= htmlspecialchars($u['name'] ?? '—') ?></td>
               <td><strong><?= htmlspecialchars($u['username']) ?></strong></td>
               <td><?= htmlspecialchars($u['email'] ?? '—') ?></td>
+              <td><?= htmlspecialchars($u['phone_number'] ?: '—') ?></td>
               <td>
                 <span class="badge-role <?= (strtoupper($u['role']) === 'ADMIN') ? 'badge-admin' : 'badge-user' ?>">
                   <?= htmlspecialchars($u['role']) ?>
@@ -682,16 +671,20 @@ $queryString = http_build_query($queryParams);
               <td><?= htmlspecialchars($u['createdOn'] ?? '—') ?></td>
               <td>
                 <div class="action-cell">
-                  <button class="icon-btn edit" title="Edit"
-                    onclick='openEdit(<?= htmlspecialchars(json_encode($u), ENT_QUOTES) ?>)'><i
-                      class="fa fa-pen"></i></button>
-                  <?php if ($_SESSION['username'] !== $u['username']): ?>
-                    <button class="icon-btn delete" title="Delete"
-                      onclick="deleteUser(<?= $u['id'] ?>, '<?= htmlspecialchars($u['username'], ENT_QUOTES) ?>')"><i
-                        class="fa fa-trash"></i></button>
+                  <?php if (isset($u['source']) && $u['source'] !== 'user'): ?>
+                    <span class="badge-role badge-admin" style="background:#64748b; font-size:11px;">Via <?= htmlspecialchars($u['source']) ?></span>
                   <?php else: ?>
-                    <button class="icon-btn delete" title="You cannot delete yourself"
-                      style="opacity:0.3; cursor:not-allowed;" disabled><i class="fa fa-trash"></i></button>
+                    <button class="icon-btn edit" title="Edit"
+                      onclick='openEdit(<?= htmlspecialchars(json_encode($u), ENT_QUOTES) ?>)'><i
+                        class="fa fa-pen"></i></button>
+                    <?php if ($_SESSION['username'] !== $u['username']): ?>
+                      <button class="icon-btn delete" title="Delete"
+                        onclick="deleteUser(<?= $u['id'] ?>, '<?= htmlspecialchars($u['username'], ENT_QUOTES) ?>')"><i
+                          class="fa fa-trash"></i></button>
+                    <?php else: ?>
+                      <button class="icon-btn delete" title="You cannot delete yourself"
+                        style="opacity:0.3; cursor:not-allowed;" disabled><i class="fa fa-trash"></i></button>
+                    <?php endif; ?>
                   <?php endif; ?>
                 </div>
               </td>
@@ -702,10 +695,9 @@ $queryString = http_build_query($queryParams);
     </table>
   </div>
 
-  <!-- PAGINATION -->
   <div class="pagination-bar" style="display:flex; justify-content:space-between; align-items:center; margin:15px 28px; font-size:14px; color:var(--muted);">
     <div>
-      <?php 
+      <?php
       $startRecord = $total_records > 0 ? $offset + 1 : 0;
       $endRecord = min($offset + $limit, $total_records);
       ?>
@@ -733,7 +725,6 @@ $queryString = http_build_query($queryParams);
     </div>
   </div>
 
-  <!-- EDIT / NEW USER MODAL -->
   <div class="modal-overlay" id="editModal">
     <div class="modal">
       <div class="modal-header">

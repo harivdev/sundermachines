@@ -37,3 +37,4 @@ do {
 echo $barcode;
 exit;
 ?>
+

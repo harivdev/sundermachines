@@ -340,7 +340,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
             align-items: center;
             gap: 6px;
             color: #4D4A42;
-            font-size: 13.5px;
+            font-size: 16.5px;
             font-weight: 500;
             text-decoration: none;
             transition: all 0.25s ease;
@@ -353,7 +353,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
         .submenu-link i,
         .submenu-dropdown a .nav-icon,
         .submenu-dropdown a i {
-            font-size: 13px;
+            font-size: 16px;
         }
 
         .dropdown>a:hover,
@@ -389,7 +389,7 @@ if (strpos($current_path, '/jobcard/') !== false) {
             align-items: center;
             gap: 6px;
             color: #4D4A42;
-            font-size: 13.5px;
+            font-size: 16.5px;
             font-weight: 500;
             text-decoration: none;
             cursor: pointer;

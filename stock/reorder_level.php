@@ -10,12 +10,50 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ADMIN') {
     exit();
 }
 
-// Delete Handler
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
-    $delete_id = (int)$_POST['delete_id'];
-    mysqli_query($conn, "DELETE FROM stock WHERE id = $delete_id");
-    
-    // Redirect to clear POST data and maintain current query params
+    $delete_id = trim($_POST['delete_id']);
+    if ($delete_id !== '') {
+        $chkStk = mysqli_prepare($conn, "SELECT id, itemName, barCode FROM stock WHERE id = ?");
+        mysqli_stmt_bind_param($chkStk, "s", $delete_id);
+        mysqli_stmt_execute($chkStk);
+        $resStk = mysqli_stmt_get_result($chkStk);
+        $stkData = mysqli_fetch_assoc($resStk);
+
+        if ($stkData) {
+            // Check if item is linked to salesitems or jobcarditemspares
+            $chkSales = mysqli_prepare($conn, "SELECT COUNT(*) FROM salesitems WHERE stock = ?");
+            mysqli_stmt_bind_param($chkSales, "s", $delete_id);
+            mysqli_stmt_execute($chkSales);
+            $resSales = mysqli_stmt_get_result($chkSales);
+            $salesCount = (int)mysqli_fetch_row($resSales)[0];
+
+            $chkJc = mysqli_prepare($conn, "SELECT COUNT(*) FROM jobcarditemspares WHERE stock = ?");
+            mysqli_stmt_bind_param($chkJc, "s", $delete_id);
+            mysqli_stmt_execute($chkJc);
+            $resJc = mysqli_stmt_get_result($chkJc);
+            $jcCount = (int)mysqli_fetch_row($resJc)[0];
+
+            if ($salesCount > 0 || $jcCount > 0) {
+                $refs = [];
+                if ($salesCount > 0) $refs[] = "$salesCount sales record(s)";
+                if ($jcCount > 0) $refs[] = "$jcCount job card(s)";
+                $_SESSION['reorder_error'] = "Cannot delete '" . htmlspecialchars($stkData['itemName']) . "' because it is referenced in " . implode(' and ', $refs) . ". You can update its quantity to 0 instead.";
+            } else {
+                $stmtDel = mysqli_prepare($conn, "DELETE FROM stock WHERE id = ?");
+                if ($stmtDel) {
+                    mysqli_stmt_bind_param($stmtDel, "s", $delete_id);
+                    if (mysqli_stmt_execute($stmtDel) && mysqli_stmt_affected_rows($stmtDel) > 0) {
+                        $_SESSION['reorder_success'] = "Stock item '" . htmlspecialchars($stkData['itemName']) . "' (" . htmlspecialchars($stkData['barCode']) . ") deleted successfully.";
+                    } else {
+                        $_SESSION['reorder_error'] = "Could not delete stock item. Please try again.";
+                    }
+                }
+            }
+        } else {
+            $_SESSION['reorder_error'] = "Stock item not found or already deleted.";
+        }
+    }
+
     $redirectUrl = 'reorder_level.php';
     if (!empty($_SERVER['QUERY_STRING'])) {
         $redirectUrl .= '?' . $_SERVER['QUERY_STRING'];
@@ -24,7 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     exit();
 }
 
-// Filter Status
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
 $where = "WHERE 1=1";
 
@@ -38,38 +75,54 @@ if ($filter === 'critical') {
     $where .= " AND st.availableQty > st.reorderLevel";
 }
 
-// Search
-if (!empty($_GET['q'])) {
-    $q = mysqli_real_escape_string($conn, $_GET['q']);
-    $where .= " AND (s.spareName LIKE '%$q%' OR st.barCode LIKE '%$q%' OR st.itemName LIKE '%$q%')";
+$rawQ = trim($_GET['q'] ?? '');
+if ($rawQ !== '') {
+    $safeQ = mysqli_real_escape_string($conn, $rawQ);
+    $directCondition = "(s.spareName LIKE '%$safeQ%' OR st.barCode LIKE '%$safeQ%' OR st.itemName LIKE '%$safeQ%' OR s.partNo LIKE '%$safeQ%' OR b.brandName LIKE '%$safeQ%' OR m.model LIKE '%$safeQ%')";
+
+    $words = array_filter(preg_split('/\s+/', $rawQ));
+    if (count($words) > 1) {
+        $wordConds = [];
+        foreach ($words as $w) {
+            $escapedW = mysqli_real_escape_string($conn, $w);
+            $wordConds[] = "(s.spareName LIKE '%$escapedW%' OR st.barCode LIKE '%$escapedW%' OR st.itemName LIKE '%$escapedW%' OR s.partNo LIKE '%$escapedW%' OR b.brandName LIKE '%$escapedW%' OR m.model LIKE '%$escapedW%')";
+        }
+        $where .= " AND ($directCondition OR (" . implode(" AND ", $wordConds) . "))";
+    } else {
+        $where .= " AND $directCondition";
+    }
 }
 
-// Pagination
 $limit = 20;
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 if ($page < 1) $page = 1;
 $offset = ($page - 1) * $limit;
 
-$countQuery = "SELECT COUNT(*) as total FROM stock st LEFT JOIN spares s ON st.spare=s.id $where";
+$countQuery = "SELECT COUNT(*) as total FROM stock st LEFT JOIN spares s ON st.spare=s.id LEFT JOIN brand b ON st.brand = b.id LEFT JOIN model m ON st.model = m.id $where";
 $countResult = mysqli_query($conn, $countQuery);
 $totalRows = (int)mysqli_fetch_assoc($countResult)['total'];
 $totalPages = $totalRows > 0 ? ceil($totalRows / $limit) : 1;
 
 $query = "
-SELECT 
-    st.id, 
+SELECT
+    st.id,
     st.barCode,
     st.itemName,
     st.availableQty,
     st.minQty,
     st.maxQty,
     st.reorderLevel,
-    s.spareName
+    s.spareName,
+    s.partNo,
+    b.brandName,
+    m.model as modelName
 FROM stock st
 LEFT JOIN spares s ON st.spare = s.id
+LEFT JOIN brand b ON st.brand = b.id
+LEFT JOIN model m ON st.model = m.id
 $where
-ORDER BY 
-    CASE 
+ORDER BY
+    CASE
         WHEN st.availableQty <= 0 THEN 1
         WHEN st.minQty > 0 AND st.availableQty <= st.minQty THEN 2
         WHEN st.reorderLevel > 0 AND st.availableQty <= st.reorderLevel THEN 3
@@ -80,8 +133,10 @@ LIMIT $limit OFFSET $offset
 ";
 $result = mysqli_query($conn, $query);
 $rows = [];
-while ($r = mysqli_fetch_assoc($result)) {
-    $rows[] = $r;
+if ($result) {
+    while ($r = mysqli_fetch_assoc($result)) {
+        $rows[] = $r;
+    }
 }
 
 $queryParams = $_GET;
@@ -201,7 +256,7 @@ $queryString = http_build_query($queryParams);
         font-size: 14px;
         color: #334155;
     }
-    
+
     tr:hover { background: #fcfcfc; }
 
     .badge {
@@ -218,7 +273,6 @@ $queryString = http_build_query($queryParams);
     .badge-out { background: #f1f5f9; color: #475569; }
     .badge-optimal { background: #dcfce3; color: #15803d; }
 
-    /* Progress Bar */
     .health-bar-container {
         width: 100%;
         height: 8px;
@@ -246,7 +300,6 @@ $queryString = http_build_query($queryParams);
         border-radius: 6px;
     }
 
-    /* Pagination */
     .pagination {
         display: flex;
         justify-content: space-between;
@@ -271,7 +324,6 @@ $queryString = http_build_query($queryParams);
     }
     .page-btn:hover { background: #f1f5f9; }
 
-    /* Modal Styles */
     .modal-overlay {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 9999;
@@ -289,21 +341,47 @@ $queryString = http_build_query($queryParams);
 </style>
 
 <div class="container-box">
+    <?php if (!empty($_SESSION['reorder_success'])): ?>
+        <div style="background:#dcfce7; border:1px solid #86efac; color:#166534; padding:12px 16px; border-radius:8px; margin-bottom:16px; display:flex; align-items:center; gap:10px; font-size:14px; font-weight:500;">
+            <i class="fa-solid fa-circle-check" style="font-size:16px;"></i>
+            <span><?= htmlspecialchars($_SESSION['reorder_success']) ?></span>
+        </div>
+        <?php unset($_SESSION['reorder_success']); ?>
+    <?php endif; ?>
+
+    <?php if (!empty($_SESSION['reorder_error'])): ?>
+        <div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:12px 16px; border-radius:8px; margin-bottom:16px; display:flex; align-items:center; gap:10px; font-size:14px; font-weight:500;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size:16px;"></i>
+            <span><?= htmlspecialchars($_SESSION['reorder_error']) ?></span>
+        </div>
+        <?php unset($_SESSION['reorder_error']); ?>
+    <?php endif; ?>
+
     <div class="header-actions">
         <div class="page-title">
             <i class="fa-solid fa-triangle-exclamation" style="color:var(--brand-gold)"></i> Stock Reorder Monitor
         </div>
         <div class="filter-group">
-            <a href="?filter=all" class="filter-btn <?= $filter === 'all' ? 'active' : '' ?>">All</a>
-            <a href="?filter=optimal" class="filter-btn <?= $filter === 'optimal' ? 'active' : '' ?>">Optimal</a>
-            <a href="?filter=reorder" class="filter-btn <?= $filter === 'reorder' ? 'active' : '' ?>">Reorder Required</a>
-            <a href="?filter=critical" class="filter-btn <?= $filter === 'critical' ? 'active' : '' ?>">Critical</a>
-            <a href="?filter=out" class="filter-btn <?= $filter === 'out' ? 'active' : '' ?>">Out of Stock</a>
+            <?php
+            $buildFilterUrl = function($targetFilter) use ($queryParams) {
+                $p = $queryParams;
+                $p['filter'] = $targetFilter;
+                return '?' . http_build_query($p);
+            };
+            ?>
+            <a href="<?= $buildFilterUrl('all') ?>" class="filter-btn <?= $filter === 'all' ? 'active' : '' ?>">All</a>
+            <a href="<?= $buildFilterUrl('optimal') ?>" class="filter-btn <?= $filter === 'optimal' ? 'active' : '' ?>">Optimal</a>
+            <a href="<?= $buildFilterUrl('reorder') ?>" class="filter-btn <?= $filter === 'reorder' ? 'active' : '' ?>">Reorder Required</a>
+            <a href="<?= $buildFilterUrl('critical') ?>" class="filter-btn <?= $filter === 'critical' ? 'active' : '' ?>">Critical</a>
+            <a href="<?= $buildFilterUrl('out') ?>" class="filter-btn <?= $filter === 'out' ? 'active' : '' ?>">Out of Stock</a>
         </div>
-        <form class="search-box" method="GET">
+        <form class="search-box" method="GET" style="display:flex; align-items:center; gap:6px;">
             <input type="hidden" name="filter" value="<?= htmlspecialchars($filter) ?>">
-            <input type="text" name="q" placeholder="Search item, barcode..." value="<?= htmlspecialchars($_GET['q'] ?? '') ?>">
+            <input type="text" name="q" placeholder="Search item, barcode, brand..." value="<?= htmlspecialchars($_GET['q'] ?? '') ?>">
             <button type="submit">Search</button>
+            <?php if (!empty($_GET['q'])): ?>
+                <a href="?filter=<?= urlencode($filter) ?>" style="padding: 8px 12px; background: #e2e8f0; color: #475569; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">Clear</a>
+            <?php endif; ?>
         </form>
     </div>
 
@@ -322,21 +400,20 @@ $queryString = http_build_query($queryParams);
             <tbody>
                 <?php if (empty($rows)): ?>
                     <tr>
-                        <td colspan="7" style="text-align:center; padding: 40px; color:#64748b;">No stock items match your filter criteria.</td>
+                        <td colspan="6" style="text-align:center; padding: 40px; color:#64748b;">No stock items match your filter criteria.</td>
                     </tr>
                 <?php endif; ?>
 
-                <?php foreach ($rows as $row): 
+                <?php foreach ($rows as $row):
                     $avail = (int)$row['availableQty'];
                     $min = (int)$row['minQty'];
                     $max = (int)$row['maxQty'];
                     $reorder = (int)$row['reorderLevel'];
 
-                    // Determine Status
                     $statusClass = '';
                     $statusText = '';
                     $fillClass = '';
-                    
+
                     if ($avail <= 0) {
                         $statusClass = 'badge-out';
                         $statusText = 'Out of Stock';
@@ -354,50 +431,45 @@ $queryString = http_build_query($queryParams);
                         $statusText = 'Optimal';
                     }
 
-                    // Calculate Percentage for Bar
                     $percent = 0;
                     if ($max > 0) {
                         $percent = ($avail / $max) * 100;
                         if ($percent > 100) $percent = 100;
                     } elseif ($avail > 0) {
-                        // If no max set, just show 100% if we have stock
                         $percent = 100;
                     }
 
-                    // Suggested Buy
                     $suggestedBuy = 0;
                     if ($max > 0 && $avail < $max) {
                         $suggestedBuy = $max - $avail;
                     }
+                    $itemDisplayName = !empty($row['itemName']) ? $row['itemName'] : (!empty($row['spareName']) ? $row['spareName'] : 'Item #' . $row['id']);
                 ?>
                 <tr>
                     <td>
-                        <div style="font-weight:600; color:#0f172a; margin-bottom:4px;"><?= htmlspecialchars($row['itemName'] ?? $row['spareName']) ?></div>
-                        <div style="font-size:12px; color:#64748b;"><i class="fa-solid fa-barcode"></i> <?= htmlspecialchars($row['barCode']) ?></div>
+                        <div style="font-weight:600; color:#0f172a; margin-bottom:4px;"><?= htmlspecialchars($itemDisplayName) ?></div>
+                        <div style="font-size:12px; color:#000;"><i class="fa-solid fa-barcode"></i> <?= htmlspecialchars($row['barCode'] ?? '') ?></div>
                     </td>
                     <td><span class="qty-bold"><?= $avail ?></span> units</td>
                     <td>
-                        <div style="font-size: 12px; color: #64748b; margin-bottom:4px;">
+                        <div style="font-size: 12px; color: #000; margin-bottom:4px;">
                             Min: <b><?= $min ?></b> &nbsp;|&nbsp; Reorder: <b><?= $reorder ?></b> &nbsp;|&nbsp; Max: <b><?= $max ?></b>
                         </div>
-                        <?php if ($min == 0 && $max == 0 && $reorder == 0): ?>
-                            <span style="font-size:11px; color:#ef4444; background:#fee2e2; padding:2px 6px; border-radius:4px;">Action Needed</span>
-                        <?php endif; ?>
                     </td>
                     <td><span class="badge <?= $statusClass ?>"><?= $statusText ?></span></td>
                     <td>
                         <?php if ($suggestedBuy > 0): ?>
                             <span class="suggested-qty">+<?= $suggestedBuy ?></span>
                         <?php else: ?>
-                            <span style="color:#94a3b8;">-</span>
+                            <span style="color:#000;">-</span>
                         <?php endif; ?>
                     </td>
                     <td>
                         <div style="display: flex; gap: 16px; align-items: center;">
-                            <a href="edit_stock.php?id=<?= urlencode($row['id']) ?>" title="Edit" style="color: #64748b; text-decoration: none; font-size: 16px; transition: color 0.2s;" onmouseover="this.style.color='#0f172a'" onmouseout="this.style.color='#64748b'">
+                            <a href="edit_stock.php?id=<?= urlencode($row['id']) ?>" title="Edit" style="color: #000; text-decoration: none; font-size: 16px; transition: color 0.2s;" onmouseover="this.style.color='#0f172a'" onmouseout="this.style.color='#000'">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </a>
-                            <a href="javascript:void(0)" title="Delete" onclick="openDeleteModal('<?= $row['id'] ?>', '<?= htmlspecialchars(addslashes($row['itemName'] ?? $row['spareName'])) ?>', '<?= htmlspecialchars(addslashes($row['barCode'])) ?>')" style="color: #64748b; text-decoration: none; font-size: 16px; transition: color 0.2s;" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='#64748b'">
+                            <a href="javascript:void(0)" title="Delete" onclick="openDeleteModal('<?= $row['id'] ?>', '<?= htmlspecialchars(addslashes($itemDisplayName)) ?>', '<?= htmlspecialchars(addslashes($row['barCode'])) ?>')" style="color: #000; text-decoration: none; font-size: 16px; transition: color 0.2s;" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='#000'">
                                 <i class="fa-solid fa-trash-can"></i>
                             </a>
                         </div>
@@ -406,14 +478,14 @@ $queryString = http_build_query($queryParams);
                 <?php endforeach; ?>
             </tbody>
         </table>
-        
+
         <div class="pagination">
             <?php if ($page > 1): ?>
                 <a href="?page=<?= $page - 1 ?>&<?= $queryString ?>" class="page-btn">&larr; Previous</a>
             <?php else: ?>
                 <div style="width: 90px;"></div>
             <?php endif; ?>
-            
+
             <div style="font-size: 14px; color:#475569;">
                 Page <b><?= $page ?></b> of <b><?= $totalPages ?></b> (<?= $totalRows ?> items)
             </div>
@@ -427,18 +499,17 @@ $queryString = http_build_query($queryParams);
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="modal-overlay">
     <div class="modal-box">
         <h3 style="margin-top:0; color:#0f172a; font-size:18px;">Confirm Deletion</h3>
         <p style="color:#475569; font-size:14px; margin-bottom:8px;">Are you sure you want to delete this stock item? This action cannot be undone.</p>
-        
+
         <div style="background:#f8fafc; padding:12px; border-radius:6px; margin-bottom:20px; border: 1px solid #e2e8f0; position: relative; overflow: hidden;">
             <div style="font-weight:600; color:#1e293b; margin-bottom:4px;" id="modalItemName"></div>
             <div style="font-size:12px; color:#64748b;"><i class="fa-solid fa-barcode"></i> <span id="modalBarcode"></span></div>
             <div id="modalLoadingLine" style="position: absolute; bottom: 0; left: 0; height: 3px; background: #dc2626; width: 0%; transition: width 2s linear;"></div>
         </div>
-        
+
         <form id="deleteForm" method="POST" style="display:flex; justify-content:flex-end; gap:12px; margin:0;" onsubmit="return startDeleteAnimation(event)">
             <input type="hidden" name="delete_id" id="modalDeleteId">
             <button type="button" class="modal-btn btn-cancel" id="btnCancelDelete" onclick="closeDeleteModal()">Cancel</button>
@@ -450,17 +521,14 @@ $queryString = http_build_query($queryParams);
 <script>
 function startDeleteAnimation(e) {
     e.preventDefault();
-    
-    // Disable buttons
+
     document.getElementById('btnCancelDelete').disabled = true;
     document.getElementById('btnConfirmDelete').disabled = true;
     document.getElementById('btnConfirmDelete').innerText = 'Deleting...';
     document.getElementById('btnConfirmDelete').style.opacity = '0.7';
-    
-    // Start animation
+
     document.getElementById('modalLoadingLine').style.width = '100%';
-    
-    // Submit after 2 seconds
+
     setTimeout(function() {
         document.getElementById('deleteForm').submit();
     }, 2000);
@@ -470,20 +538,18 @@ function openDeleteModal(id, name, barcode) {
     document.getElementById('modalDeleteId').value = id;
     document.getElementById('modalItemName').innerText = name;
     document.getElementById('modalBarcode').innerText = barcode;
-    
-    // Reset animation and buttons
+
     document.getElementById('modalLoadingLine').style.width = '0%';
     document.getElementById('modalLoadingLine').style.transition = 'none';
-    
-    // Force reflow to instantly apply width:0 before re-enabling transition
-    document.getElementById('modalLoadingLine').offsetHeight; 
+
+    document.getElementById('modalLoadingLine').offsetHeight;
     document.getElementById('modalLoadingLine').style.transition = 'width 2s linear';
-    
+
     document.getElementById('btnCancelDelete').disabled = false;
     document.getElementById('btnConfirmDelete').disabled = false;
     document.getElementById('btnConfirmDelete').innerText = 'Delete';
     document.getElementById('btnConfirmDelete').style.opacity = '1';
-    
+
     document.getElementById('deleteModal').style.display = 'flex';
 }
 function closeDeleteModal() {
@@ -493,3 +559,4 @@ function closeDeleteModal() {
 
 </body>
 </html>
+

@@ -1,6 +1,9 @@
 -- MySQL Dump - SUNDER MACHINES WORLD Fresh Database
--- Host: localhost    Database: billing
+-- Host: localhost    Database: sunder_billing
 -- ------------------------------------------------------
+
+CREATE DATABASE IF NOT EXISTS `sunder_billing`;
+USE `sunder_billing`;
 
 SET FOREIGN_KEY_CHECKS=0;
 

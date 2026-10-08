@@ -9,31 +9,23 @@ $message = "";
 $status = "info";
 
 try {
-    // 1. Disable Foreign Key Constraints for Safe Truncation
     mysqli_query($conn, "SET FOREIGN_KEY_CHECKS = 0");
 
-    // 2. Clear Job Card Module Data
     mysqli_query($conn, "TRUNCATE TABLE jobcarditems");
     mysqli_query($conn, "TRUNCATE TABLE jobcard");
 
-    // 3. Clear Sales Module Data
     mysqli_query($conn, "TRUNCATE TABLE salesitems");
     mysqli_query($conn, "TRUNCATE TABLE sales");
 
-    // 4. Clear Purchase Module Data
     mysqli_query($conn, "TRUNCATE TABLE purchaseitems");
     mysqli_query($conn, "TRUNCATE TABLE purchase");
 
-    // 5. Clear Customer Address Records
     mysqli_query($conn, "DELETE FROM address WHERE id IN (SELECT address FROM customer WHERE address IS NOT NULL)");
 
-    // 6. Clear Customer Module Data
     mysqli_query($conn, "TRUNCATE TABLE customer");
 
-    // 7. Re-enable Foreign Key Constraints
     mysqli_query($conn, "SET FOREIGN_KEY_CHECKS = 1");
 
-    // 8. Clear Session Draft Variables
     unset($_SESSION['draft_jobcard_no']);
     unset($_SESSION['draft_jobcard_ym']);
 
@@ -73,3 +65,4 @@ try {
     </div>
 </body>
 </html>
+

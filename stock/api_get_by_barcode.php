@@ -7,6 +7,12 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    exit;
+}
+
 $barcode = trim($_GET['barcode'] ?? $_POST['barcode'] ?? $_GET['q'] ?? '');
 
 if (empty($barcode)) {
@@ -15,13 +21,13 @@ if (empty($barcode)) {
 }
 
 $stmt = mysqli_prepare($conn, "
-    SELECT 
-        st.*, 
-        s.spareName, 
-        s.partNo, 
+    SELECT
+        st.*,
+        s.spareName,
+        s.partNo,
         s.rackNumber,
         s.picture,
-        b.brandName, 
+        b.brandName,
         m.model AS modelName,
         mc.machineName
     FROM stock st
@@ -29,9 +35,8 @@ $stmt = mysqli_prepare($conn, "
     LEFT JOIN brand b ON st.brand = b.id
     LEFT JOIN model m ON st.model = m.id
     LEFT JOIN machine mc ON st.machine = mc.id
-    WHERE LOWER(TRIM(st.barCode)) = LOWER(?) 
+    WHERE LOWER(TRIM(st.barCode)) = LOWER(?)
        OR LOWER(TRIM(st.serialNo)) = LOWER(?)
-       OR LOWER(TRIM(s.partNo)) = LOWER(?)
     LIMIT 1
 ");
 
@@ -40,51 +45,27 @@ if (!$stmt) {
     exit;
 }
 
-mysqli_stmt_bind_param($stmt, "sss", $barcode, $barcode, $barcode);
+mysqli_stmt_bind_param($stmt, "ss", $barcode, $barcode);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $row = mysqli_fetch_assoc($result);
 
-// Fallback search with LIKE if exact match yields no row
-if (!$row) {
-    $likeBarcode = '%' . $barcode . '%';
-    $stmtLike = mysqli_prepare($conn, "
-        SELECT 
-            st.*, 
-            s.spareName, 
-            s.partNo, 
-            s.rackNumber,
-            s.picture,
-            b.brandName, 
-            m.model AS modelName,
-            mc.machineName
-        FROM stock st
-        LEFT JOIN spares s ON st.spare = s.id
-        LEFT JOIN brand b ON st.brand = b.id
-        LEFT JOIN model m ON st.model = m.id
-        LEFT JOIN machine mc ON st.machine = mc.id
-        WHERE st.barCode LIKE ? 
-           OR st.serialNo LIKE ?
-           OR s.partNo LIKE ?
-        LIMIT 1
-    ");
-    if ($stmtLike) {
-        mysqli_stmt_bind_param($stmtLike, "sss", $likeBarcode, $likeBarcode, $likeBarcode);
-        mysqli_stmt_execute($stmtLike);
-        $resLike = mysqli_stmt_get_result($stmtLike);
-        $row = mysqli_fetch_assoc($resLike);
-    }
-}
-
 if ($row) {
-    $foundBarcode = !empty($row['barCode']) ? $row['barCode'] : $barcode;
+    // Always return the scanned value as barCode — not the DB's stored barCode field
+    // (prevents mismatch where partNo 'p169' returns stored barCode 'p381')
+    $foundBarcode = $barcode;
     $foundItemName = !empty($row['spareName']) ? $row['spareName'] : ($row['itemName'] ?? 'N/A');
+    $sellingPrice = (float)($row['sellingPricePerUnit'] ?? $row['sellingPricePerQty'] ?? $row['selledPricePerUnit'] ?? 0);
 
     $itemData = [
         'id' => $row['id'],
+        'stock_id' => $row['id'],
         'barCode' => $foundBarcode,
         'serialNo' => (!empty($row['serialNo']) ? $row['serialNo'] : $foundBarcode),
         'spareName' => $foundItemName,
+        'itemName' => $foundItemName,
+        'spareId' => $row['spare'] ?? null,
+        'spare_id' => $row['spare'] ?? null,
         'partNo' => (!empty($row['partNo']) ? $row['partNo'] : '-'),
         'rackNumber' => (!empty($row['rackNumber']) ? $row['rackNumber'] : '-'),
         'brandName' => (!empty($row['brandName']) ? $row['brandName'] : '-'),
@@ -92,9 +73,11 @@ if ($row) {
         'machineName' => (!empty($row['machineName']) ? $row['machineName'] : '-'),
         'availableQty' => (int)($row['availableQty'] ?? 0),
         'quantity' => (int)($row['quantity'] ?? 0),
-        'sellingPricePerUnit' => (float)($row['sellingPricePerUnit'] ?? 0),
-        'selledPricePerUnit' => (float)($row['selledPricePerUnit'] ?? 0),
-        'actualPricePerUnit' => (float)($row['actualPricePerUnit'] ?? 0),
+        'sellingPrice' => $sellingPrice,
+        'sellingPricePerUnit' => $sellingPrice,
+        'sellingPricePerQty' => (float)($row['sellingPricePerQty'] ?? $sellingPrice),
+        'selledPricePerUnit' => (float)($row['selledPricePerUnit'] ?? $sellingPrice),
+        'actualPricePerUnit' => (float)($row['actualPricePerUnit'] ?? $row['actualPricePerQty'] ?? 0),
         'gstPercentage' => (float)($row['gstPercentage'] ?? 0),
         'selled' => (bool)($row['selled'] ?? false),
         'selledText' => (($row['selled'] ?? 0) ? 'Yes' : 'No'),
@@ -117,3 +100,4 @@ if ($row) {
     ]);
 }
 exit;
+

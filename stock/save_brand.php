@@ -19,7 +19,6 @@ if (empty($name)) {
     exit();
 }
 
-// Check duplicate brand
 $stmtChk = mysqli_prepare($conn, "SELECT id, brandName FROM brand WHERE LOWER(brandName) = LOWER(?)");
 mysqli_stmt_bind_param($stmtChk, "s", $name);
 mysqli_stmt_execute($stmtChk);

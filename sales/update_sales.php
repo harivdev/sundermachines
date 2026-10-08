@@ -57,7 +57,6 @@ if ($existingCustId > 0) {
     mysqli_stmt_bind_param($upd, "sssi", $customerName, $whatsApp, $customerPhone, $customerId);
     mysqli_stmt_execute($upd);
 } else {
-    // search by phone
     $stmt = mysqli_prepare($conn, "SELECT id FROM customer WHERE phoneNo1 = ? LIMIT 1");
     mysqli_stmt_bind_param($stmt, "s", $customerPhone);
     mysqli_stmt_execute($stmt);
@@ -82,8 +81,7 @@ $modifiedBy = $_SESSION['username'] ?? "System Admin";
 mysqli_begin_transaction($conn);
 
 try {
-    
-    // 1. Fetch old items and restock
+
     $oItems = mysqli_query($conn, "SELECT id, stock, quantity FROM salesitems WHERE sales = $salesId AND deleted = 0");
     while ($old = mysqli_fetch_assoc($oItems)) {
         if (!empty($old['stock'])) {
@@ -95,12 +93,40 @@ try {
         }
     }
 
-    // 2. Clear old items
     mysqli_query($conn, "DELETE FROM salesitems WHERE sales = $salesId");
 
-    // 3. Insert new items and deduct stock
+    $stockRequestedTotals = [];
+    foreach ($_POST['item'] as $k => $iName) {
+        $iName = trim($iName);
+        if ($iName === '') continue;
+        $sId = trim($_POST['stockId'][$k] ?? '');
+        $spId = intval($_POST['spareId'][$k] ?? 0) ?: NULL;
+        $q = max(1, intval($_POST['qty'][$k] ?? 1));
+
+        if (empty($sId) && !empty($spId)) {
+            $fb = mysqli_query($conn, "SELECT id FROM stock WHERE spare = $spId AND availableQty > 0 ORDER BY availableQty DESC LIMIT 1");
+            if ($fb && $fbR = mysqli_fetch_assoc($fb)) {
+                $sId = $fbR['id'];
+                $_POST['stockId'][$k] = $sId;
+            }
+        }
+        if (!empty($sId)) {
+            $stockRequestedTotals[$sId] = ($stockRequestedTotals[$sId] ?? 0) + $q;
+        }
+    }
+
+    foreach ($stockRequestedTotals as $stkId => $reqQty) {
+        $chkStk = mysqli_query($conn, "SELECT availableQty, itemName FROM stock WHERE id = '" . mysqli_real_escape_string($conn, $stkId) . "' LIMIT 1");
+        if ($chkStk && $stkRow = mysqli_fetch_assoc($chkStk)) {
+            $avail = intval($stkRow['availableQty']);
+            if ($reqQty > $avail) {
+                throw new Exception("Insufficient stock for item '{$stkRow['itemName']}'. Available: {$avail}, Requested: {$reqQty}");
+            }
+        }
+    }
+
     $actualSum = 0;
-    
+
     $iStmt = mysqli_prepare($conn, "
         INSERT INTO salesitems
             (createdBy, createdOn, modifiedBy, modifiedOn,
@@ -134,9 +160,9 @@ try {
 
         mysqli_stmt_bind_param($iStmt, "ssssddsdisdssi",
             $modifiedBy, $now, $modifiedBy, $now,
-            $gst, $gstValue, $itemName,             
-            $price, $qty, $serial, $rowTotal,       
-            $spareId, $stockIdVal, $salesId         
+            $gst, $gstValue, $itemName,
+            $price, $qty, $serial, $rowTotal,
+            $spareId, $stockIdVal, $salesId
         );
 
         if (!mysqli_stmt_execute($iStmt)) {
@@ -145,7 +171,6 @@ try {
 
         $actualSum += $rowTotal;
 
-        // Deduct stock
         if ($stockIdVal !== null) {
             $dq = mysqli_prepare($conn, "UPDATE stock SET availableQty = GREATEST(0, availableQty - ?) WHERE id = ?");
             mysqli_stmt_bind_param($dq, "is", $qty, $stockIdVal);
@@ -153,7 +178,6 @@ try {
         }
     }
 
-    // 4. Check existing payment in payment table
     $paidSum = 0;
     $chkP = mysqli_prepare($conn, "SELECT amount FROM payment WHERE sales = ? LIMIT 1");
     mysqli_stmt_bind_param($chkP, "i", $salesId);
@@ -164,18 +188,17 @@ try {
         $orderStatus = 'Invoiced';
     }
 
-    // 5. Update Sales Wrapper
     $upd = mysqli_prepare($conn, "
-        UPDATE sales 
-        SET orderDate = ?, orderStatus = ?, customer = ?, 
-            actualAmountSum = ?, paidAmountSum = ?, 
-            modifiedBy = ?, modifiedOn = ? 
+        UPDATE sales
+        SET orderDate = ?, orderStatus = ?, customer = ?,
+            actualAmountSum = ?, paidAmountSum = ?,
+            modifiedBy = ?, modifiedOn = ?
         WHERE id = ?
     ");
-    mysqli_stmt_bind_param($upd, "ssidsssi", 
-        $orderDate, $orderStatus, $customerId, 
-        $actualSum, $paidSum, 
-        $modifiedBy, $now, 
+    mysqli_stmt_bind_param($upd, "ssidsssi",
+        $orderDate, $orderStatus, $customerId,
+        $actualSum, $paidSum,
+        $modifiedBy, $now,
         $salesId
     );
     if (!mysqli_stmt_execute($upd)) {
@@ -190,3 +213,4 @@ try {
     err($e->getMessage());
 }
 ?>
+

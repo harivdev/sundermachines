@@ -138,6 +138,14 @@ $today = date('Y-m-d');
     .action-bar { flex-direction: column; }
     .action-bar button { width: 100%; }
   }
+  .scan-tools-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 0 14px; flex-wrap: wrap; }
+  .scan-btn-blue { background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .scan-btn-blue:hover { background: #1d4ed8; }
+  .scan-input-group { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 200px; max-width: 350px; }
+  .scan-barcode-input { flex: 1; height: 34px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 0 10px; font-size: 13px; outline: none; }
+  .scan-barcode-input:focus { border-color: #2563eb; }
+  .scan-btn-go { background: #16a34a; color: #fff; border: none; border-radius: 6px; padding: 0 16px; height: 34px; font-weight: 600; font-size: 13px; cursor: pointer; }
+  .scan-btn-go:hover { background: #15803d; }
 </style>
 
 <div class="top-bar">
@@ -194,6 +202,15 @@ $today = date('Y-m-d');
 
     <!-- ITEMS TABLE -->
     <div class="section">
+      <div class="scan-tools-row" style="margin-top: 14px;">
+        <button type="button" class="scan-btn-blue" onclick="openScanToBill()">
+          📷 Scan Barcode
+        </button>
+        <div class="scan-input-group">
+          <input type="text" id="usbBarcodeInput" class="scan-barcode-input" placeholder="Scan / Enter Barcode" autocomplete="off" onkeydown="if(event.key==='Enter'){handleUsbBarcodeSubmit();event.preventDefault();}">
+          <button type="button" class="scan-btn-go" onclick="handleUsbBarcodeSubmit()">Go</button>
+        </div>
+      </div>
       <div class="items-wrap">
         <table class="items-tbl">
           <thead>
@@ -547,4 +564,342 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+<!-- Spare Details Modal -->
+<div id="spareDetailsConfirmModal" class="modal-overlay" style="z-index: 100005;">
+    <div class="modal-content" style="max-width: 400px; width: 90%;">
+        <div class="modal-header">
+            <h3 style="margin: 0; color: #0f172a; font-size: 16px; font-weight: 700;">Spare Details</h3>
+            <button type="button" onclick="closeSpareDetailsConfirmModal()" style="background: transparent; border: none; font-size: 24px; color: #64748b; cursor: pointer; line-height: 1;">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <input type="hidden" id="confirmSpareIdx" value="">
+            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 14px; color: #334155;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-weight: 600;">Spare Name:</span>
+                    <span id="confirmSpareName" style="font-weight: 700; color: #0f172a;"></span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-weight: 600;">Barcode Number:</span>
+                    <span id="confirmSpareBarcode" style="font-weight: 700; color: #2563eb; font-family: monospace; font-size: 14px;"></span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-weight: 600;">Available Stock:</span>
+                    <span id="confirmSpareAvail" style="font-weight: 700; color: #166534;"></span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600;">Wanted Stocks:</span>
+                    <input type="number" id="confirmSpareWanted" value="1" min="1" oninput="updateConfirmSpareRemaining()" style="width: 80px; height: 32px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 700; padding: 0 8px;">
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-weight: 600;">Remaining Stock:</span>
+                    <span id="confirmSpareRemaining" style="font-weight: 700;"></span>
+                </div>
+            </div>
+            
+            <div id="confirmSpareWarning" style="margin-top: 15px; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: 600; display: none;"></div>
+            
+            <div style="margin-top: 25px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeSpareDetailsConfirmModal()" style="padding: 8px 16px; background: #f1f5f9; color: #475569; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Cancel</button>
+                <button type="button" id="confirmSpareAddBtn" onclick="confirmAddSpareFromModal()" style="padding: 8px 16px; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-plus"></i> Confirm & Add
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php include("../includes/barcode_scanner_modal.php"); ?>
+
+<!-- Scan-to-Bill Toast Container -->
+<div id="scanToastContainer" style="position:fixed; top:80px; right:16px; z-index:100000; display:flex; flex-direction:column; gap:8px; pointer-events:none;"></div>
+
+<script>
+(function() {
+  /* -- Scan-to-Bill: Continuous Scanning + Cart Integration -- */
+
+  let lastScanBarcode = '';
+  let lastScanTime = 0;
+  const SCAN_COOLDOWN_MS = 1200;
+
+  // -- Toast notification --
+  window.showScanToast = function(message, type) {
+    const container = document.getElementById('scanToastContainer');
+    if (!container) return;
+    const colors = {
+      success: { bg: '#d1fae5', border: '#34d399', color: '#065f46' },
+      error:   { bg: '#fee2e2', border: '#f87171', color: '#991b1b' },
+      warning: { bg: '#fef3c7', border: '#fbbf24', color: '#92400e' },
+      info:    { bg: '#dbeafe', border: '#60a5fa', color: '#1e40af' }
+    };
+    const c = colors[type] || colors.info;
+    const toast = document.createElement('div');
+    toast.style.cssText = "background:" + c.bg + "; border:1px solid " + c.border + "; color:" + c.color + "; padding:10px 16px; border-radius:8px; font-size:13px; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,0.12); pointer-events:auto; max-width:340px; animation:fadeIn 0.15s ease-out;";
+    toast.innerHTML = message;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 2500);
+  }
+
+  // -- Open scanner modal in continuous scan-to-bill mode --
+  window.openScanToBill = function() {
+    if (typeof window.openBarcodeScanner !== 'function') {
+      alert('Barcode scanner is not available. Please use the manual barcode input field.');
+      return;
+    }
+
+    window.openBarcodeScanner({
+      title: '?? Scan to Bill � Continuous Mode',
+      continuous: true,
+      callback: function(barcode) {
+        handleScannedBarcode(barcode);
+      }
+    });
+  };
+
+  // -- Central barcode handler � used by camera, USB, and manual input --
+  window.handleScannedBarcode = function(barcode) {
+    if (!barcode || barcode.trim() === '') return;
+    barcode = barcode.trim();
+
+    // Duplicate scan protection (same barcode within cooldown = ignore)
+    const now = Date.now();
+    if (barcode === lastScanBarcode && (now - lastScanTime) < SCAN_COOLDOWN_MS) {
+      console.log('[ScanToBill] Duplicate scan ignored (cooldown):', barcode);
+      return;
+    }
+    lastScanBarcode = barcode;
+    lastScanTime = now;
+
+    // Play beep
+    if (typeof playCommonScanBeep === 'function') playCommonScanBeep();
+
+    // Call existing barcode API
+    fetch('../stock/get_by_barcode.php?barcode=' + encodeURIComponent(barcode))
+      .then(r => r.json())
+      .then(res => {
+        if (res.success && res.data) {
+          openStockPopupForScannedSpare(res.data);
+        } else {
+          showScanToast('? Product not found: <span style="font-family:monospace;">' + escapeHtml(barcode) + '</span><br><a href="../stock/add_stock.php" target="_blank" style="color:inherit; text-decoration:underline;">Add New Product</a>', 'error');
+        }
+      })
+      .catch(err => {
+        console.error('[ScanToBill] API error:', err);
+        showScanToast('? Unable to contact server. Check your connection.', 'error');
+      });
+  };
+
+  // -- Add scanned product to the existing billing cart --
+  window.addScannedProductToCart = function(data, initialQty = 1) {
+    const stockId = data.stockId || data.id || '';
+    const spareName = data.spareName || data.itemName || 'Item';
+    const availableQty = parseInt(data.availableQty) || 0;
+
+    // Check if this product is already in the cart (duplicate scan ? increase qty)
+    const existingRows = document.querySelectorAll('#itemsBody tr');
+    for (const row of existingRows) {
+      const rowStockId = row.querySelector('.h-stock-id');
+      if (rowStockId && rowStockId.value == stockId && stockId !== '') {
+        // Found existing row � increase quantity
+        const qtyInput = row.querySelector('.inp-qty');
+        const currentQty = parseInt(qtyInput.value) || 0;
+        const newQty = currentQty + initialQty;
+
+        // Stock validation
+        if (newQty > availableQty && availableQty > 0) {
+          showScanToast('? Only ' + availableQty + ' units available for ' + spareName, 'warning');
+          return;
+        }
+
+        qtyInput.value = newQty;
+        calcRow(qtyInput);
+        showScanToast('? ' + spareName + ' � ' + newQty, 'success');
+        return;
+      }
+    }
+
+    // Stock validation for new item
+    if (availableQty < initialQty) {
+      showScanToast('? ' + spareName + ' does not have enough stock (' + availableQty + ' available)', 'warning');
+      return;
+    }
+
+    // Check if there's an empty row we can fill (first row often starts empty)
+    let targetRow = null;
+    for (const row of existingRows) {
+      const nameInput = row.querySelector('.item-name-inp');
+      if (nameInput && nameInput.value.trim() === '') {
+        targetRow = row;
+        break;
+      }
+    }
+
+    // No empty row found � add a new one
+    if (!targetRow) {
+      addItemRow();
+      const allRows = document.querySelectorAll('#itemsBody tr');
+      targetRow = allRows[allRows.length - 1];
+    }
+
+    // Populate the row � same logic as existing pickStock()
+    targetRow.querySelector('.item-name-inp').value = spareName;
+    targetRow.querySelector('.h-stock-id').value = stockId;
+    const availInp = targetRow.querySelector('.h-avail-qty');
+    if (availInp) availInp.value = availableQty;
+    const qtyInp = targetRow.querySelector('.inp-qty');
+    if (qtyInp && availableQty > 0) qtyInp.max = availableQty;
+    targetRow.querySelector('.h-spare-id').value = data.spareId || '';
+    targetRow.querySelector('.h-picture').value = data.picture || '';
+    targetRow.querySelector('.h-barcode').value = data.barCode || '';
+    targetRow.querySelector('.h-serial').value = data.serialNo || data.partNo || '';
+    targetRow.querySelector('.h-rack').value = data.rackNumber || '';
+
+    const price = parseFloat(data.selledPricePerUnit) || parseFloat(data.sellingPricePerUnit) || 0;
+    targetRow.querySelector('.inp-price').value = price;
+    targetRow.querySelector('.inp-gst').value = parseFloat(data.gstPercentage) || 0;
+    targetRow.querySelector('.inp-qty').value = initialQty;
+
+    // Load picture thumbnail
+    const imgCell = targetRow.querySelector('.img-cell');
+    if (imgCell) {
+      if (data.picture && data.picture !== 'no-image.png') {
+        const src = (data.picture.startsWith('uploads/') || data.picture.startsWith('Spare/')) ? '../' + data.picture.replace(/^\.\.\//, '') : '../uploads/spares/' + data.picture;
+        imgCell.innerHTML = '<img src="' + src + '" onerror="this.parentNode.innerHTML=\'??\'">';
+      } else {
+        imgCell.innerHTML = '??';
+      }
+    }
+
+    calcRow(targetRow.querySelector('.inp-price'));
+    showScanToast('? ' + spareName + ' � ' + initialQty + ' &nbsp;(Stock: ' + availableQty + ')', 'success');
+  }
+
+  // -- USB / Manual barcode input handler --
+  window.handleUsbBarcodeSubmit = function() {
+    const input = document.getElementById('usbBarcodeInput');
+    if (!input) return;
+    const barcode = input.value.trim();
+    if (!barcode) { input.focus(); return; }
+    handleScannedBarcode(barcode);
+    input.value = '';
+    input.focus();
+  };
+
+  // Handle Enter key on USB barcode input
+  document.addEventListener('DOMContentLoaded', function() {
+    const usbInput = document.getElementById('usbBarcodeInput');
+    if (usbInput) {
+      usbInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          e.stopPropagation();
+          handleUsbBarcodeSubmit();
+        }
+      });
+    }
+  });
+
+})();
+
+let currentSelectedSpareItem = null;
+
+window.selectSpareFromModal = function(idx) {
+    const tbody = document.getElementById('sdTbody');
+    if(!tbody || !tbody.dataset.items) return;
+    const items = JSON.parse(tbody.dataset.items || "[]");
+    const item = items[idx];
+    if (!item) return;
+    
+    currentSelectedSpareItem = item;
+    document.getElementById('confirmSpareIdx').value = idx;
+    document.getElementById('confirmSpareName').textContent = item.spareName || item.itemName || '-';
+    document.getElementById('confirmSpareBarcode').textContent = item.barCode || item.barcode || '-';
+    document.getElementById('confirmSpareAvail').textContent = item.availableQty || '0';
+    document.getElementById('confirmSpareWanted').value = '1';
+    
+    updateConfirmSpareRemaining();
+    
+    document.getElementById('spareDetailsConfirmModal').style.display = 'flex';
+}
+
+window.closeSpareDetailsConfirmModal = function() {
+    document.getElementById('spareDetailsConfirmModal').style.display = 'none';
+    currentSelectedSpareItem = null;
+}
+
+window.updateConfirmSpareRemaining = function() {
+    const avail = parseInt(document.getElementById('confirmSpareAvail').textContent) || 0;
+    const wanted = parseInt(document.getElementById('confirmSpareWanted').value) || 0;
+    const remaining = avail - wanted;
+    const remainingEl = document.getElementById('confirmSpareRemaining');
+    const warningEl = document.getElementById('confirmSpareWarning');
+    const confirmBtn = document.getElementById('confirmSpareAddBtn');
+    
+    remainingEl.textContent = remaining;
+    
+    if (remaining < 0) {
+        remainingEl.style.color = '#ef4444';
+        warningEl.style.display = 'block';
+        warningEl.style.background = '#fef2f2';
+        warningEl.style.color = '#991b1b';
+        warningEl.style.border = '1px solid #fecaca';
+        warningEl.innerHTML = '?? No stock to add. Please purchase it quickly.';
+        confirmBtn.disabled = true;
+        confirmBtn.style.opacity = '0.5';
+        confirmBtn.style.cursor = 'not-allowed';
+    } else {
+        if (remaining === 0) {
+            remainingEl.style.color = '#f59e0b';
+        } else {
+            remainingEl.style.color = '#166534';
+        }
+        warningEl.style.display = 'none';
+        confirmBtn.disabled = false;
+        confirmBtn.style.opacity = '1';
+        confirmBtn.style.cursor = 'pointer';
+    }
+}
+
+window.confirmAddSpareFromModal = function() {
+    const wanted = parseInt(document.getElementById('confirmSpareWanted').value) || 1;
+    
+    if (!currentSelectedSpareItem) return;
+    
+    closeSpareDetailsConfirmModal();
+    if(typeof addScannedProductToCart === 'function') {
+        addScannedProductToCart(currentSelectedSpareItem, wanted);
+    }
+    
+    const drawer = document.getElementById('stockDrawerOverlay');
+    if (drawer && drawer.style.display !== 'none') {
+        closeStockDrawer();
+    }
+}
+
+window.openStockPopupForScannedSpare = function(data) {
+    if (!data) return;
+
+    currentSelectedSpareItem = data;
+
+    document.getElementById('confirmSpareIdx').value = 'SCANNED';
+    document.getElementById('confirmSpareName').textContent = currentSelectedSpareItem.spareName || currentSelectedSpareItem.itemName || 'Spare Item';
+    document.getElementById('confirmSpareBarcode').textContent = currentSelectedSpareItem.barCode || currentSelectedSpareItem.barcode || '-';
+    document.getElementById('confirmSpareAvail').textContent = currentSelectedSpareItem.availableQty || '0';
+    document.getElementById('confirmSpareWanted').value = '1';
+
+    updateConfirmSpareRemaining();
+
+    document.getElementById('spareDetailsConfirmModal').style.display = 'flex';
+}
+
+// Function to escape HTML
+function escapeHtml(unsafe) {
+    return (unsafe||'').toString()
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+}
+</script>
 <?php include("../includes/footer.php"); ?>
+

@@ -1,0 +1,11 @@
+{
+    "name": "sanruth/billing-erp",
+    "description": "Sanruth billing ERP application",
+    "type": "project",
+    "require": {
+        "php": ">=7.4"
+    },
+    "scripts": {
+        "test": "@php -r \"$root = new RecursiveDirectoryIterator(__DIR__, FilesystemIterator::SKIP_DOTS); $files = new RecursiveIteratorIterator($root); $failed = false; foreach ($files as $file) { if ($file->getExtension() !== 'php' || strpos($file->getPathname(), DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR) !== false || strpos($file->getPathname(), DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR) !== false) { continue; } passthru('php -l ' . escapeshellarg($file->getPathname()), $code); $failed = $failed || $code !== 0; } exit($failed ? 1 : 0);\""
+    }
+}

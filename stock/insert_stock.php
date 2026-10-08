@@ -16,7 +16,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ADMIN') {
     exit();
 }
 
-// If accessed directly via GET, redirect to add_stock.php form page
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && empty($_POST)) {
     header("Location: add_stock.php");
     exit();
@@ -36,7 +35,6 @@ function respondError($msg, $isAjax) {
     }
 }
 
-// Check if multi-stock batch array is submitted
 $multiBatch = isset($_POST['multi_items']) ? $_POST['multi_items'] : null;
 
 if ($multiBatch && is_array($multiBatch) && count($multiBatch) > 0) {
@@ -63,14 +61,13 @@ if ($multiBatch && is_array($multiBatch) && count($multiBatch) > 0) {
         $sellingUnit = floatval($itemData['sellingPricePerUnit'] ?? 0);
         $selledUnit = floatval($itemData['selledPricePerUnit'] ?? 0);
         $gstPercentage = floatval($itemData['gstPercentage'] ?? 0);
-        
+
         $minQty = intval($itemData['minQty'] ?? 0);
         $maxQty = intval($itemData['maxQty'] ?? 0);
         $reorderLevel = intval($itemData['reorderLevel'] ?? 0);
 
         if (empty($spare) || empty($itemName)) continue;
 
-        // Generate barcode if empty
         if (empty($barcode)) {
             $attempts = 0;
             do {
@@ -127,7 +124,6 @@ if ($multiBatch && is_array($multiBatch) && count($multiBatch) > 0) {
     }
 }
 
-// ================= SINGLE STOCK INSERT =================
 $spare = trim($_POST['spare'] ?? '');
 $itemName = trim($_POST['itemName'] ?? '');
 $brand = trim($_POST['brand'] ?? '');
@@ -143,7 +139,6 @@ $minQty = intval($_POST['minQty'] ?? 0);
 $maxQty = intval($_POST['maxQty'] ?? 0);
 $reorderLevel = intval($_POST['reorderLevel'] ?? 0);
 
-// Check mandatory fields
 if (empty($brand) || $brand === '0' || empty($model) || $model === '0') {
     respondError('Brand and Model are required. Please fill them before saving stock.', $isAjax);
 }
@@ -170,7 +165,6 @@ if ($quantity <= 0) {
     respondError("❌ Quantity must be greater than 0", $isAjax);
 }
 
-// Validate spare exists
 $spareVal = intval($spare);
 $stmtSp = mysqli_prepare($conn, "SELECT id FROM spares WHERE id = ?");
 mysqli_stmt_bind_param($stmtSp, "i", $spareVal);
@@ -180,7 +174,6 @@ if (mysqli_num_rows($resSp) == 0) {
     respondError("❌ Invalid spare selected. Please search and select again.", $isAjax);
 }
 
-// Duplicate Barcode check if barcode provided manually
 if (!empty($barcodeInput)) {
     $chkB = mysqli_prepare($conn, "SELECT id FROM stock WHERE barCode = ?");
     mysqli_stmt_bind_param($chkB, "s", $barcodeInput);
@@ -207,7 +200,6 @@ if (!empty($barcodeInput)) {
     } while ($exists && $attempts < 100);
 }
 
-// Duplicate Serial Number check if provided
 if (!empty($serialNo)) {
     $chkS = mysqli_prepare($conn, "SELECT id FROM stock WHERE serialNo = ?");
     mysqli_stmt_bind_param($chkS, "s", $serialNo);
@@ -218,13 +210,13 @@ if (!empty($serialNo)) {
     }
 }
 
-// Upload stock/spare photo if provided
 if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) {
     $tmpName = $_FILES['picture']['tmp_name'];
     $fileName = basename($_FILES['picture']['name']);
     $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
     $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-    if (in_array($ext, $allowed)) {
+    $imgInfo = @getimagesize($tmpName);
+    if (in_array($ext, $allowed) && $imgInfo !== false) {
         $uploadDir = '../uploads/stock/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);

@@ -2,7 +2,6 @@
 session_start();
 require_once __DIR__ . '/../config/db.php';
 
-// Filtering parameters
 $search = trim($_GET['search'] ?? '');
 $roleFilter = trim($_GET['role'] ?? '');
 $statusFilter = isset($_GET['status']) ? trim($_GET['status']) : '';
@@ -11,7 +10,7 @@ $whereClauses = ["1=1"];
 
 if (!empty($search)) {
     $searchEsc = mysqli_real_escape_string($conn, $search);
-    $whereClauses[] = "(name LIKE '%$searchEsc%' OR empId LIKE '%$searchEsc%' OR phoneNo1 LIKE '%$searchEsc%' OR phoneNo2 LIKE '%$searchEsc%' OR email LIKE '%$searchEsc%' OR city LIKE '%$searchEsc%' OR designation LIKE '%$searchEsc%')";
+    $whereClauses[] = "(name LIKE '%$searchEsc%' OR empId LIKE '%$searchEsc%' OR phoneNo1 LIKE '%$searchEsc%' OR phoneNo2 LIKE '%$searchEsc%' OR email LIKE '%$searchEsc%' OR city LIKE '%$searchEsc%')";
 }
 
 if (!empty($roleFilter)) {
@@ -24,7 +23,6 @@ if ($statusFilter !== '') {
     $whereClauses[] = "active = $statusInt";
 }
 
-// Fetch distinct roles for filter dropdown
 $distinctRolesRes = mysqli_query($conn, "SELECT DISTINCT UPPER(role) as roleName FROM employee WHERE role IS NOT NULL AND role != '' ORDER BY roleName ASC");
 $allRoles = ['ADMIN', 'TECHNICIAN', 'MANAGER', 'STAFF'];
 if ($distinctRolesRes) {
@@ -36,7 +34,6 @@ if ($distinctRolesRes) {
     }
 }
 
-// Pagination
 $page = max(1, intval($_GET['page'] ?? 1));
 $limit = 15;
 $offset = ($page - 1) * $limit;
@@ -53,15 +50,13 @@ include("../includes/header.php");
 ?>
 
 <div class="page-main-container erp-container" style="width: 100%; padding: 20px;">
-    
-    <!-- HEADER BAR -->
+
     <div class="erp-header-bar" style="background: #ffffff; padding: 16px 20px; border-radius: 8px 8px 0 0; border: 1px solid #cbd5e1; border-bottom: none; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
         <div class="erp-header-title" style="font-size: 20px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
             <span>👥 Employee Management</span>
             <span style="font-size: 13px; font-weight: 600; color: #64748b; background: #f1f5f9; padding: 2px 10px; border-radius: 4px; border: 1px solid #cbd5e1;"><?= $totalRows ?> Total</span>
         </div>
-        
-        <!-- COLOR CODED OUTER ACTION BOXES -->
+
         <div class="erp-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <a href="add.php" style="background: #2563eb; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 8px 16px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
                 ➕ New Employee
@@ -75,7 +70,6 @@ include("../includes/header.php");
         </div>
     </div>
 
-    <!-- FILTER PANEL -->
     <div id="empFilter" class="erp-filter-panel" style="display:<?= (!empty($search) || !empty($roleFilter) || $statusFilter !== '') ? 'block' : 'none' ?>; background: #f8fafc; padding: 16px 20px; border: 1px solid #cbd5e1; border-radius: 0 0 8px 8px; margin-bottom: 20px;">
         <form method="GET" class="erp-filter-form" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
             <div>
@@ -116,14 +110,20 @@ include("../includes/header.php");
         </div>
     <?php endif; ?>
 
-    <!-- MAIN TABLE -->
+    <?php if (isset($_SESSION['error_msg'])): ?>
+        <div style="background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; line-height: 1.5;">
+            ⚠️ <?= htmlspecialchars($_SESSION['error_msg']) ?>
+            <?php unset($_SESSION['error_msg']); ?>
+        </div>
+    <?php endif; ?>
+
     <div class="erp-table-box" style="background: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; overflow-x: auto; width: 100%;">
         <table class="erp-table master-table" style="width: 100%; border-collapse: collapse; min-width: 0;">
             <thead>
                 <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
                     <th style="width: 45px; padding: 12px 10px; text-align: center;">#</th>
                     <th style="padding: 12px 12px;">Emp ID</th>
-                    <th style="padding: 12px 12px;">Name & Designation</th>
+                    <th style="padding: 12px 12px;">Employee Name</th>
                     <th style="padding: 12px 12px;">Contact Info</th>
                     <th style="padding: 12px 12px;">City</th>
                     <th style="padding: 12px 12px; text-align: center;">Role</th>
@@ -133,23 +133,30 @@ include("../includes/header.php");
             </thead>
             <tbody>
                 <?php if ($totalRows > 0): ?>
-                    <?php 
+                    <?php
                     $i = $offset + 1;
-                    while ($emp = mysqli_fetch_assoc($employeesRes)): 
+                    while ($emp = mysqli_fetch_assoc($employeesRes)):
                         $isActive = intval($emp['active']) === 1;
                         $roleName = strtoupper($emp['role'] ?? 'STAFF');
                     ?>
                         <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;" onmouseover="this.style.background='#fbfcfe'" onmouseout="this.style.background='white'">
                             <td style="padding: 10px; text-align: center; color: #64748b; font-size: 13.5px; font-weight: 600;"><?= $i++ ?></td>
                             <td style="padding: 10px; font-weight: 700; color: #1e293b; font-size: 13.5px; font-family: monospace;">
-                                <?= htmlspecialchars($emp['empId'] ?? 'EMP-'.$emp['id']) ?>
+                                <?php
+                                $dEmpId = trim($emp['empId'] ?? '');
+                                $num = intval($emp['id']);
+                                if (preg_match('/\d+/', $dEmpId, $m)) {
+                                    $num = intval($m[0]);
+                                }
+                                $formattedEmpId = 'EMP' . str_pad($num, 4, '0', STR_PAD_LEFT);
+                                ?>
+                                <?= htmlspecialchars($formattedEmpId) ?>
                             </td>
                             <td style="padding: 10px;">
                                 <div style="font-weight: 700; color: #0f172a; font-size: 14px;"><?= htmlspecialchars($emp['name']) ?></div>
-                                <div style="font-size: 12px; color: #64748b;"><?= htmlspecialchars($emp['designation'] ?: ($emp['employmentType'] ?: 'Employee')) ?></div>
                             </td>
                             <td style="padding: 10px; font-size: 13px; color: #334155;">
-                                <div>📞 <strong><?= htmlspecialchars($emp['phoneNo1'] ?? '-') ?></strong></div>
+                                <div><strong><?= htmlspecialchars((!empty($emp['phoneNo1']) && $emp['phoneNo1'] !== '0') ? $emp['phoneNo1'] : '-') ?></strong></div>
                             </td>
                             <td style="padding: 10px; font-size: 13.5px; color: #475569;">
                                 <?= htmlspecialchars($emp['city'] ?: '-') ?>
@@ -161,9 +168,13 @@ include("../includes/header.php");
                             </td>
                             <td style="padding: 10px; text-align: center;">
                                 <?php if (intval($emp['active']) === 1): ?>
-                                    <span style="background: #dcfce7; color: #166534; font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 12px; border: 1px solid #86efac;">Active</span>
+                                    <a href="delete.php?id=<?= $emp['id'] ?>&action=toggle" title="Click to Deactivate employee" onclick="return confirm('Deactivate this employee?')" style="text-decoration: none;">
+                                        <span style="background: #dcfce7; color: #166534; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 12px; border: 1px solid #86efac; cursor: pointer; display: inline-block;">Active</span>
+                                    </a>
                                 <?php else: ?>
-                                    <span style="background: #fee2e2; color: #991b1b; font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 12px; border: 1px solid #fca5a5;">Inactive</span>
+                                    <a href="delete.php?id=<?= $emp['id'] ?>&action=toggle" title="Click to Activate employee" onclick="return confirm('Activate this employee?')" style="text-decoration: none;">
+                                        <span style="background: #fee2e2; color: #991b1b; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 12px; border: 1px solid #fca5a5; cursor: pointer; display: inline-block;">Inactive</span>
+                                    </a>
                                 <?php endif; ?>
                             </td>
                             <td style="padding: 10px; text-align: center;">
@@ -189,7 +200,6 @@ include("../includes/header.php");
         </table>
     </div>
 
-    <!-- PAGINATION -->
     <?php if ($totalPages > 1): ?>
         <div style="display: flex; justify-content: center; gap: 6px; margin-top: 20px; flex-wrap: wrap;">
             <?php for ($p = 1; $p <= $totalPages; $p++): ?>
@@ -201,3 +211,4 @@ include("../includes/header.php");
     <?php endif; ?>
 
 </div>
+

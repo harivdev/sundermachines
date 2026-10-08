@@ -9,7 +9,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ADMIN') {
     exit();
 }
 
-// Prevent any PHP undefined variable warnings
 $successMsg = (isset($_GET['success']) && $_GET['success'] == 1);
 $errorMsg = isset($_GET['error']) ? htmlspecialchars($_GET['error']) : '';
 $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
@@ -108,7 +107,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     margin-bottom: 20px;
   }
 
-  /* ── Top bar ── */
   .top-bar {
     display: flex;
     justify-content: space-between;
@@ -177,12 +175,21 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     transform: translateX(16px);
   }
 
-  /* ── Main Layout Grid ── */
   .stock-grid {
     display: grid;
     grid-template-columns: 210px 1fr 1fr;
     gap: 24px;
-    align-items: start;
+    align-items: stretch;
+  }
+
+  .main-stock-photo-wrap {
+    align-self: start;
+  }
+
+  .stock-pricing-col {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
 
   @media (max-width: 900px) {
@@ -280,17 +287,18 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     margin-bottom: 6px;
   }
 
-  /* ── Image Box ── */
   .image-box {
     width: 100%;
     aspect-ratio: 1 / 1;
-    background: #e9ecef;
-    border-radius: 8px;
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     position: relative;
+    box-sizing: border-box;
   }
 
   .image-box img {
@@ -300,12 +308,43 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
   }
 
   .image-box .placeholder-svg {
-    width: 80px;
-    height: 80px;
-    fill: #adb5bd;
+    width: 70px;
+    height: 70px;
+    fill: #94a3b8;
+    margin: auto;
+    display: block;
   }
 
-  /* ── Search Dropdown ── */
+  .modal-min-label {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    margin-bottom: 2px !important;
+    display: block !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.2px !important;
+    line-height: 1.15 !important;
+  }
+
+  .modal-min-input {
+    font-size: 12px !important;
+    padding: 5px 8px !important;
+    height: 30px !important;
+    box-sizing: border-box !important;
+  }
+
+  .modal-photo-btn-col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+    width: 100% !important;
+  }
+
+  .modal-photo-btn-col button {
+    width: 100% !important;
+    flex: none !important;
+  }
+
   .search-wrap {
     position: relative;
   }
@@ -346,11 +385,12 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     border-radius: 4px;
   }
 
-  /* ── Action Buttons at Bottom Right ── */
   .action-bar {
     display: flex;
     gap: 8px;
-    margin-top: 24px;
+    margin-top: auto;
+    padding-top: 24px;
+    margin-bottom: 12px;
     width: 100%;
   }
 
@@ -358,6 +398,12 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
   .action-bar .btn-res {
     flex: 1;
     text-align: center;
+    padding: 12.5px 18px;
+    min-height: 43px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
   }
 
   .btn-sub {
@@ -365,10 +411,15 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     color: #fff;
     border: none;
     border-radius: 6px;
-    padding: 11px 18px;
+    padding: 12.5px 18px;
+    min-height: 43px;
     font-weight: 600;
     font-size: 14.5px;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
   }
 
   .btn-res {
@@ -376,16 +427,20 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     color: #fff;
     border: none;
     border-radius: 6px;
-    padding: 11px 18px;
+    padding: 12.5px 18px;
+    min-height: 43px;
     font-weight: 600;
     font-size: 14.5px;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
   }
 
   .btn-sub:hover { background: #0b5ed7; }
   .btn-res:hover { background: #4c535a; }
 
-  /* ── Toast Alert ── */
   .toast {
     position: fixed;
     top: 75px;
@@ -400,7 +455,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     box-shadow: 0 4px 16px rgba(0,0,0,0.15);
   }
 
-  /* ── Modals ── */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -447,7 +501,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     margin-top: 20px;
   }
 
-  /* Multi Stock Batch Container */
   #multiStockContainer {
     display: none;
     margin-top: 20px;
@@ -467,15 +520,31 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     font-size: 12.5px;
   }
 
-  /* ── Responsive Layout Grid & Mobile Viewports ── */
   @media (max-width: 992px) {
     .stock-grid {
       grid-template-columns: 1fr !important;
-      gap: 16px;
+      gap: 12px;
     }
     .image-box {
-      max-width: 210px;
-      margin: 0 auto;
+      max-width: 250px !important;
+      height: 190px !important;
+      aspect-ratio: auto !important;
+      margin: 0 auto !important;
+    }
+    .main-stock-photo-wrap {
+      max-width: 250px !important;
+      margin: 0 auto !important;
+      text-align: center;
+    }
+    .main-stock-photo-wrap .photo-btn-row {
+      max-width: 250px !important;
+      margin: 6px auto 0 auto !important;
+    }
+    .photo-btn-row button {
+      padding: 7px 4px !important;
+      font-size: 11.5px !important;
+      gap: 4px !important;
+      white-space: nowrap !important;
     }
   }
 
@@ -510,13 +579,16 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
       gap: 10px;
     }
     .action-bar {
-      flex-direction: column;
-      width: 100%;
-      gap: 8px;
+      display: flex !important;
+      flex-direction: row !important;
+      width: 100% !important;
+      gap: 8px !important;
     }
     .btn-sub, .btn-res {
-      width: 100%;
-      padding: 10px 14px;
+      flex: 1 1 0 !important;
+      width: auto !important;
+      padding: 11.5px 14px !important;
+      min-height: 43px !important;
       text-align: center;
     }
     input[type=text], input[type=number], select {
@@ -530,7 +602,7 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
       padding: 0 8px;
     }
     .image-box {
-      max-width: 180px;
+      max-width: 230px;
     }
     .page-header h2 {
       font-size: 18px;
@@ -563,6 +635,14 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
 
 <div class="page-wrapper">
 
+  <?php if (!empty($_GET['barcode'])): ?>
+    <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; color: #1e40af; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; font-size: 13.5px;">
+      <div>
+        ℹ️ <strong>Adding new stock for Barcode:</strong> <span style="font-family: monospace; font-weight: 700; background: #dbeafe; padding: 2px 6px; border-radius: 4px;"><?= htmlspecialchars(trim($_GET['barcode'])) ?></span>
+      </div>
+    </div>
+  <?php endif; ?>
+
   <div class="page-header">
     <h2>Stock Info</h2>
     <div class="header-actions">
@@ -576,8 +656,7 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
 
   <div class="card">
 
-    <!-- Top Bar -->
-    <div class="top-bar"> 
+    <div class="top-bar">
       <div class="toggle-row">
         <label class="toggle" style="margin:0;">
           <input type="checkbox" id="selledToggle" name="selled" value="1">
@@ -588,11 +667,11 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     </div>
 
     <form method="POST" action="insert_stock.php" id="stockForm" enctype="multipart/form-data" onsubmit="return handleFormSubmit(event)">
+      <input type="hidden" name="barCode" id="presetBarcode" value="<?= htmlspecialchars(trim($_GET['barcode'] ?? '')) ?>">
 
       <div class="stock-grid">
 
-        <!-- COLUMN 1: IMAGE PLACEHOLDER -->
-        <div>
+        <div class="main-stock-photo-wrap">
           <div class="image-box" id="imageBox" style="position: relative; cursor: pointer;" onclick="if(document.getElementById('spareImg').src && document.getElementById('spareImg').style.display !== 'none') openStockLightbox(document.getElementById('spareImg').src)">
             <img id="spareImg" src="" alt="" style="display:none;" onerror="this.style.display='none'; document.getElementById('imgSvg').style.display='block';">
             <svg id="imgSvg" class="placeholder-svg" viewBox="0 0 16 16">
@@ -601,13 +680,12 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
             </svg>
           </div>
 
-          <!-- Dual Photo Upload Buttons for Main Stock Entry -->
-          <div style="display: flex; gap: 6px; flex-direction: column; margin-top: 10px;">
-            <button type="button" id="btnTakeStockPhoto" onclick="triggerStockCamera()" style="background: #2563eb; color: #fff; border: none; padding: 7px 12px; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
-              📷 Take Photo (Camera)
+          <div class="photo-btn-row" style="display: flex; gap: 6px; flex-direction: row; margin-top: 6px;">
+            <button type="button" id="btnTakeStockPhoto" onclick="triggerStockCamera()" style="flex: 1 1 0; background: #2563eb; color: #fff; border: none; padding: 7px 4px; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap;">
+              <span style="font-size: 13px;">📷</span> Take Photo
             </button>
-            <button type="button" id="btnChooseStockGallery" onclick="triggerStockGallery()" style="background: #475569; color: #fff; border: none; padding: 7px 12px; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
-              📁 Choose File (System)
+            <button type="button" id="btnChooseStockGallery" onclick="triggerStockGallery()" style="flex: 1 1 0; background: #475569; color: #fff; border: none; padding: 7px 4px; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap;">
+              <span style="font-size: 13px;">📁</span> Choose File
             </button>
           </div>
 
@@ -615,7 +693,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
           <input type="file" name="picture_gallery" id="addStockGallery" accept="image/*" style="display:none;" onchange="previewAddStockImage(this)">
         </div>
 
-        <!-- COLUMN 2: ITEM NAME, RACK #, PART #, BRAND, MODEL, QTY, STOCKS -->
         <div>
 
           <div class="form-group">
@@ -628,7 +705,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
             <input type="hidden" name="sparePicture" id="sparePicture">
           </div>
 
-          <!-- Rack # and Part # Row -->
           <div class="grid-2 form-group">
             <div>
               <label>Rack #</label>
@@ -640,7 +716,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
             </div>
           </div>
 
-          <!-- Brand and Model Row -->
           <div class="grid-2 form-group">
             <div>
               <label>Brand <span style="color:#dc3545">*</span><a class="add-link" onclick="openModal('brandModal')">Add</a></label>
@@ -672,13 +747,11 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
             </div>
           </div>
 
-          <!-- Quantity Row -->
           <div class="form-group">
             <label>Quantity <span style="color:#dc3545">*</span></label>
             <input type="number" id="qtyInput" name="quantity" value="1" min="1" required oninput="syncQty(this)">
           </div>
 
-          <!-- STOCK THRESHOLDS -->
           <div class="section-title">Stock Thresholds:</div>
           <div class="grid-3 form-group">
             <div>
@@ -695,13 +768,11 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
             </div>
           </div>
 
-          <!-- STOCKED QUANTITY -->
           <div class="form-group">
             <label>Stock Quantity <span style="color:var(--red)">*</span></label>
             <input type="number" name="quantity" id="qtyInput" value="1" min="1" required oninput="calc()" style="font-weight: 700;">
           </div>
 
-          <!-- Hidden optional fields stored cleanly -->
           <input type="hidden" name="serialNo" id="serialNo" value="">
           <input type="hidden" name="unit" id="unitSelect" value="1">
           <input type="hidden" name="machine" id="machineSelect" value="">
@@ -709,8 +780,7 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
 
         </div>
 
-        <!-- COLUMN 3: PRICE PER QUANTITY, TOTAL PRICE, WARRANTY, ACTIONS -->
-        <div>
+        <div class="stock-pricing-col">
 
           <div class="section-title">Price Per Quantity</div>
           <div class="grid-3 form-group">
@@ -750,7 +820,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
             <input type="number" name="warrantyInMonths" id="warrantyInMonths" placeholder="0" min="0">
           </div>
 
-          <!-- Hidden calculations -->
           <input type="hidden" name="actualPricePerQty" id="tActual">
           <input type="hidden" name="actualPricePerUnit" id="actualUnit">
           <input type="hidden" name="sellingPricePerQty" id="tSelling">
@@ -759,24 +828,20 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
           <input type="hidden" name="gstPercentage" id="gstHidden">
           <input type="hidden" name="availableQty" id="availableQty">
 
-          <!-- Action Buttons -->
           <div class="action-bar">
-            <button type="submit" class="btn-sub">Submit</button>
             <button type="button" class="btn-res" onclick="resetForm()">Reset</button>
+            <button type="submit" class="btn-sub">Submit</button>
           </div>
 
         </div>
 
       </div>
 
-
-
     </form>
 
   </div>
 </div>
 
-<!-- ================= QUICK ADD MODAL A: BRAND ================= -->
 <div id="brandModal" class="modal-overlay">
   <div class="modal-box">
     <h3>Add New Brand <button type="button" class="modal-close" onclick="closeModal('brandModal')">✕</button></h3>
@@ -791,7 +856,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
   </div>
 </div>
 
-<!-- ================= QUICK ADD MODAL B: MODEL ================= -->
 <div id="modelModal" class="modal-overlay">
   <div class="modal-box">
     <h3>Add New Model <button type="button" class="modal-close" onclick="closeModal('modelModal')">✕</button></h3>
@@ -806,84 +870,69 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
   </div>
 </div>
 
-<!-- ================= QUICK ADD MODAL C: SPARE INFO (IMAGE 1 MATCHING) ================= -->
 <div id="itemModal" class="modal-overlay">
   <div class="modal-box lg">
     <h3>Spare Info <button type="button" class="modal-close" onclick="closeModal('itemModal')">✕</button></h3>
     <form id="newItemForm" onsubmit="saveNewItem(event)" enctype="multipart/form-data">
-      <div style="display:flex; gap:20px; align-items:flex-start;">
-        
-        <!-- Left: Image Box + Active Toggle -->
-        <div style="width:160px; flex-shrink:0; text-align:center;">
-          <div style="width:160px; height:160px; background:#e9ecef; border:2px dashed #ced4da; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; overflow:hidden; position:relative;" onclick="document.getElementById('modalGalleryInput').click()">
+      <div style="display:flex; gap:12px; align-items:flex-start;">
+
+        <div style="width:125px; flex-shrink:0; text-align:center;">
+          <div style="width:125px; height:125px; background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; overflow:hidden; position:relative; margin:0 auto;" onclick="document.getElementById('modalGalleryInput').click()">
             <img id="modalImgPreview" style="max-width:100%; max-height:100%; object-fit:contain; display:none;">
-            <svg id="modalImgSvg" style="width:60px; height:60px; fill:#adb5bd;" viewBox="0 0 16 16">
+            <svg id="modalImgSvg" style="width:48px; height:48px; fill:#94a3b8;" viewBox="0 0 16 16">
               <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
               <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
             </svg>
           </div>
 
-          <!-- Dual Camera & Gallery Photo Upload Buttons for Modal -->
-          <div style="display: flex; gap: 6px; flex-direction: column; margin-top: 8px;">
-            <button type="button" onclick="openErpCamera(function(dataUrl, file){ if(dataUrl){ let img = document.getElementById('modalImgPreview'); let svg = document.getElementById('modalImgSvg'); if(img){ img.src = dataUrl; img.style.display = 'block'; } if(svg) svg.style.display = 'none'; if(file){ try { let c = new DataTransfer(); c.items.add(file); document.getElementById('modalGalleryInput').files = c.files; } catch(e){} } } })" style="background: #2563eb; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+          <div class="modal-photo-btn-col" style="display: flex !important; gap: 5px !important; flex-direction: column !important; margin-top: 6px; width: 100%;">
+            <button type="button" onclick="openErpCamera(function(dataUrl, file){ if(dataUrl){ let img = document.getElementById('modalImgPreview'); let svg = document.getElementById('modalImgSvg'); if(img){ img.src = dataUrl; img.style.display = 'block'; } if(svg) svg.style.display = 'none'; if(file){ try { let c = new DataTransfer(); c.items.add(file); document.getElementById('modalGalleryInput').files = c.files; } catch(e){} } } })" style="width: 100% !important; background: #2563eb; color: #fff; border: none; padding: 6px 4px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap; box-sizing: border-box;">
               📷 Take Photo
             </button>
-            <button type="button" onclick="document.getElementById('modalGalleryInput').click()" style="background: #475569; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+            <button type="button" onclick="document.getElementById('modalGalleryInput').click()" style="width: 100% !important; background: #475569; color: #fff; border: none; padding: 6px 4px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap; box-sizing: border-box;">
               📁 Choose File
             </button>
           </div>
 
-          <input type="file" name="picture" id="modalCameraInput" accept="image/*" capture="environment" style="display:none;" onchange="previewModalImage(this)">
+          <input type="file" name="picture_camera" id="modalCameraInput" accept="image/*" capture="environment" style="display:none;" onchange="previewModalImage(this)">
           <input type="file" name="picture" id="modalGalleryInput" accept="image/*" style="display:none;" onchange="previewModalImage(this)">
         </div>
 
-        <!-- Right: Spare Name, Part #, Rack #, Active -->
-        <div style="flex:1;">
-          <div class="form-group">
-            <label>Spare Name <span style="color:#dc3545">*</span></label>
-            <input type="text" id="ni_name" name="spareName" placeholder="" required>
+        <div style="flex:1; min-width: 0;">
+          <div class="form-group" style="margin-bottom: 6px;">
+            <label class="modal-min-label">Spare Name <span style="color:#dc3545">*</span></label>
+            <input type="text" id="ni_name" name="spareName" placeholder="" required class="modal-min-input">
           </div>
-          <div class="grid-2 form-group">
-            <div>
-              <label>Part # <span style="color:#dc3545">*</span></label>
-              <input type="text" id="ni_part" name="partNo" placeholder="" required>
-            </div>
-            <div>
-              <label>Rack # <span style="color:#dc3545">*</span></label>
-              <input type="text" id="ni_rack" name="rackNumber" placeholder="" required>
-            </div>
+          <div class="form-group" style="margin-bottom: 6px;">
+            <label class="modal-min-label">Part # <span style="color:#dc3545">*</span></label>
+            <input type="text" id="ni_part" name="partNo" placeholder="" required class="modal-min-input">
           </div>
-          <div class="grid-2 form-group" style="margin-top: 10px;">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <input type="checkbox" name="active" value="1" checked style="width:auto; cursor:pointer;">
-              <span style="background:#8b5cf6; color:#fff; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700;">✓ Active</span>
-            </div>
-            <div></div>
+          <div class="form-group" style="margin-bottom: 6px;">
+            <label class="modal-min-label">Rack # <span style="color:#dc3545">*</span></label>
+            <input type="text" id="ni_rack" name="rackNumber" placeholder="" required class="modal-min-input">
+          </div>
+          <div style="display:flex; align-items:center; gap:6px; margin-top: 4px;">
+            <input type="checkbox" name="active" value="1" checked style="width:auto; cursor:pointer;">
+            <span style="background:#8b5cf6; color:#fff; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:700;">✓ Active</span>
           </div>
         </div>
 
       </div>
 
       <div class="modal-footer">
-        <button type="submit" class="btn-sub">Submit</button>
         <button type="button" class="btn-res" onclick="closeModal('itemModal')">Cancel</button>
+        <button type="submit" class="btn-sub">Submit</button>
       </div>
     </form>
   </div>
 </div>
 
-
-
-
-
 <script>
 
-  // ── Init ──
   window.onload = function () {
     calc();
   };
 
-  // ── Modal Image Preview ──
   function previewModalImage(input) {
     if (input.files && input.files[0]) {
       let reader = new FileReader();
@@ -929,7 +978,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     modal.style.display = 'flex';
   }
 
-  // ── Toast Helper ──
   function showToast(msg, isSuccess = true) {
     let container = document.getElementById("toastContainer");
     let t = document.createElement("div");
@@ -940,7 +988,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     setTimeout(() => { t.remove(); }, 3500);
   }
 
-  // ── Spare Image Loader ──
   function loadSpareImage(picturePath) {
     let img = document.getElementById("spareImg");
     let svg = document.getElementById("imgSvg");
@@ -967,7 +1014,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     if (svg) svg.style.display = "block";
   }
 
-  // ── Sync quantity fields ──
   function syncQty(el) {
     let val = Math.max(1, +el.value || 1);
     document.getElementById("qtyInput").value = val;
@@ -977,7 +1023,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     calc();
   }
 
-  // ── Calculation ──
   function calc() {
     let q = +document.getElementById("qtyInput").value || 1;
     let aStr = document.getElementById("actual").value;
@@ -1011,9 +1056,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     el.addEventListener("input", calc);
   });
 
-
-
-  // ── Search Spare Autocomplete ──
   function searchSpare() {
     let term = document.getElementById("spareSearch").value.trim();
     if (term.length < 1) {
@@ -1071,14 +1113,12 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     if (item.model) document.getElementById("modelSelect").value = item.model;
     if (item.machine) document.getElementById("machineSelect").value = item.machine;
     if (item.unit) document.getElementById("unitSelect").value = item.unit;
-    
+
     if (item.actualPricePerUnit !== undefined) document.getElementById("actual").value = item.actualPricePerUnit;
     if (item.sellingPricePerUnit !== undefined) document.getElementById("selling").value = item.sellingPricePerUnit;
     if (item.gstPercentage !== undefined) document.getElementById("gst").value = item.gstPercentage;
     if (item.warrantyInMonths !== undefined) document.getElementById("warrantyInMonths").value = item.warrantyInMonths;
     if (item.purchaseItem !== undefined) document.getElementById("purchaseItemSelect").value = item.purchaseItem;
-
-
 
     loadSpareImage(item.picture);
 
@@ -1104,7 +1144,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
       .catch(() => { calc(); });
   }
 
-  // ── Multi Stock Toggle & Manager ──
   function toggleMultiStock(cb) {
     let container = document.getElementById("multiStockContainer");
     if (cb.checked) {
@@ -1130,7 +1169,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     tbody.appendChild(tr);
   }
 
-  // ── Quick Add Modals JS ──
   function openModal(id) { document.getElementById(id).style.display = 'block'; }
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
@@ -1219,17 +1257,35 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     let form = document.getElementById("newItemForm");
     let formData = new FormData(form);
 
+    // If modalCameraInput has a file and modalGalleryInput doesn't, use picture_camera
+    let camInp = document.getElementById("modalCameraInput");
+    let galInp = document.getElementById("modalGalleryInput");
+    if (camInp && camInp.files && camInp.files.length > 0 && (!galInp || !galInp.files || galInp.files.length === 0)) {
+      formData.set("picture", camInp.files[0]);
+    }
+
     fetch("save_item.php", {
       method: "POST",
       body: formData
     })
-    .then(r => r.json())
+    .then(async r => {
+      let text = await r.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        console.error("save_item server response:", text);
+        if (text.includes("POST Content-Length") || text.includes("exceeds the limit")) {
+          throw new Error("Image file is too large. Please select a smaller photo (under 2MB).");
+        }
+        throw new Error("Server error saving spare. Check console for details.");
+      }
+    })
     .then(data => {
       if (data.success && data.spare) {
         showToast(data.message || "Spare created successfully!");
         closeModal("itemModal");
         form.reset();
-        
+
         let preview = document.getElementById("modalImgPreview");
         let svg = document.getElementById("modalImgSvg");
         if (preview) preview.style.display = "none";
@@ -1240,7 +1296,10 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
         showToast(data.message || "Failed to add new spare.", false);
       }
     })
-    .catch(() => showToast("Error creating new spare.", false));
+    .catch(err => {
+      console.error(err);
+      showToast(err.message || "Error creating new spare.", false);
+    });
   }
 
   function handleFormSubmit(e) {
@@ -1301,7 +1360,6 @@ $successCount = isset($_GET['count']) ? intval($_GET['count']) : 0;
     m.addEventListener("click", e => { if (e.target === m) m.style.display = "none"; });
   });
 
-  // ── UNIFIED ERP CAMERA INTEGRATION ──
   function triggerStockCamera() {
     console.log("Camera button clicked");
     openErpCamera(function(dataUrl, file) {

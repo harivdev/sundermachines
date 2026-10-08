@@ -1,7 +1,6 @@
 <?php
 require_once(__DIR__ . "/../config/db.php");
 
-// Determine active filter preset and date range
 $preset = isset($_GET['preset']) ? trim($_GET['preset']) : '';
 $fromDate = isset($_GET['from_date']) ? trim($_GET['from_date']) : '';
 $toDate = isset($_GET['to_date']) ? trim($_GET['to_date']) : '';
@@ -28,7 +27,6 @@ if ($preset === 'today') {
     $toDate = '';
 }
 
-// Calculate active preset for button styling
 $todayStr = date('Y-m-d');
 $yesterdayStr = date('Y-m-d', strtotime('-1 day'));
 $weekStr = date('Y-m-d', strtotime('-7 days'));
@@ -51,7 +49,6 @@ if ($preset === 'custom' || empty($preset)) {
     }
 }
 
-// Build WHERE clause
 $where = "WHERE jis.deleted = 0";
 
 if ($search !== '') {
@@ -69,9 +66,8 @@ if ($toDate !== '') {
     $where .= " AND DATE(jis.createdOn) <= '$safeTo'";
 }
 
-// 1. Calculate Daily No mapping across all records in chronological order
 $chronoQuery = "
-    SELECT 
+    SELECT
         jis.id,
         jis.createdOn
     FROM jobcarditemspares jis
@@ -100,7 +96,6 @@ if ($chronoResult) {
     }
 }
 
-// 2. Handle Clean CSV Export (Free of PHP 8.1+ deprecation warnings & HTML output)
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     while (ob_get_level()) {
         ob_end_clean();
@@ -108,7 +103,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     ini_set('display_errors', 0);
 
     $exportQuery = "
-        SELECT 
+        SELECT
             jis.id,
             jis.itemName,
             jis.quantity,
@@ -131,7 +126,6 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     header('Expires: 0');
 
     $output = fopen('php://output', 'w');
-    // Output UTF-8 BOM for Excel compatibility
     fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
 
     fputcsv($output, ['No', 'Job Card No', 'Spare', 'Quantity', 'Price', 'Total Price', 'Date', 'Time'], ',', '"', "\\");
@@ -160,14 +154,12 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     exit;
 }
 
-// Standard Page Request Header Inclusion
 include(__DIR__ . "/../includes/header.php");
 
 $limit = 10;
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $offset = ($page - 1) * $limit;
 
-// 3. Count total rows for pagination
 $countQuery = "
     SELECT COUNT(jis.id) AS total
     FROM jobcarditemspares jis
@@ -184,9 +176,8 @@ if ($page > $totalPages && $totalPages > 0) {
     $offset = ($page - 1) * $limit;
 }
 
-// 4. Main Query for page records (Sorted Latest First)
 $query = "
-    SELECT 
+    SELECT
         jis.id,
         jis.itemName,
         jis.quantity,
@@ -268,7 +259,6 @@ $queryString = http_build_query($queryParams);
         pointer-events: none;
     }
 
-    /* RESPONSIVE FILTER PANEL LAYOUT */
     .filter-form-row {
         display: flex;
         flex-wrap: wrap;
@@ -341,9 +331,8 @@ $queryString = http_build_query($queryParams);
     }
 </style>
 
-<div class="page-main-container erp-container" style="padding: 20px; background: #f8fafc; min-height: calc(100vh - 110px);">
+<div class="page-main-container erp-container" style="padding: 20px; background: #f8fafc;">
 
-    <!-- HEADER BAR -->
     <div class="list-header-bar" style="background: #ffffff; display: flex; align-items: center; justify-content: space-between; border-radius: 8px 8px 0 0; padding: 15px 20px; border: 1px solid #e2e8f0; border-bottom: none; flex-wrap: wrap; gap: 10px;">
         <div class="list-header-title" style="color: #1e293b; font-weight: 700; font-size: 20px; display: flex; align-items: center; gap: 8px;">
             <span>⚙️</span> Job Card Spares
@@ -361,7 +350,6 @@ $queryString = http_build_query($queryParams);
         </div>
     </div>
 
-    <!-- PRESET BUTTONS BAR -->
     <div style="background: #ffffff; padding: 10px 20px; border: 1px solid #e2e8f0; border-bottom: none; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
         <span style="font-size: 13px; font-weight: 600; color: #64748b; white-space: nowrap;">Quick Date:</span>
         <div style="display: flex; gap: 8px; flex-wrap: wrap; flex: 1; align-items: center;">
@@ -373,7 +361,6 @@ $queryString = http_build_query($queryParams);
         </div>
     </div>
 
-    <!-- FILTER PANEL -->
     <div id="sparesFilter" style="display:<?= (!empty($search) || !empty($_GET['from_date']) || !empty($_GET['to_date'])) ? 'block' : 'none' ?>; background:#ffffff; padding:15px 20px; border:1px solid #e2e8f0; border-bottom:none;">
         <form method="GET" action="spares_list.php" class="filter-form-row">
             <input type="hidden" name="preset" value="custom">
@@ -400,7 +387,6 @@ $queryString = http_build_query($queryParams);
         </form>
     </div>
 
-    <!-- TABLE CONTAINER -->
     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px; overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; min-width: 1000px; white-space: nowrap;">
             <thead>
@@ -416,7 +402,7 @@ $queryString = http_build_query($queryParams);
             </thead>
             <tbody>
                 <?php if (mysqli_num_rows($result) > 0): ?>
-                    <?php while ($row = mysqli_fetch_assoc($result)): 
+                    <?php while ($row = mysqli_fetch_assoc($result)):
                         $dNo = $dailyNoMap[$row['id']] ?? 1;
                         $cOn = !empty($row['createdOn']) && $row['createdOn'] !== '0000-00-00 00:00:00' ? strtotime($row['createdOn']) : false;
                         $displayDate = $cOn ? date('d-m-Y', $cOn) : '-';
@@ -471,19 +457,16 @@ $queryString = http_build_query($queryParams);
         </table>
     </div>
 
-    <!-- ENHANCED PAGINATION BAR -->
     <div class="list-pagination-bar" style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding: 0 4px; flex-wrap: wrap; gap: 10px;">
         <div class="pagination-info" style="color: #64748b; font-size: 14px; font-weight: 400;">
             Showing <?= $totalRows > 0 ? ($offset + 1) : 0 ?>–<?= min($offset + $limit, $totalRows) ?> of <?= $totalRows ?> records &nbsp;|&nbsp; Page <?= $page ?> of <?= $totalPages ?>
         </div>
         <div class="pagination-buttons" style="display: flex; gap: 6px; align-items: center;">
-            <!-- FIRST BUTTON -->
+
             <a href="spares_list.php?page=1<?= !empty($queryString) ? '&' . $queryString : '' ?>" class="btn-pg <?= $page <= 1 ? 'disabled' : '' ?>">First</a>
 
-            <!-- PREVIOUS BUTTON -->
             <a href="spares_list.php?page=<?= max(1, $page - 1) ?><?= !empty($queryString) ? '&' . $queryString : '' ?>" class="btn-pg <?= $page <= 1 ? 'disabled' : '' ?>">Previous</a>
 
-            <!-- NUMERIC PAGE BUTTONS -->
             <?php
             $startP = max(1, $page - 2);
             $endP = min($totalPages, $page + 2);
@@ -492,17 +475,14 @@ $queryString = http_build_query($queryParams);
                 <a href="spares_list.php?page=<?= $p ?><?= !empty($queryString) ? '&' . $queryString : '' ?>" class="btn-pg <?= $p === $page ? 'active' : '' ?>"><?= $p ?></a>
             <?php endfor; ?>
 
-            <!-- NEXT BUTTON -->
             <a href="spares_list.php?page=<?= min($totalPages, $page + 1) ?><?= !empty($queryString) ? '&' . $queryString : '' ?>" class="btn-pg <?= $page >= $totalPages ? 'disabled' : '' ?>">Next</a>
 
-            <!-- LAST BUTTON -->
             <a href="spares_list.php?page=<?= $totalPages ?><?= !empty($queryString) ? '&' . $queryString : '' ?>" class="btn-pg <?= $page >= $totalPages ? 'disabled' : '' ?>">Last</a>
         </div>
     </div>
 
 </div>
 
-<!-- INTERACTIVE DOWNLOAD REPORT MODAL -->
 <div id="downloadModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9999; backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: #ffffff; width: 90%; max-width: 480px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); overflow: hidden;">
         <div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #ffffff; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
@@ -518,7 +498,7 @@ $queryString = http_build_query($queryParams);
             <?php endif; ?>
 
             <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 12px;">Which date range report do you want to download?</label>
-            
+
             <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
                 <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #1e293b; cursor: pointer; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-weight: 500;">
                     <input type="radio" name="preset" value="today" checked onclick="toggleModalCustomDates(false)">
@@ -582,3 +562,4 @@ function toggleModalCustomDates(show) {
 </script>
 
 <?php include(__DIR__ . "/../includes/footer.php"); ?>
+

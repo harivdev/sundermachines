@@ -31,7 +31,6 @@ if (empty($spareName)) {
     exit();
 }
 
-// Check duplicate Item Name + Part Number
 if (!empty($partNo)) {
     $stmtChk = mysqli_prepare($conn, "SELECT id FROM spares WHERE LOWER(spareName) = LOWER(?) AND LOWER(partNo) = LOWER(?)");
     mysqli_stmt_bind_param($stmtChk, "ss", $spareName, $partNo);
@@ -50,16 +49,20 @@ if ($row = mysqli_fetch_assoc($resChk)) {
     exit();
 }
 
-// Image upload handling for 'picture' or 'image'
 $picture = 'no-image.png';
 $fileObj = isset($_FILES['picture']) ? $_FILES['picture'] : (isset($_FILES['image']) ? $_FILES['image'] : null);
+
+if ($fileObj && $fileObj['error'] === UPLOAD_ERR_INI_SIZE) {
+    echo json_encode(['success' => false, 'message' => 'Uploaded image is too large (exceeds PHP 2MB limit). Please select a smaller photo.']);
+    exit();
+}
 
 if ($fileObj && $fileObj['error'] === UPLOAD_ERR_OK) {
     $fileTmp = $fileObj['tmp_name'];
     $fileName = $fileObj['name'];
     $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
     $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-    
+
     if (in_array($fileExt, $allowed)) {
         $uploadDir = '../uploads/stock/';
         if (!is_dir($uploadDir)) {
@@ -68,7 +71,7 @@ if ($fileObj && $fileObj['error'] === UPLOAD_ERR_OK) {
         $safePart = !empty($partNo) ? preg_replace('/[^a-zA-Z0-9_-]/', '', $partNo) : 'STK';
         $newFileName = $safePart . '_' . time() . '_1.' . $fileExt;
         $destination = $uploadDir . $newFileName;
-        
+
         if (move_uploaded_file($fileTmp, $destination)) {
             $picture = 'uploads/stock/' . $newFileName;
         }
@@ -81,7 +84,7 @@ mysqli_stmt_bind_param($stmt, "ssssis", $spareName, $partNo, $rackNumber, $pictu
 
 if (mysqli_stmt_execute($stmt)) {
     $newId = mysqli_insert_id($conn);
-    
+
     echo json_encode([
         'success' => true,
         'message' => 'Spare created successfully',
@@ -106,3 +109,4 @@ if (mysqli_stmt_execute($stmt)) {
 }
 exit();
 ?>
+

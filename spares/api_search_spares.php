@@ -1,5 +1,4 @@
 <?php
-// spares/api_search_spares.php
 require_once(__DIR__ . "/../config/db.php");
 
 header('Content-Type: application/json');
@@ -10,16 +9,16 @@ $termEsc = mysqli_real_escape_string($conn, $term);
 $where = "WHERE 1=1";
 if ($termEsc !== '') {
     $where .= " AND (
-        sp.spareName LIKE '%$termEsc%' OR 
-        s.itemName LIKE '%$termEsc%' OR 
-        sp.partNo LIKE '%$termEsc%' OR 
-        s.barCode LIKE '%$termEsc%' OR 
-        sp.rackNumber LIKE '%$termEsc%' OR 
+        sp.spareName LIKE '%$termEsc%' OR
+        s.itemName LIKE '%$termEsc%' OR
+        sp.partNo LIKE '%$termEsc%' OR
+        s.barCode LIKE '%$termEsc%' OR
+        sp.rackNumber LIKE '%$termEsc%' OR
         s.id LIKE '%$termEsc%'
     )";
 }
 
-$sql = "SELECT 
+$sql = "SELECT
             s.id AS stock_id,
             sp.id AS spare_id,
             COALESCE(sp.spareName, s.itemName) AS spareName,
@@ -57,3 +56,4 @@ if ($res) {
 echo json_encode(['success' => true, 'data' => $data]);
 exit;
 ?>
+

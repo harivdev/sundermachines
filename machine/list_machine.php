@@ -2,38 +2,47 @@
 <?php require_once("../includes/auth.php"); ?>
 <?php requireAdmin(); ?>
 <?php
-// Quick POST handler for adding machine
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'add') {
-    $mName = mysqli_real_escape_string($conn, $_POST['machineName']);
-    if (!empty($mName)) {
-        $now = date('Y-m-d H:i:s');
-        $user = "System Admin";
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
+    $mName = mysqli_real_escape_string($conn, trim($_POST['machineName'] ?? ''));
+    $now = date('Y-m-d H:i:s');
+    $user = "System Admin";
+
+    if ($_POST['action'] == 'add' && !empty($mName)) {
+        $check = mysqli_query($conn, "SELECT id FROM machine WHERE machineName = '$mName'");
+        if (mysqli_num_rows($check) > 0) {
+            echo "<script>alert('Error: Machine with this name already exists!'); window.location.href='list_machine.php';</script>";
+            exit();
+        }
         $sql = "INSERT INTO machine (machineName, active, createdBy, createdOn) VALUES ('$mName', b'1', '$user', '$now')";
         mysqli_query($conn, $sql);
-        echo "<script>window.location.href='list_machine.php';</script>";
-        exit();
+    } elseif ($_POST['action'] == 'update' && isset($_POST['id']) && !empty($mName)) {
+        $id = (int)$_POST['id'];
+        $check = mysqli_query($conn, "SELECT id FROM machine WHERE machineName = '$mName' AND id != $id");
+        if (mysqli_num_rows($check) > 0) {
+            echo "<script>alert('Error: Another machine with this name already exists!'); window.location.href='list_machine.php';</script>";
+            exit();
+        }
+        $sql = "UPDATE machine SET machineName = '$mName', modifiedBy = '$user', modifiedOn = '$now' WHERE id = $id";
+        mysqli_query($conn, $sql);
     }
+    echo "<script>window.location.href='list_machine.php';</script>";
+    exit();
 }
 ?>
 <?php include("../includes/header.php"); ?>
 
 <?php
-// ================= PAGINATION =================
 $limit = 10;
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $offset = ($page - 1) * $limit;
 
-// ================= FILTER =================
 $where = "WHERE 1=1";
-
 $name = $_GET['name'] ?? '';
-
 if (!empty($name)) {
     $safe = mysqli_real_escape_string($conn, $name);
     $where .= " AND machineName LIKE '%$safe%'";
 }
 
-// ================= COUNT =================
 $countRes = mysqli_query($conn, "SELECT COUNT(*) AS total FROM machine $where");
 $totalRows = (int)mysqli_fetch_assoc($countRes)['total'];
 $totalPages = $totalRows > 0 ? ceil($totalRows / $limit) : 1;
@@ -42,8 +51,7 @@ if ($page > $totalPages && $totalPages > 0) {
     $offset = ($page - 1) * $limit;
 }
 
-// ================= DATA =================
-$query = "SELECT * FROM machine $where ORDER BY id DESC LIMIT $limit OFFSET $offset";
+$query = "SELECT * FROM machine $where ORDER BY id ASC LIMIT $limit OFFSET $offset";
 $res = mysqli_query($conn, $query);
 
 $queryParams = $_GET;
@@ -53,82 +61,39 @@ $queryString = http_build_query($queryParams);
 
 <style>
     .erp-container {
-        max-width: 1100px;
+        max-width: 1000px;
         margin: 25px auto;
         padding: 0 15px;
     }
 
-    .badge-active {
-        background: #10b981;
-        color: #ffffff;
-        padding: 4px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 700;
-        display: inline-block;
-        box-shadow: 0 1px 3px rgba(16, 185, 129, 0.2);
+    input:focus {
+        outline: none;
+        border-color: #2563eb !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
     }
 
-    .badge-inactive {
-        background: #ef4444;
-        color: #ffffff;
-        padding: 4px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 700;
-        display: inline-block;
-        box-shadow: 0 1px 3px rgba(239, 68, 68, 0.2);
-    }
-
-    .btn-edit-action {
-        background: #f59e0b;
-        color: #ffffff;
-        padding: 7px 16px;
-        border-radius: 8px;
-        font-weight: 700;
-        font-size: 13px;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.2s ease-in-out;
-        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.25);
-    }
-
-    .btn-edit-action:hover {
-        background: #d97706;
-        color: #ffffff;
+    button:hover {
+        filter: brightness(1.1);
         transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(217, 119, 6, 0.35);
     }
 
-    .machine-table-cell-link {
-        color: #1e293b;
-        font-weight: 600;
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-
-    .machine-table-cell-link:hover {
-        color: #d97706;
-    }
-
-    /* FILTER DRAWER STYLING */
     .filter-drawer {
         position: fixed;
         top: 0;
-        right: -320px;
-        width: 300px;
+        right: 0;
+        width: 320px;
         height: 100%;
         background: #ffffff;
         padding: 25px;
         box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
-        transition: right 0.3s ease-in-out;
+        transform: translateX(100%);
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         z-index: 1050;
+        box-sizing: border-box;
     }
 
     .filter-drawer.active {
-        right: 0;
+        transform: translateX(0);
     }
 
     .overlay {
@@ -138,13 +103,18 @@ $queryString = http_build_query($queryParams);
         width: 100%;
         height: 100%;
         background: rgba(15, 23, 42, 0.4);
-        backdrop-filter: blur(2px);
-        display: none;
+        backdrop-filter: blur(3px);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         z-index: 1040;
     }
 
     .overlay.active {
-        display: block;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
     }
 
     .filter-input {
@@ -166,7 +136,6 @@ $queryString = http_build_query($queryParams);
 
 <div class="page-main-container erp-container" style="padding: 20px;">
 
-    <!-- HEADER BAR -->
     <div class="erp-header-bar">
         <div class="erp-header-title">
             <span style="margin-right: 8px;">⚙️</span>Manage Machines
@@ -174,20 +143,18 @@ $queryString = http_build_query($queryParams);
 
         <div class="erp-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <button type="button" onclick="focusAddMachineField()" style="background: #2563eb; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">➕ New Machine</button>
-            <button type="button" onclick="location.reload()" style="background: #475569; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(71, 85, 105, 0.2);">🔄 Refresh</button>
+            <button type="button" onclick="window.location.href='list_machine.php'" style="background: #475569; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(71, 85, 105, 0.2);">🔄 Refresh</button>
             <button type="button" onclick="openFilter()" style="background: #d97706; color: #ffffff; border: none; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);">🔽 Filter</button>
         </div>
     </div>
 
-    <!-- TABLE BOX -->
     <div class="erp-table-box" style="overflow-x: auto; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); width: 100%;">
         <table class="erp-table master-table" style="width: 100%; border-collapse: collapse; min-width: 0;">
             <thead>
                 <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-                    <th style="width: 60px; padding: 14px 18px; color: #475569; font-weight: 700; font-size: 13px; text-transform: uppercase;">#</th>
-                    <th style="padding: 14px 18px; color: #475569; font-weight: 700; font-size: 13px; text-transform: uppercase;">Machine Name</th>
-                    <th style="padding: 14px 18px; color: #475569; font-weight: 700; font-size: 13px; text-transform: uppercase; text-align: center; width: 120px;">Active</th>
-                    <th style="padding: 14px 18px; color: #475569; font-weight: 700; font-size: 13px; text-transform: uppercase; text-align: center; width: 140px;">Action</th>
+                    <th style="width: 45px; padding: 12px 10px; text-align: center; color: #475569; font-weight: 700; font-size: 13px; text-transform: uppercase;">#</th>
+                    <th style="padding: 12px 10px; color: #475569; font-weight: 700; font-size: 13px; text-transform: uppercase;">Machine Name</th>
+                    <th style="text-align: right; width: 100px; padding: 12px 12px; color: #475569; font-weight: 700; font-size: 13px; text-transform: uppercase;">Actions</th>
                 </tr>
             </thead>
 
@@ -196,35 +163,22 @@ $queryString = http_build_query($queryParams);
                 if ($totalRows > 0) {
                     $i = $offset + 1;
                     while ($row = mysqli_fetch_assoc($res)) {
-                        $isActive = (ord($row['active'] ?? 1) == 1 || $row['active'] == 1);
                         ?>
                         <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;" onmouseover="this.style.background='#fbfcfe'" onmouseout="this.style.background='white'">
-                            <td style="padding: 14px 18px; color: #64748b; font-size: 14px; font-weight: 600;"><?= $i++ ?></td>
-
-                            <td style="padding: 14px 18px; font-size: 14.5px;">
-                                <a href="edit_machine.php?id=<?= $row['id'] ?>" class="machine-table-cell-link">
-                                    <?= htmlspecialchars($row['machineName']) ?>
-                                </a>
-                            </td>
-
-                            <td style="padding: 14px 18px; text-align: center;">
-                                <?php if ($isActive): ?>
-                                    <span class="badge-active">Active</span>
-                                <?php else: ?>
-                                    <span class="badge-inactive">Inactive</span>
-                                <?php endif; ?>
-                            </td>
-
-                            <td style="padding: 14px 18px; text-align: center;">
-                                <a href="edit_machine.php?id=<?= $row['id'] ?>" class="btn-edit-action">
-                                    <span>✏️</span> Edit
-                                </a>
+                            <td style="padding: 10px 10px; color: #64748b; font-size: 13.5px; font-weight: 600; width: 45px; text-align: center;"><?= $i++ ?></td>
+                            <td colspan="2" style="padding: 8px 12px;">
+                                <form action="list_machine.php" method="POST" style="display: flex; gap: 8px; width: 100%; align-items: center;">
+                                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                    <input type="hidden" name="action" value="update">
+                                    <input type="text" name="machineName" value="<?= htmlspecialchars($row['machineName']) ?>" required style="flex: 1; width: 100%; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; font-size: 13.5px; background: #fff; box-sizing: border-box;">
+                                    <button type="submit" style="background: #475569; color: #fff; border: none; padding: 7px 16px; border-radius: 6px; font-weight: 600; font-size: 12.5px; cursor: pointer; flex-shrink: 0; white-space: nowrap;">Update</button>
+                                </form>
                             </td>
                         </tr>
                     <?php }
                 } else { ?>
                     <tr>
-                        <td colspan="4" style="text-align: center; padding: 40px; color: #64748b; font-size: 15px; font-weight: 500;">
+                        <td colspan="3" style="text-align: center; padding: 40px; color: #64748b; font-size: 15px; font-weight: 500;">
                             No Machines Found
                         </td>
                     </tr>
@@ -232,14 +186,14 @@ $queryString = http_build_query($queryParams);
             </tbody>
             <tfoot>
                 <tr id="addMachineSection" style="background: #f8fafc; border-top: 2px solid #e2e8f0;">
-                    <td style="padding: 12px 10px; color: #2563eb; font-size: 13px; font-weight: 700; width: 50px; text-align: center;">Add</td>
-                    <td colspan="3" style="padding: 12px 20px;">
-                        <form action="list_machine.php" method="POST" style="display: flex; gap: 10px; width: 100%; align-items: center;">
+                    <td style="padding: 10px 10px; color: #2563eb; font-size: 13px; font-weight: 700; width: 45px; text-align: center;">Add</td>
+                    <td colspan="2" style="padding: 8px 12px;">
+                        <form action="list_machine.php" method="POST" style="display: flex; gap: 8px; width: 100%; align-items: center;">
                             <input type="hidden" name="action" value="add">
                             <input type="text" name="machineName" id="newMachineInput" placeholder="New Machine Name" required
-                                style="flex: 1; min-width: 120px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; font-size: 14px; background: #fff; transition: all 0.3s ease;">
+                                style="flex: 1; width: 100%; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; font-size: 13.5px; background: #fff; box-sizing: border-box; transition: all 0.3s ease;">
                             <button type="submit"
-                                style="background: #2563eb; color: #fff; border: none; padding: 10px 26px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; flex-shrink: 0; white-space: nowrap;">Add Machine</button>
+                                style="background: #2563eb; color: #fff; border: none; padding: 7px 18px; border-radius: 6px; font-weight: 700; font-size: 12.5px; cursor: pointer; flex-shrink: 0; white-space: nowrap; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">Add</button>
                         </form>
                     </td>
                 </tr>
@@ -247,10 +201,9 @@ $queryString = http_build_query($queryParams);
         </table>
     </div>
 
-    <!-- PAGINATION -->
     <div class="pagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; font-size: 14px; color: #64748b;">
         <div>
-            <?php 
+            <?php
             $startRecord = $totalRows > 0 ? $offset + 1 : 0;
             $endRecord = min($offset + $limit, $totalRows);
             ?>
@@ -280,7 +233,6 @@ $queryString = http_build_query($queryParams);
 
 </div>
 
-<!-- FILTER DRAWER -->
 <div id="filterDrawer" class="filter-drawer">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
         <h3 style="margin: 0; color: #0f172a; font-size: 17px; font-weight: 700;">Filter Machines</h3>
@@ -294,8 +246,8 @@ $queryString = http_build_query($queryParams);
         </div>
 
         <div style="display: flex; gap: 10px; margin-top: 25px;">
-            <button type="submit" style="flex: 1; background: #0f172a; color: #FDD017; border: none; padding: 10px; border-radius: 6px; font-weight: 700; cursor: pointer;">Apply Filter</button>
-            <a href="list_machine.php" style="background: #e2e8f0; color: #475569; padding: 10px 14px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 13px;">Clear</a>
+            <button type="button" onclick="clearFilter(event, 'list_machine.php')" style="background: #e2e8f0; color: #475569; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; font-size: 13.5px; cursor: pointer;">Clear</button>
+            <button type="submit" style="flex: 1; background: #0f172a; color: #FDD017; border: none; padding: 10px; border-radius: 6px; font-weight: 700; font-size: 13.5px; cursor: pointer;">Apply Filter</button>
         </div>
     </form>
 </div>
@@ -310,6 +262,17 @@ $queryString = http_build_query($queryParams);
     function closeFilter() {
         document.getElementById("filterDrawer").classList.remove("active");
         document.getElementById("overlay").classList.remove("active");
+    }
+    function clearFilter(e, targetUrl) {
+        if (e) e.preventDefault();
+        const input = document.querySelector('#filterDrawer .filter-input');
+        if (input) input.value = '';
+        closeFilter();
+        if (window.location.search.length > 1) {
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 320);
+        }
     }
 
     function focusAddMachineField() {

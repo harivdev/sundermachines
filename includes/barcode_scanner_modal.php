@@ -1,8 +1,7 @@
-<!-- COMMON REUSABLE BARCODE SCANNER MODAL FOR ERP -->
+
 <div id="commonBarcodeScannerModal" class="barcode-modal-backdrop" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99999; align-items:center; justify-content:center; padding:15px; box-sizing:border-box;">
-    <div class="barcode-modal-card" style="background:#fff; border-radius:12px; max-width:680px; width:100%; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,0.35);">
-        
-        <!-- HEADER -->
+    <div class="barcode-modal-card" style="background:#fff; border-radius:12px; max-width:460px; width:100%; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,0.35); margin:0 auto;">
+
         <div class="barcode-modal-header" style="display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:#f8fafc; border-bottom:1px solid #e2e8f0;">
             <div style="display:flex; align-items:center; gap:10px;">
                 <button type="button" class="btn-scanner-back" onclick="closeCommonBarcodeScannerModal()" style="background:#e2e8f0; border:none; padding:5px 10px; border-radius:6px; font-weight:600; font-size:13px; cursor:pointer; color:#334155;">&larr; Back</button>
@@ -12,34 +11,41 @@
         </div>
 
         <div class="barcode-modal-body" style="padding:0; overflow-y:auto; flex:1;">
-            <!-- CAMERA CONTROLS BAR -->
+
             <div class="scanner-controls-bar" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; padding:10px 14px; background:#f8fafc; border-bottom:1px solid #e2e8f0;">
                 <div class="camera-select-wrap" style="display:flex; align-items:center; gap:8px; flex:1; min-width:220px;">
                     <label for="commonCameraSelect" style="font-size:12px; font-weight:700; color:#475569; white-space:nowrap;">Camera:</label>
                     <select id="commonCameraSelect" class="erp-input" style="padding:6px 10px; font-size:13px; width:100%; border-radius:6px; border:1px solid #cbd5e1;" onchange="onCommonCameraSelectChange()"></select>
                     <button type="button" id="commonBtnRefreshCameras" onclick="refreshCommonCameraDevices()" class="btn-erp" style="padding:6px 10px; font-size:12px; white-space:nowrap; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer;" title="Refresh available cameras">🔄 Refresh</button>
                 </div>
-                <div class="camera-btn-wrap" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                    <button type="button" id="commonBtnStartCamera" onclick="startCommonBarcodeScannerCamera()" class="btn-erp btn-erp-primary" style="padding:6px 12px; font-size:13px; background:#2563eb; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">▶ Start Camera</button>
-                    <button type="button" id="commonBtnStopCamera" onclick="stopCommonBarcodeScannerCamera()" class="btn-erp btn-erp-danger" style="display:none; background:#dc2626; color:#fff; padding:6px 12px; font-size:13px; border:none; border-radius:6px; font-weight:600; cursor:pointer;">⏹ Stop Camera</button>
-                    <button type="button" id="commonBtnCapturePhoto" onclick="captureCommonPhotoAndScan()" class="btn-erp" style="display:none; background:#0284c7; color:#fff; padding:6px 12px; font-size:13px; border:none; border-radius:6px; font-weight:600; cursor:pointer;">📸 Capture Photo</button>
-                </div>
             </div>
 
-            <!-- CAMERA SCANNER SECTION -->
             <div id="commonScannerCameraSection" style="padding:14px;">
-                <div class="scanner-view-box" style="position:relative; width:100%; max-height:360px; background:#000; border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center;">
-                    <video id="commonCameraPreview" autoplay playsinline muted style="width:100%; height:100%; max-height:360px; object-fit:cover;"></video>
-                    
+                <div id="commonScannerCameraStatus" class="camera-status-info" style="margin-bottom:10px; padding:8px 12px; background:#f1f5f9; border-radius:6px; font-size:12.5px; color:#334155; text-align:center; font-weight:600;">
+                    Click <strong>Start Camera</strong> to scan barcodes.
+                </div>
+
+                <div class="scanner-view-box" id="commonScannerViewBox" style="position:relative; width:100%; max-width:220px; height:200px; margin:0 auto; background:#000; border:2.5px solid #38bdf8; border-radius:10px; overflow:hidden; display:flex; align-items:center; justify-content:center; box-shadow:0 0 16px rgba(56,189,248,0.35);">
+                    <video id="commonCameraPreview" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover;"></video>
+
                     <div class="scan-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; pointer-events:none;">
-                        <div class="scan-frame" style="width:240px; height:150px; border:2px solid #38bdf8; box-shadow:0 0 0 4000px rgba(0,0,0,0.5); position:relative; border-radius:8px;">
-                            <div class="scan-line" style="position:absolute; width:100%; height:2px; background:#38bdf8; top:50%; box-shadow:0 0 8px #38bdf8; animation:scanLineMove 2s infinite ease-in-out;"></div>
-                            <div style="position:absolute; bottom:6px; width:100%; text-align:center; color:#38bdf8; font-size:10px; font-weight:800; letter-spacing:1px;">ALIGN BARCODE HERE</div>
+                        <div class="scan-line" style="position:absolute; width:100%; height:2px; background:#38bdf8; top:50%; box-shadow:0 0 8px #38bdf8; animation:scanLineMove 1.8s infinite ease-in-out;"></div>
+                        <div style="position:absolute; bottom:6px; width:100%; text-align:center; color:#38bdf8; font-size:10.5px; font-weight:800; letter-spacing:1px; text-shadow:0 1px 3px rgba(0,0,0,0.85);">ALIGN BARCODE HERE</div>
+                    </div>
+
+                    <!-- Floating overlay message shown in front of camera without closing it -->
+                    <div id="scannerOverlayMsg" style="display:none; position:absolute; bottom:8px; left:50%; transform:translateX(-50%); z-index:20; min-width:200px; max-width:92%; pointer-events:all;">
+                        <div id="scannerOverlayMsgInner" style="background:rgba(15,23,42,0.92); backdrop-filter:blur(6px); border-radius:8px; padding:8px 12px; box-shadow:0 4px 20px rgba(0,0,0,0.4); font-size:12px; color:#f1f5f9; line-height:1.4;">
                         </div>
                     </div>
                 </div>
 
-                <!-- CAPTURED PHOTO PREVIEW BOX -->
+                <div class="camera-btn-wrap" style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:14px; flex-wrap:wrap;">
+                    <button type="button" id="commonBtnStartCamera" onclick="startCommonBarcodeScannerCamera()" class="btn-erp btn-erp-primary" style="padding:7px 16px; font-size:13px; background:#2563eb; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">▶ Start Camera</button>
+                    <button type="button" id="commonBtnStopCamera" onclick="stopCommonBarcodeScannerCamera()" class="btn-erp btn-erp-danger" style="display:none; background:#dc2626; color:#fff; padding:7px 16px; font-size:13px; border:none; border-radius:6px; font-weight:600; cursor:pointer;">⏹ Stop Camera</button>
+                    <button type="button" id="commonBtnCapturePhoto" onclick="captureCommonPhotoAndScan()" class="btn-erp" style="display:none; background:#0284c7; color:#fff; padding:7px 16px; font-size:13px; border:none; border-radius:6px; font-weight:600; cursor:pointer;">📸 Capture Photo</button>
+                </div>
+
                 <div id="commonPhotoPreviewBox" style="display:none; text-align:center; padding:12px; background:#0f172a; border-radius:8px; margin:10px 0;">
                     <div style="color:#e2e8f0; font-size:13px; font-weight:600; margin-bottom:8px;">Captured Frame Preview</div>
                     <img id="commonPhotoCapturedImg" style="max-width:100%; max-height:260px; border-radius:6px; border:2px solid #38bdf8; object-fit:contain;" alt="Captured Photo">
@@ -47,11 +53,6 @@
                     <div id="commonPhotoScanStatus" style="color:#38bdf8; font-weight:700; font-size:13px; margin-top:8px;">⌛ Scanning barcode from captured photo...</div>
                 </div>
 
-                <div id="commonScannerCameraStatus" class="camera-status-info" style="margin-top:10px; padding:10px 12px; background:#f1f5f9; border-radius:6px; font-size:12.5px; color:#334155; text-align:center;">
-                    Click <strong>Start Camera</strong> to grant permission and open real device webcam.
-                </div>
-
-                <!-- MANUAL BARCODE ENTRY -->
                 <div class="manual-search-box" style="margin-top:12px; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
                     <div class="manual-search-title" style="font-size:12px; font-weight:700; color:#475569; margin-bottom:6px;">Or Enter Barcode Manually:</div>
                     <div class="manual-search-form" style="display:flex; gap:8px;">
@@ -61,14 +62,13 @@
                 </div>
             </div>
 
-            <!-- RESULT DETAILS PANEL -->
             <div id="commonScannerResultPanel" style="display:none; padding:14px;">
                 <div id="commonScannerAlertHeader" class="alert-status alert-success-bg" style="padding:10px 14px; border-radius:6px; font-weight:700; font-size:14px; margin-bottom:14px;">
                     <span id="commonScannerAlertText">✓ Barcode Scanned Successfully</span>
                 </div>
 
                 <div id="commonScannerDetailsContent">
-                    <!-- Dynamic details populated here -->
+
                 </div>
             </div>
         </div>
@@ -92,17 +92,23 @@
 .alert-danger-bg { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 </style>
 
-<!-- COMMON JS LIBRARIES & SCANNER LOGIC -->
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.0/umd/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.4/dist/quagga.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
     let commonScannerRunning = false;
     let commonMediaStream = null;
     let commonZxingCodeReader = null;
     let commonBarcodeDetectorAnimFrame = null;
+    let commonLiveScanInterval = null;
     let commonCurrentScannedData = null;
     let currentBarcodeScannerCallback = null;
+    let commonContinuousMode = false;
+    let commonLastScanCode = '';
+    let commonLastScanTime = 0;
+    let commonScanLockUntil = 0; // Absolute timestamp — no scan accepted before this time
+    const COMMON_SCAN_COOLDOWN = 2500; // ms before the SAME barcode can re-trigger
 
     function escapeHtmlCommon(text) {
         if (!text) return '';
@@ -114,16 +120,17 @@
             .replace(/'/g, "&#039;");
     }
 
-    // PUBLIC GLOBAL API FOR ALL ERP PAGES
     window.openBarcodeScanner = function(callbackOrOptions) {
         let callback = null;
         let title = "📷 Real Web Camera Barcode Scanner";
+        commonContinuousMode = false;
 
         if (typeof callbackOrOptions === 'function') {
             callback = callbackOrOptions;
         } else if (typeof callbackOrOptions === 'object' && callbackOrOptions !== null) {
             callback = callbackOrOptions.callback || null;
             if (callbackOrOptions.title) title = callbackOrOptions.title;
+            if (callbackOrOptions.continuous) commonContinuousMode = true;
         }
 
         currentBarcodeScannerCallback = callback;
@@ -146,6 +153,7 @@
         const modal = document.getElementById('commonBarcodeScannerModal');
         if (modal) modal.style.display = 'none';
         currentBarcodeScannerCallback = null;
+        commonContinuousMode = false;
     };
 
     async function refreshCommonCameraDevices() {
@@ -153,14 +161,14 @@
         if (statusEl) statusEl.innerHTML = '🔄 Scanning available camera devices...';
         await initCommonCameraDevices(true);
         if (statusEl && !commonScannerRunning) {
-            statusEl.innerHTML = 'Camera list updated. Click <strong>Start Camera</strong> to open webcam.';
+            statusEl.innerHTML = 'Camera list updated. Click <strong>Start Camera</strong>.';
         }
     }
 
     async function initCommonCameraDevices(forceRefresh = false) {
         const select = document.getElementById('commonCameraSelect');
         if (!select) return;
-        
+
         const previousVal = select.value;
 
         if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
@@ -228,7 +236,7 @@
 
         const photoBox = document.getElementById('commonPhotoPreviewBox');
         if (photoBox) photoBox.style.display = 'none';
-        
+
         const btnPrint = document.getElementById('commonBtnPrintScanned');
         if (btnPrint) btnPrint.style.display = 'none';
 
@@ -272,7 +280,7 @@
         }
 
         const selectedDeviceId = select ? select.value : '';
-        
+
         const constraintOptions = [];
 
         if (selectedDeviceId) {
@@ -339,7 +347,7 @@
 
         commonMediaStream = stream;
         videoEl.srcObject = commonMediaStream;
-        
+
         if (videoEl.paused) {
             try {
                 await videoEl.play();
@@ -353,13 +361,184 @@
         if (btnCapture) btnCapture.style.display = 'inline-flex';
 
         if (statusEl) {
-            statusEl.innerHTML = '🟢 Live Camera Active — Point camera at Barcode or click 📸 Capture Photo';
+            statusEl.innerHTML = '🟢 Live Camera Active — Hold Barcode steady inside box or click 📸 Capture Photo';
         }
 
         console.log("Camera Started");
 
         initCommonCameraDevices();
         initCommonMultiEngineScanner(videoEl);
+    }
+
+    // Helper: contrast enhance / threshold canvas for phone screens & low contrast
+    function preprocessCanvasContrast(sourceCanvas) {
+        const out = document.createElement('canvas');
+        out.width = sourceCanvas.width;
+        out.height = sourceCanvas.height;
+        const ctx = out.getContext('2d');
+        ctx.drawImage(sourceCanvas, 0, 0);
+
+        try {
+            const imgData = ctx.getImageData(0, 0, out.width, out.height);
+            const d = imgData.data;
+            const factor = 1.6; // High contrast
+            for (let i = 0; i < d.length; i += 4) {
+                // Grayscale
+                const gray = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+                // Contrast stretch
+                const contrasted = Math.min(255, Math.max(0, factor * (gray - 128) + 128));
+                d[i] = contrasted;
+                d[i+1] = contrasted;
+                d[i+2] = contrasted;
+            }
+            ctx.putImageData(imgData, 0, 0);
+        } catch(e) {}
+        return out;
+    }
+
+    // Helper: crop center region (where user aligns barcode in guide frame)
+    function cropCenterCanvas(sourceCanvas, ratio = 0.65) {
+        const out = document.createElement('canvas');
+        const sw = sourceCanvas.width;
+        const sh = sourceCanvas.height;
+        const cw = Math.round(sw * ratio);
+        const ch = Math.round(sh * ratio);
+        const cx = Math.round((sw - cw) / 2);
+        const cy = Math.round((sh - ch) / 2);
+        out.width = cw;
+        out.height = ch;
+        const ctx = out.getContext('2d');
+        ctx.drawImage(sourceCanvas, cx, cy, cw, ch, 0, 0, cw, ch);
+        return out;
+    }
+
+    // Crop to match ONLY the blue scan-frame box (240px×150px guide)
+    // The box is roughly 38% of width and 42% of height of the camera view
+    // This prevents barcodes/QR codes in the background from being detected
+    function cropToScanFrame(sourceCanvas) {
+        const out = document.createElement('canvas');
+        const sw = sourceCanvas.width;
+        const sh = sourceCanvas.height;
+        const cw = Math.round(sw * 0.38);
+        const ch = Math.round(sh * 0.44);
+        const cx = Math.round((sw - cw) / 2);
+        const cy = Math.round((sh - ch) / 2);
+        out.width = cw;
+        out.height = ch;
+        const ctx = out.getContext('2d');
+        ctx.drawImage(sourceCanvas, cx, cy, cw, ch, 0, 0, cw, ch);
+        return out;
+    }
+
+    let commonCachedZxingReader = null;
+    let commonCachedBarcodeDetector = null;
+
+    function getCommonBarcodeDetector() {
+        if (!commonCachedBarcodeDetector && 'BarcodeDetector' in window) {
+            try {
+                commonCachedBarcodeDetector = new BarcodeDetector({
+                    formats: ['code_128', 'code_39', 'code_93', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'itf', 'qr_code', 'codabar', 'data_matrix']
+                });
+            } catch(e) {}
+        }
+        return commonCachedBarcodeDetector;
+    }
+
+    function getCommonZxingReader() {
+        if (!commonCachedZxingReader && typeof ZXing !== 'undefined') {
+            try {
+                const hints = new Map();
+                hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+                    ZXing.BarcodeFormat.CODE_128,
+                    ZXing.BarcodeFormat.CODE_39,
+                    ZXing.BarcodeFormat.CODE_93,
+                    ZXing.BarcodeFormat.EAN_13,
+                    ZXing.BarcodeFormat.EAN_8,
+                    ZXing.BarcodeFormat.UPC_A,
+                    ZXing.BarcodeFormat.UPC_E,
+                    ZXing.BarcodeFormat.ITF,
+                    ZXing.BarcodeFormat.CODABAR,
+                    ZXing.BarcodeFormat.QR_CODE,
+                    ZXing.BarcodeFormat.DATA_MATRIX
+                ]);
+                hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+                commonCachedZxingReader = new ZXing.BrowserMultiFormatReader(hints);
+            } catch(e) {}
+        }
+        return commonCachedZxingReader;
+    }
+
+    // Comprehensive multi-engine decode function for any canvas
+    async function decodeBarcodeFromCanvasMultiEngine(targetCanvas) {
+        // 1. Native BarcodeDetector (First! Hardware accelerated, ~3ms)
+        const detector = getCommonBarcodeDetector();
+        if (detector) {
+            try {
+                const barcodes = await detector.detect(targetCanvas);
+                if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+                    const code = barcodes[0].rawValue.trim();
+                    if (code && code.length >= 2) return code;
+                }
+            } catch(e) {}
+        }
+
+        // 2. ZXing Reader (Cached instance, ~15ms)
+        const zxingReader = getCommonZxingReader();
+        if (zxingReader) {
+            try {
+                const img = new Image();
+                img.src = targetCanvas.toDataURL('image/jpeg', 0.88);
+                await new Promise(res => { img.onload = res; img.onerror = res; });
+                const res = await zxingReader.decodeFromImageElement(img);
+                if (res && res.getText()) {
+                    const code = res.getText().trim();
+                    if (code && code.length >= 2) return code;
+                }
+            } catch(e) {}
+        }
+
+        // 3. Quagga2 pass (~20ms)
+        if (typeof Quagga !== 'undefined') {
+            const quaggaPromise = new Promise(resolve => {
+                try {
+                    const dataUrl = targetCanvas.toDataURL('image/jpeg', 0.85);
+                    Quagga.decodeSingle({
+                        src: dataUrl,
+                        numOfWorkers: 0,
+                        inputStream: { size: Math.max(targetCanvas.width, targetCanvas.height) },
+                        decoder: {
+                            readers: [
+                                "code_128_reader",
+                                "ean_reader",
+                                "ean_8_reader",
+                                "code_39_reader",
+                                "code_39_vin_reader",
+                                "codabar_reader",
+                                "upc_reader",
+                                "upc_e_reader",
+                                "i2of5_reader",
+                                "code_93_reader"
+                            ]
+                        },
+                        locate: true
+                    }, function(res) {
+                        if (res && res.codeResult && res.codeResult.code) {
+                            const code = res.codeResult.code.trim();
+                            resolve(code && code.length >= 2 ? code : null);
+                        } else {
+                            resolve(null);
+                        }
+                    });
+                } catch(e) {
+                    resolve(null);
+                }
+            });
+
+            const code = await quaggaPromise;
+            if (code) return code;
+        }
+
+        return null;
     }
 
     async function captureCommonPhotoAndScan() {
@@ -382,144 +561,218 @@
         const dataUrl = photoCanvas.toDataURL('image/png');
         photoImg.src = dataUrl;
         photoBox.style.display = 'block';
-        photoStatus.innerHTML = '⌛ Scanning barcode from captured photo...';
+        photoStatus.innerHTML = '⌛ Scanning barcode with multi-engine decoders...';
 
-        stopCommonBarcodeScannerCamera();
+        // In continuous mode: don't stop camera, keep scanning after decode
+        if (!commonContinuousMode) {
+            stopCommonBarcodeScannerCamera();
+        }
 
         console.log("Photo Captured, analyzing frame for barcode...");
 
-        if ('BarcodeDetector' in window) {
-            try {
-                const detector = new BarcodeDetector({ formats: ['code_128', 'code_39', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'qr_code'] });
-                const barcodes = await detector.detect(photoCanvas);
-                if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
-                    const code = barcodes[0].rawValue.trim();
-                    if (code) {
-                        console.log("Barcode Found from Photo (Native):", code);
-                        photoStatus.innerHTML = `🟢 Barcode Found: <strong>${escapeHtmlCommon(code)}</strong>`;
-                        onCommonBarcodeScanned(code);
-                        return;
-                    }
-                }
-            } catch(e) {
-                console.warn("Native BarcodeDetector photo error:", e);
-            }
+        // Pass 1: Scan frame box crop (matches live scanner area — best for aligned barcodes)
+        let detectedCode = await decodeBarcodeFromCanvasMultiEngine(cropToScanFrame(photoCanvas));
+
+        // Pass 2: Wider center crop (65%)
+        if (!detectedCode) {
+            detectedCode = await decodeBarcodeFromCanvasMultiEngine(cropCenterCanvas(photoCanvas, 0.65));
         }
 
-        if (typeof ZXing !== 'undefined') {
-            try {
-                const hints = new Map();
-                hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-                    ZXing.BarcodeFormat.CODE_128,
-                    ZXing.BarcodeFormat.CODE_39,
-                    ZXing.BarcodeFormat.EAN_13,
-                    ZXing.BarcodeFormat.EAN_8,
-                    ZXing.BarcodeFormat.UPC_A,
-                    ZXing.BarcodeFormat.UPC_E,
-                    ZXing.BarcodeFormat.QR_CODE
-                ]);
-                const reader = new ZXing.BrowserMultiFormatReader(hints);
-                const result = await reader.decodeFromImageElement(photoImg);
-                if (result && result.getText()) {
-                    const code = result.getText().trim();
-                    if (code) {
-                        console.log("Barcode Found from Photo (ZXing):", code);
-                        photoStatus.innerHTML = `🟢 Barcode Found: <strong>${escapeHtmlCommon(code)}</strong>`;
-                        onCommonBarcodeScanned(code);
-                        return;
-                    }
+        // Pass 3: Contrast-enhanced scan frame (handles glare and low-contrast labels)
+        if (!detectedCode) {
+            detectedCode = await decodeBarcodeFromCanvasMultiEngine(preprocessCanvasContrast(cropToScanFrame(photoCanvas)));
+        }
+
+        // Pass 4: Full frame (fallback for very large barcodes)
+        if (!detectedCode) {
+            detectedCode = await decodeBarcodeFromCanvasMultiEngine(photoCanvas);
+        }
+
+        // Pass 5: Tight crop (0.42) with contrast
+        if (!detectedCode) {
+            detectedCode = await decodeBarcodeFromCanvasMultiEngine(preprocessCanvasContrast(cropCenterCanvas(photoCanvas, 0.42)));
+        }
+
+        if (detectedCode) {
+            console.log("Barcode Found from Photo:", detectedCode);
+            photoStatus.innerHTML = `🟢 Barcode Found: <strong>${escapeHtmlCommon(detectedCode)}</strong>`;
+
+            if (commonContinuousMode && currentBarcodeScannerCallback) {
+                // Continuous mode: invoke callback directly (same path as live scan)
+                // then restart the camera for the next scan
+                commonScanLockUntil = Date.now() + 3000;
+                const statusEl = document.getElementById('commonScannerCameraStatus');
+                if (statusEl) {
+                    statusEl.innerHTML = `<span style="color:#0284c7; font-weight:700; font-size:14.5px;">🔍 Found: &nbsp;<span style="font-family:monospace; font-size:13px;">${escapeHtmlCommon(detectedCode)}</span> &nbsp;— Confirm details...</span>`;
                 }
-            } catch(e) {
-                console.warn("ZXing photo decode warning:", e);
+                playCommonScanBeep();
+                currentBarcodeScannerCallback(detectedCode);
+                // Restart camera so continuous mode keeps going
+                setTimeout(() => {
+                    if (document.getElementById('commonBarcodeScannerModal')?.style.display !== 'none') {
+                        photoBox.style.display = 'none';
+                        startCommonBarcodeScannerCamera();
+                        setTimeout(() => { commonScanLockUntil = 0; }, 3000);
+                    }
+                }, 1200);
+                return;
             }
+
+            onCommonBarcodeScanned(detectedCode);
+            return;
         }
 
         photoStatus.innerHTML = '<span style="color:#f87171; font-weight:700;">❌ No barcode detected in captured photo. Click Start Camera to try again or enter barcode manually below.</span>';
+        const manualInput = document.getElementById('commonManualBarcodeInput');
+        if (manualInput) manualInput.focus();
+
+        // In continuous mode: restart camera automatically after failed decode
+        if (commonContinuousMode) {
+            setTimeout(() => {
+                if (document.getElementById('commonBarcodeScannerModal')?.style.display !== 'none') {
+                    photoBox.style.display = 'none';
+                    startCommonBarcodeScannerCamera();
+                }
+            }, 2000);
+        }
     }
+
 
     function initCommonMultiEngineScanner(videoEl) {
         if (!commonScannerRunning) return;
 
-        if ('BarcodeDetector' in window) {
-            try {
-                const supportedFormats = ['code_128', 'code_39', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'qr_code'];
-                const detector = new BarcodeDetector({ formats: supportedFormats });
+        // Dedicated reusable processing canvas for continuous live frame sampling
+        const scanCanvas = document.createElement('canvas');
+        const sctx = scanCanvas.getContext('2d', { willReadFrequently: true });
 
-                const detectFrame = async () => {
-                    if (!commonScannerRunning || !commonMediaStream) return;
+        const detector = getCommonBarcodeDetector();
+        const zxingReader = getCommonZxingReader();
+
+        let isProcessing = false;
+
+        // Ultra-fast 130ms live scanning ticker (120ms-150ms maintained)
+        commonLiveScanInterval = setInterval(async () => {
+            if (!commonScannerRunning || !commonMediaStream || isProcessing) return;
+            if (Date.now() < commonScanLockUntil) return;
+            if (!videoEl || videoEl.readyState < 2 || videoEl.videoWidth === 0) return;
+
+            isProcessing = true;
+            try {
+                const vw = videoEl.videoWidth;
+                const vh = videoEl.videoHeight;
+
+                // Crop center 52% width and 52% height directly from video
+                // strictly matching the blue label viewfinder
+                const cw = Math.round(vw * 0.52);
+                const ch = Math.round(vh * 0.52);
+                const cx = Math.round((vw - cw) / 2);
+                const cy = Math.round((vh - ch) / 2);
+
+                scanCanvas.width = 460;
+                scanCanvas.height = Math.round(460 * (ch / cw));
+                sctx.drawImage(videoEl, cx, cy, cw, ch, 0, 0, scanCanvas.width, scanCanvas.height);
+
+                let code = null;
+
+                // Engine 1: Native BarcodeDetector (First! Hardware accelerated, 2-4ms)
+                if (detector) {
                     try {
-                        if (videoEl && videoEl.readyState >= 2 && videoEl.videoWidth > 0) {
-                            const barcodes = await detector.detect(videoEl);
-                            if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
-                                const code = barcodes[0].rawValue.trim();
-                                if (code && commonScannerRunning) {
-                                    console.log("Barcode Found:", code);
-                                    onCommonBarcodeScanned(code);
-                                    return;
-                                }
-                            }
+                        const barcodes = await detector.detect(scanCanvas);
+                        if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+                            const raw = barcodes[0].rawValue.trim();
+                            if (raw && raw.length >= 2) code = raw;
                         }
                     } catch(e) {}
-
-                    if (commonScannerRunning) {
-                        commonBarcodeDetectorAnimFrame = requestAnimationFrame(detectFrame);
-                    }
-                };
-
-                commonBarcodeDetectorAnimFrame = requestAnimationFrame(detectFrame);
-                return;
-            } catch(e) {
-                console.warn("Native BarcodeDetector setup error:", e);
-            }
-        }
-
-        if (typeof ZXing !== 'undefined') {
-            try {
-                if (commonZxingCodeReader) {
-                    try { commonZxingCodeReader.reset(); } catch(e) {}
-                    commonZxingCodeReader = null;
                 }
 
-                const hints = new Map();
-                hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-                    ZXing.BarcodeFormat.CODE_128,
-                    ZXing.BarcodeFormat.CODE_39,
-                    ZXing.BarcodeFormat.EAN_13,
-                    ZXing.BarcodeFormat.EAN_8,
-                    ZXing.BarcodeFormat.UPC_A,
-                    ZXing.BarcodeFormat.UPC_E,
-                    ZXing.BarcodeFormat.QR_CODE
-                ]);
-                commonZxingCodeReader = new ZXing.BrowserMultiFormatReader(hints);
-
-                commonZxingCodeReader.decodeFromVideoElement(videoEl, (result, error) => {
-                    if (result && commonScannerRunning) {
-                        const code = result.getText().trim();
-                        if (code) {
-                            console.log("Barcode Found:", code);
-                            onCommonBarcodeScanned(code);
+                // Engine 2: ZXing Reader (Cached instance, ~15ms)
+                if (!code && zxingReader) {
+                    try {
+                        const img = new Image();
+                        img.src = scanCanvas.toDataURL('image/jpeg', 0.85);
+                        await new Promise(res => { img.onload = res; img.onerror = res; });
+                        const res = await zxingReader.decodeFromImageElement(img);
+                        if (res && res.getText()) {
+                            const raw = res.getText().trim();
+                            if (raw && raw.length >= 2) code = raw;
                         }
-                    }
-                    if (error) {
-                        if (error instanceof ZXing.NotFoundException || (error.name && error.name.includes('NotFoundException'))) {
-                            return;
-                        }
-                    }
-                }).catch(err => {
-                    if (err && (err.name === 'NotFoundException' || (err.message && err.message.includes('stream has ended')))) {
-                        return;
-                    }
-                });
+                    } catch(e) {}
+                }
 
-                return;
-            } catch(e) {
-                console.warn("ZXing setup error:", e);
-            }
+                // Engine 3: Quagga2 (~20ms)
+                if (!code && typeof Quagga !== 'undefined') {
+                    code = await new Promise(resolve => {
+                        try {
+                            Quagga.decodeSingle({
+                                src: scanCanvas.toDataURL('image/jpeg', 0.85),
+                                numOfWorkers: 0,
+                                inputStream: { size: scanCanvas.width },
+                                decoder: {
+                                    readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader", "upc_e_reader", "i2of5_reader", "codabar_reader"]
+                                },
+                                locate: true
+                            }, res => {
+                                if (res && res.codeResult && res.codeResult.code) {
+                                    const raw = res.codeResult.code.trim();
+                                    resolve(raw && raw.length >= 2 ? raw : null);
+                                } else {
+                                    resolve(null);
+                                }
+                            });
+                        } catch(e) {
+                            resolve(null);
+                        }
+                    });
+                }
+
+                if (code && code.length >= 2 && commonScannerRunning) {
+                    handleBarcodeDetectionEvent(code);
+                }
+            } catch(e) {}
+            isProcessing = false;
+        }, 130);
+    }
+
+    function handleBarcodeDetectionEvent(code) {
+        if (!code || code.length < 2) return;
+        const now = Date.now();
+
+        // Hard lock — no scan accepted during the post-scan cooldown window
+        if (now < commonScanLockUntil) return;
+
+        // If spare details confirmation modal is visible, pause scanning until dismissed
+        const confirmModal = document.getElementById('spareDetailsConfirmModal');
+        if (confirmModal && confirmModal.style.display !== 'none' && confirmModal.style.display !== '') {
+            return;
         }
+
+        // Per-code cooldown — prevents the same barcode firing multiple times rapidly
+        if (code === commonLastScanCode && (now - commonLastScanTime) < COMMON_SCAN_COOLDOWN) {
+            return;
+        }
+        commonLastScanCode = code;
+        commonLastScanTime = now;
+        onCommonBarcodeScanned(code);
     }
 
     function stopCommonBarcodeScannerCamera() {
         commonScannerRunning = false;
+
+        if (commonLiveScanInterval) {
+            clearInterval(commonLiveScanInterval);
+            commonLiveScanInterval = null;
+        }
+
+        // Also clear the ZXing frame-grab interval (Engine 2)
+        if (window._zxingFrameInterval) {
+            clearInterval(window._zxingFrameInterval);
+            window._zxingFrameInterval = null;
+        }
+
+        // Reset scan lock so the scanner is fresh next time it opens
+        commonScanLockUntil = 0;
+        commonLastScanCode = '';
+        commonLastScanTime = 0;
 
         if (commonBarcodeDetectorAnimFrame) {
             cancelAnimationFrame(commonBarcodeDetectorAnimFrame);
@@ -552,7 +805,7 @@
         if (btnStop) btnStop.style.display = 'none';
         if (btnCapture) btnCapture.style.display = 'none';
         if (statusEl && !statusEl.innerHTML.includes('❌')) {
-            statusEl.innerHTML = 'Camera stopped. Click <strong>Start Camera</strong> to scan barcodes.';
+            statusEl.innerHTML = 'Camera stopped. Click <strong>Start Camera</strong>.';
         }
 
         console.log("Scanner Stopped");
@@ -575,8 +828,29 @@
 
     function onCommonBarcodeScanned(barcode) {
         if (!barcode) return;
-        console.log("Barcode Found:", barcode);
+        console.log('Barcode Found:', barcode);
         playCommonScanBeep();
+
+        if (commonContinuousMode && currentBarcodeScannerCallback) {
+            // Continuous Scan-to-Bill mode — keep camera running, but lock for 3s
+            // to prevent the SAME scan from firing multiple times
+            commonScanLockUntil = Date.now() + 3000;
+
+            const statusEl = document.getElementById('commonScannerCameraStatus');
+            if (statusEl) {
+                statusEl.innerHTML = `<span style="color:#0284c7; font-weight:700; font-size:14.5px;">🔍 Scanned: &nbsp;<span style="font-family:monospace; font-size:13px;">${escapeHtmlCommon(barcode)}</span> &nbsp;— Confirm details...</span>`;
+                setTimeout(() => {
+                    if (commonScannerRunning && statusEl && (!document.getElementById('spareDetailsConfirmModal') || document.getElementById('spareDetailsConfirmModal').style.display === 'none')) {
+                        statusEl.innerHTML = '🟢 Live Camera Active — Hold Barcode steady inside box or click 📸 Capture Photo';
+                        commonScanLockUntil = 0; // Re-enable scanning
+                    }
+                }, 3000);
+            }
+            currentBarcodeScannerCallback(barcode);
+            return;
+        }
+
+        // Single-scan mode: stop camera and look up barcode
         stopCommonBarcodeScannerCamera();
         searchCommonBarcodeAPI(barcode);
     }
@@ -585,6 +859,16 @@
         const code = document.getElementById('commonManualBarcodeInput').value.trim();
         if (!code) {
             alert('Please enter a barcode string!');
+            return;
+        }
+        if (commonContinuousMode && currentBarcodeScannerCallback) {
+            document.getElementById('commonManualBarcodeInput').value = '';
+            playCommonScanBeep();
+            const statusEl = document.getElementById('commonScannerCameraStatus');
+            if (statusEl) {
+                statusEl.innerHTML = `<span style="color:#0284c7; font-weight:700; font-size:14.5px;">🔍 Searched: &nbsp;<span style="font-family:monospace; font-size:13px;">${escapeHtmlCommon(code)}</span> &nbsp;— Confirm details...</span>`;
+            }
+            currentBarcodeScannerCallback(code);
             return;
         }
         stopCommonBarcodeScannerCamera();
@@ -601,40 +885,80 @@
         fetch(apiUrl)
             .then(response => response.json())
             .then(res => {
-                if (currentBarcodeScannerCallback) {
-                    const callback = currentBarcodeScannerCallback;
-                    closeCommonBarcodeScannerModal();
-                    callback(barcode, res.success ? res.data : null);
-                    return;
-                }
-
-                document.getElementById('commonScannerCameraSection').style.display = 'none';
-                document.getElementById('commonScannerResultPanel').style.display = 'block';
-
                 if (res.success && res.data) {
+                    if (currentBarcodeScannerCallback) {
+                        // Let the callback page handle modal closing & UI
+                        currentBarcodeScannerCallback(barcode, res.data);
+                        return;
+                    }
+                    document.getElementById('commonScannerCameraSection').style.display = 'none';
+                    document.getElementById('commonScannerResultPanel').style.display = 'block';
                     commonCurrentScannedData = res.data;
                     showCommonBarcodeResultSuccess(res.data);
                 } else {
+                    // Not found in stock
+                    if (currentBarcodeScannerCallback) {
+                        // Let the callback page show its own in-camera message
+                        currentBarcodeScannerCallback(barcode, null);
+                        return;
+                    }
+                    document.getElementById('commonScannerCameraSection').style.display = 'none';
+                    document.getElementById('commonScannerResultPanel').style.display = 'block';
                     commonCurrentScannedData = null;
                     showCommonBarcodeResultNotFound(barcode);
                 }
             })
             .catch(err => {
                 if (currentBarcodeScannerCallback) {
-                    const callback = currentBarcodeScannerCallback;
-                    closeCommonBarcodeScannerModal();
-                    callback(barcode, null);
+                    currentBarcodeScannerCallback(barcode, null);
                     return;
                 }
                 alert('Error querying barcode API: ' + err);
             });
     }
 
+    // Show a small floating message bubble in front of the camera (does NOT close camera)
+    window.showScannerOverlayMessage = function(type, htmlContent, autoDismissMs) {
+        const box = document.getElementById('scannerOverlayMsg');
+        const inner = document.getElementById('scannerOverlayMsgInner');
+        if (!box || !inner) return;
+
+        const colors = {
+            warning: { bg: 'rgba(120,53,15,0.93)', border: '#f59e0b', icon: '⚠️' },
+            error:   { bg: 'rgba(127,29,29,0.93)', border: '#f87171', icon: '❌' },
+            info:    { bg: 'rgba(15,23,42,0.92)',   border: '#38bdf8', icon: 'ℹ️' },
+            success: { bg: 'rgba(6,78,59,0.93)',    border: '#34d399', icon: '✅' }
+        };
+        const c = colors[type] || colors.info;
+
+        inner.style.background = c.bg;
+        inner.style.border = '1.5px solid ' + c.border;
+        inner.innerHTML = htmlContent;
+        box.style.display = 'block';
+
+        // Clear any previous auto-dismiss
+        if (window._scannerOverlayTimer) clearTimeout(window._scannerOverlayTimer);
+        if (autoDismissMs && autoDismissMs > 0) {
+            window._scannerOverlayTimer = setTimeout(() => {
+                window.hideScannerOverlayMessage();
+            }, autoDismissMs);
+        }
+    };
+
+    window.hideScannerOverlayMessage = function() {
+        const box = document.getElementById('scannerOverlayMsg');
+        if (box) box.style.display = 'none';
+        if (window._scannerOverlayTimer) {
+            clearTimeout(window._scannerOverlayTimer);
+            window._scannerOverlayTimer = null;
+        }
+    };
+
     function showCommonBarcodeResultSuccess(data) {
         const alertHeader = document.getElementById('commonScannerAlertHeader');
         alertHeader.className = 'alert-status alert-success-bg';
         document.getElementById('commonScannerAlertText').innerHTML = '✓ Barcode Scanned Successfully';
-        
+
         const btnPrint = document.getElementById('commonBtnPrintScanned');
         if (btnPrint) btnPrint.style.display = 'inline-flex';
 
@@ -724,22 +1048,30 @@
     function showCommonBarcodeResultNotFound(barcode) {
         const alertHeader = document.getElementById('commonScannerAlertHeader');
         alertHeader.className = 'alert-status alert-danger-bg';
-        document.getElementById('commonScannerAlertText').innerHTML = '❌ Barcode Not Found';
-        
+        document.getElementById('commonScannerAlertText').innerHTML = '❌ Stock Not Added (Barcode Not Found)';
+
         const btnPrint = document.getElementById('commonBtnPrintScanned');
         if (btnPrint) btnPrint.style.display = 'none';
 
         const btnView = document.getElementById('commonBtnViewItem');
         if (btnView) btnView.style.display = 'none';
 
+        const currentPath = window.location.pathname;
+        const addStockUrl = (currentPath.includes('/stock/') ? '' : '../stock/') + 'add_stock.php?barcode=' + encodeURIComponent(barcode);
+
         const content = `
             <div style="text-align:center; padding: 20px 10px;">
                 <div style="font-size:16px; font-weight:700; color:#b91c1c; margin-bottom:8px;">
-                    No spare / item matches barcode: <span style="font-family:monospace; text-decoration:underline;">${escapeHtmlCommon(barcode)}</span>
+                    Stock not added for barcode: <span style="font-family:monospace; text-decoration:underline;">${escapeHtmlCommon(barcode)}</span>
                 </div>
-                <p style="font-size:13px; color:#64748b; margin-bottom:16px;">
-                    Please check the barcode sticker or try entering the barcode manually below.
+                <p style="font-size:13px; color:#64748b; margin-bottom:14px;">
+                    This product is not in our stock list. You can add it directly below or try entering another barcode.
                 </p>
+                <div style="margin-bottom:18px;">
+                    <a href="${addStockUrl}" target="_blank" style="background:#2563eb; color:#ffffff; padding:8px 18px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:700; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(37,99,235,0.25);">
+                        ➕ Add to Stock
+                    </a>
+                </div>
                 <div class="manual-search-box" style="max-width:400px; margin:0 auto; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
                     <div class="manual-search-title" style="font-size:12px; font-weight:700; color:#475569; margin-bottom:6px;">Enter Barcode Manually</div>
                     <div class="manual-search-form" style="display:flex; gap:8px;">
@@ -770,7 +1102,7 @@
 
     function printCommonCurrentScannedLabel() {
         if (!commonCurrentScannedData || !commonCurrentScannedData.barCode) return;
-        
+
         let w = window.open('', '_blank');
         let html = `
         <html>
@@ -801,3 +1133,4 @@
         w.document.close();
     }
 </script>
+

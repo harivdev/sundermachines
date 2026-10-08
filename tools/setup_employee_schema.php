@@ -1,9 +1,10 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/auth.php';
+requireAdmin();
 
 echo "Setting up Employee database schema...\n";
 
-// 1. Ensure employee table exists with base columns
 $sqlCreate = "CREATE TABLE IF NOT EXISTS `employee` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `empId` varchar(100) DEFAULT NULL,
@@ -37,7 +38,6 @@ if (mysqli_query($conn, $sqlCreate)) {
     echo "Error creating employee table: " . mysqli_error($conn) . "\n";
 }
 
-// 2. Add columns if table already existed without them
 $columnsToAdd = [
     'empId' => "VARCHAR(100) DEFAULT NULL",
     'phoneNo1' => "VARCHAR(50) DEFAULT NULL",
@@ -82,3 +82,4 @@ foreach ($columnsToAdd as $colName => $colDef) {
 }
 
 echo "Employee schema setup finished successfully.\n";
+

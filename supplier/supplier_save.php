@@ -1,5 +1,4 @@
 <?php
-// supplier_save.php – Insert or Update supplier + address (plain mysqli queries)
 require_once("../config/db.php");
 require_once("../includes/auth.php");
 requireAdmin();
@@ -9,7 +8,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// ── Read and sanitize POST values ──
 $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
 $address_id = isset($_POST['address_id']) ? (int) $_POST['address_id'] : 0;
 
@@ -29,11 +27,7 @@ $now = date('Y-m-d H:i:s');
 $modifiedBy = 'System Admin';
 $createdBy = 'System Admin';
 
-// ══════════════════════════════════════════
-//  UPSERT ADDRESS
-// ══════════════════════════════════════════
 if ($address_id > 0) {
-    // Update existing address
     $sql_addr = "UPDATE address
                  SET    line1      = '$line1',
                         line2      = '$line2',
@@ -45,18 +39,13 @@ if ($address_id > 0) {
     $conn->query($sql_addr);
 
 } else {
-    // Insert new address
     $sql_addr = "INSERT INTO address (createdOn, createdBy, modifiedOn, modifiedBy, line1, line2, city, zipCode)
                  VALUES ('$now', '$createdBy', '$now', '$modifiedBy', '$line1', '$line2', '$city', '$zipCode')";
     $conn->query($sql_addr);
     $address_id = $conn->insert_id;
 }
 
-// ══════════════════════════════════════════
-//  UPSERT SUPPLIER
-// ══════════════════════════════════════════
 if ($id > 0) {
-    // Update existing supplier
     $sql_supp = "UPDATE supplier
                  SET    name       = '$name',
                         phoneNo1   = '$phoneNo1',
@@ -71,7 +60,6 @@ if ($id > 0) {
     $conn->query($sql_supp);
 
 } else {
-    // Insert new supplier
     $sql_supp = "INSERT INTO supplier
                     (name, phoneNo1, phoneNo2, whatsAppNo, emailId, active, address, createdOn, createdBy, modifiedOn, modifiedBy)
                  VALUES
@@ -80,6 +68,5 @@ if ($id > 0) {
     $conn->query($sql_supp);
 }
 
-// Redirect back with success flag
 header('Location: manage_suppliers.php?saved=1');
 exit;

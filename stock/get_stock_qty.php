@@ -38,7 +38,6 @@ $data = [
     'picture' => ''
 ];
 
-// If searching by barcode, find spare ID first
 if ($barcode !== '') {
     $stmtB = mysqli_prepare($conn, "SELECT spare, itemName, brand, model, machine, unit, actualPricePerUnit, sellingPricePerUnit, gstPercentage, warrantyInMonths, purchaseItem FROM stock WHERE barCode = ? ORDER BY id DESC LIMIT 1");
     if ($stmtB) {
@@ -61,7 +60,6 @@ if ($barcode !== '') {
 }
 
 if ($spareId > 0) {
-    // Get total available stock quantity
     $stmtQty = mysqli_prepare($conn, "SELECT COALESCE(SUM(availableQty), 0) AS totalQty FROM stock WHERE spare = ?");
     if ($stmtQty) {
         mysqli_stmt_bind_param($stmtQty, "i", $spareId);
@@ -72,7 +70,6 @@ if ($spareId > 0) {
         }
     }
 
-    // Get latest pricing, brand, model, machine from most recent stock entry if not already set
     $stmtS = mysqli_prepare($conn, "SELECT brand, model, machine, unit, actualPricePerUnit, sellingPricePerUnit, gstPercentage, warrantyInMonths, purchaseItem FROM stock WHERE spare = ? ORDER BY id DESC LIMIT 1");
     if ($stmtS) {
         mysqli_stmt_bind_param($stmtS, "i", $spareId);
@@ -91,7 +88,6 @@ if ($spareId > 0) {
         }
     }
 
-    // Get spare picture and details
     $stmtSp = mysqli_prepare($conn, "SELECT id, spareName, partNo, picture, rackNumber FROM spares WHERE id = ?");
     if ($stmtSp) {
         mysqli_stmt_bind_param($stmtSp, "i", $spareId);
@@ -110,3 +106,4 @@ if ($spareId > 0) {
 echo json_encode($data);
 exit;
 ?>
+

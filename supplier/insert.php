@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $createdOn = date('Y-m-d H:i:s');
     $createdBy = "System Admin";
 
-    $addressQuery = "INSERT INTO address (line1, line2, city, zipCode, createdOn, createdBy, modifiedOn, modifiedBy) 
+    $addressQuery = "INSERT INTO address (line1, line2, city, zipCode, createdOn, createdBy, modifiedOn, modifiedBy)
                      VALUES ('$line1', '$line2', '$city', '$zipCode', '$createdOn', '$createdBy', '$createdOn', '$createdBy')";
 
     if (mysqli_query($conn, $addressQuery)) {
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $emailId = mysqli_real_escape_string($conn, $_POST['emailId']);
         $active = isset($_POST['active']) ? 1 : 0;
 
-        $supplierQuery = "INSERT INTO supplier (active, emailId, name, phoneNo1, phoneNo2, whatsAppNo, address, createdOn, createdBy) 
+        $supplierQuery = "INSERT INTO supplier (active, emailId, name, phoneNo1, phoneNo2, whatsAppNo, address, createdOn, createdBy)
                           VALUES ($active, '$emailId', '$name', '$phoneNo1', '', '$whatsAppNo', $addressId, '$createdOn', '$createdBy')";
 
         if (mysqli_query($conn, $supplierQuery)) {

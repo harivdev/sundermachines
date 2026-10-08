@@ -32,7 +32,6 @@ $queryString = http_build_query($queryParams);
 
 <div class="erp-container">
 
-    <!-- HEADER BAR -->
     <div class="erp-header-bar">
         <div class="erp-header-title">Manage Spares</div>
         <div class="erp-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
@@ -46,7 +45,6 @@ $queryString = http_build_query($queryParams);
         </div>
     </div>
 
-    <!-- FILTER PANEL -->
     <div id="filterPanel" class="erp-filter-panel" style="display:<?= $search !== '' ? 'block' : 'none' ?>;">
         <form method="GET" class="erp-filter-form">
             <div>
@@ -60,7 +58,6 @@ $queryString = http_build_query($queryParams);
         </form>
     </div>
 
-    <!-- TABLE -->
     <div class="erp-table-box">
         <table class="erp-table">
             <thead>
@@ -101,7 +98,7 @@ $queryString = http_build_query($queryParams);
 
                     <td style="text-align:center;">
                         <a href="edit_spare.php?id=<?= $row['id'] ?>" class="btn-erp btn-erp-warning btn-erp-sm">
-                            ✏️ Edit
+                            Edit
                         </a>
                     </td>
                 </tr>
@@ -114,10 +111,9 @@ $queryString = http_build_query($queryParams);
         </table>
     </div>
 
-    <!-- PAGINATION -->
     <div class="erp-pagination">
         <div>
-            <?php 
+            <?php
             $startRecord = $totalRows > 0 ? $offset + 1 : 0;
             $endRecord = min($offset + $limit, $totalRows);
             ?>

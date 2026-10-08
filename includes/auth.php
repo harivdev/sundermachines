@@ -30,3 +30,4 @@ function normalizeRole($role): string
 {
     return (isset($role) && strtoupper(trim((string) $role)) === 'ADMIN') ? 'ADMIN' : 'USER';
 }
+

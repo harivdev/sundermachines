@@ -1,5 +1,4 @@
 <?php
-// jobcard/update_jobcard.php
 require_once(__DIR__ . "/../config/db.php");
 require_once(__DIR__ . "/../config/whatsapp.php");
 
@@ -20,7 +19,6 @@ if ($jobcardId <= 0) {
     exit;
 }
 
-// Parse givenDate
 $rawDate = trim($_POST['givenDate'] ?? '');
 if (preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $rawDate, $dMatch)) {
     $givenDate = "{$dMatch[3]}-{$dMatch[2]}-{$dMatch[1]}";
@@ -36,7 +34,6 @@ $customerPhone = mysqli_real_escape_string($conn, trim($_POST['customerPhone'] ?
 $customerName = mysqli_real_escape_string($conn, trim($_POST['customerName'] ?? ''));
 $customerCity = mysqli_real_escape_string($conn, trim($_POST['city'] ?? ''));
 
-// Customer resolution
 if ($customerId > 0) {
     $res = mysqli_query($conn, "SELECT id FROM customer WHERE id = $customerId LIMIT 1");
     if (!$res || mysqli_num_rows($res) === 0) {
@@ -75,10 +72,9 @@ $user = $_SESSION['user_name'] ?? "System Admin";
 mysqli_begin_transaction($conn);
 
 try {
-    // 1. RESTORE previous stock quantities allocated for this job card
     $oldSparesRes = mysqli_query($conn, "
-        SELECT stock, quantity 
-        FROM jobcarditemspares 
+        SELECT stock, quantity
+        FROM jobcarditemspares
         WHERE (jobCardItem = $jobcardId OR jobCardItem IN (SELECT id FROM jobcarditems WHERE jobCard = $jobcardId))
           AND deleted = 0 AND stock IS NOT NULL AND stock != ''
     ");
@@ -92,24 +88,27 @@ try {
         }
     }
 
-    // 2. VALIDATE stock for newly submitted spares
     $sparesToDeduct = [];
+    $stockCumulativeMap = [];
+
     if (!empty($_POST['spare_stock_id']) && is_array($_POST['spare_stock_id'])) {
         foreach ($_POST['spare_stock_id'] as $idx => $stId) {
             $stId = trim($stId);
+            $spareIdVal = (int)($_POST['spare_id'][$idx] ?? 0);
             $qty = (int)($_POST['spare_qty'][$idx] ?? 0);
             if ($qty <= 0) continue;
 
             $sName = mysqli_real_escape_string($conn, $_POST['spare_name'][$idx] ?? 'Spare Part');
-            
-            if (!empty($stId)) {
-                $checkStock = mysqli_query($conn, "SELECT availableQty, itemName FROM stock WHERE id = '$stId' LIMIT 1");
-                if ($checkStock && $sRow = mysqli_fetch_assoc($checkStock)) {
-                    $currAvailable = (int)$sRow['availableQty'];
-                    if ($qty > $currAvailable) {
-                        throw new Exception("Insufficient Stock for spare: '" . $sRow['itemName'] . "'. Available: $currAvailable, Requested: $qty");
-                    }
+
+            if (empty($stId) && $spareIdVal > 0) {
+                $fbStock = mysqli_query($conn, "SELECT id FROM stock WHERE spare = $spareIdVal AND availableQty > 0 ORDER BY availableQty DESC LIMIT 1");
+                if ($fbStock && $fbR = mysqli_fetch_assoc($fbStock)) {
+                    $stId = $fbR['id'];
                 }
+            }
+
+            if (!empty($stId)) {
+                $stockCumulativeMap[$stId] = ($stockCumulativeMap[$stId] ?? 0) + $qty;
             }
 
             $createdOnVal = trim($_POST['spare_created_on'][$idx] ?? '');
@@ -121,7 +120,7 @@ try {
 
             $sparesToDeduct[] = [
                 'stock_id' => $stId,
-                'spare_id' => (int)($_POST['spare_id'][$idx] ?? 0),
+                'spare_id' => $spareIdVal,
                 'name' => $sName,
                 'barcode' => mysqli_real_escape_string($conn, $_POST['spare_barcode'][$idx] ?? ''),
                 'rack' => mysqli_real_escape_string($conn, $_POST['spare_rack'][$idx] ?? ''),
@@ -134,22 +133,23 @@ try {
         }
     }
 
-    // 3. Update jobcard main record
+
+
     $e_jobStatus = mysqli_real_escape_string($conn, $_POST['jobStatus'] ?? 'New');
     $e_jobCategory = mysqli_real_escape_string($conn, $_POST['jobCategory'] ?? 'Service');
     $laborCharge = (float)($_POST['laborCharge'] ?? 0);
     $paidAmount = (float)($_POST['paidAmount'] ?? 0);
 
-    // Auto-update status based on paid amount, labor charge, and spares
-    if ($paidAmount > 0) {
-        $e_jobStatus = 'Delivered';
-    } elseif ($laborCharge > 0) {
-        $e_jobStatus = 'Completed';
-    } elseif (count($sparesToDeduct) > 0 && ($e_jobStatus === 'New' || $e_jobStatus === 'New Job' || $e_jobStatus === '')) {
-        $e_jobStatus = 'In Progress';
+    if ($e_jobStatus !== 'Cancelled') {
+        if ($paidAmount > 0) {
+            $e_jobStatus = 'Delivered';
+        } elseif ($laborCharge > 0) {
+            $e_jobStatus = 'Completed';
+        } elseif (count($sparesToDeduct) > 0 && ($e_jobStatus === 'New' || $e_jobStatus === 'New Job' || $e_jobStatus === '')) {
+            $e_jobStatus = 'In Progress';
+        }
     }
 
-    // Calculate Spares Total
     $sparesTotal = 0;
     foreach ($sparesToDeduct as $sItem) {
         $sub = $sItem['qty'] * $sItem['price'];
@@ -171,13 +171,13 @@ try {
         }
     }
 
-    // Completed & Delivered date logic (MySQL strict mode compatible)
-    $oldJcRes = mysqli_query($conn, "SELECT completedDate, deliveryDate FROM jobcard WHERE id = $jobcardId LIMIT 1");
+    $oldJcRes = mysqli_query($conn, "SELECT completedDate, deliveryDate, jobStatus, (delivered + 0) AS delivered, paymentMode FROM jobcard WHERE id = $jobcardId LIMIT 1");
     $oldJc = $oldJcRes ? mysqli_fetch_assoc($oldJcRes) : [];
 
     $todayDate = date('Y-m-d');
-    $isCompleted = ($e_jobStatus === 'Completed' || $e_jobStatus === 'Delivered') ? 1 : 0;
-    $isDelivered = ($e_jobStatus === 'Delivered') ? 1 : 0;
+    $stClean = strtolower(trim((string)$e_jobStatus));
+    $isCompleted = (strpos($stClean, 'complete') !== false || strpos($stClean, 'deliver') !== false) ? 1 : 0;
+    $isDelivered = (strpos($stClean, 'deliver') !== false) ? 1 : 0;
 
     $compDateVal = "NULL";
     if ($isCompleted) {
@@ -191,7 +191,37 @@ try {
         $delivDateVal = "'$existingDeliv'";
     }
 
-    $updateJcSql = "UPDATE jobcard 
+    $paymentMode = trim($_POST['paymentMode'] ?? 'Cash');
+    if ($paymentMode === 'Net Banking') $paymentMode = 'NetBanking';
+    if (!in_array($paymentMode, ['Cash', 'Card', 'UPI', 'NetBanking', 'Cheque'])) {
+        $paymentMode = 'Cash';
+    }
+
+    $oldStClean = strtolower(trim((string)($oldJc['jobStatus'] ?? '')));
+    $wasAlreadyDelivered = (
+        strpos($oldStClean, 'deliver') !== false ||
+        (!empty($oldJc['delivered']) && ($oldJc['delivered'] == 1 || ord((string)$oldJc['delivered']) === 1)) ||
+        (!empty($oldJc['deliveryDate']) && $oldJc['deliveryDate'] !== '0000-00-00')
+    );
+    if ($wasAlreadyDelivered && !empty($oldJc['paymentMode'])) {
+        $paymentMode = $oldJc['paymentMode'];
+    }
+    $paymentModeEsc = mysqli_real_escape_string($conn, $paymentMode);
+
+    // Ensure paymentMode column exists in jobcard table
+    $hasPayModeCol = false;
+    $chkCol = @mysqli_query($conn, "SHOW COLUMNS FROM jobcard LIKE 'paymentMode'");
+    if ($chkCol && mysqli_num_rows($chkCol) > 0) {
+        $hasPayModeCol = true;
+    } else {
+        if (@mysqli_query($conn, "ALTER TABLE jobcard ADD COLUMN paymentMode VARCHAR(50) DEFAULT 'Cash'")) {
+            $hasPayModeCol = true;
+        }
+    }
+
+    $payModeSqlPart = $hasPayModeCol ? ", paymentMode = '$paymentModeEsc'" : "";
+
+    $updateJcSql = "UPDATE jobcard
                     SET givenDate = '$givenDate',
                         customer = $custVal,
                         employee = $empIdVal,
@@ -203,7 +233,8 @@ try {
                         deliveryDate = $delivDateVal,
                         laborCharge = $laborCharge,
                         actualAmountSum = $grandTotal,
-                        receivedAmountSum = $paidAmount,
+                        receivedAmountSum = $paidAmount
+                        $payModeSqlPart,
                         modifiedBy = '$user',
                         modifiedOn = '$now'
                     WHERE id = $jobcardId";
@@ -212,7 +243,29 @@ try {
         throw new Exception("Error updating jobcard: " . mysqli_error($conn));
     }
 
-    // 4. Process Photo Uploads & Update / Insert jobcarditems
+    // Sync with payment table
+    if ($paidAmount > 0) {
+        $checkPay = mysqli_query($conn, "SELECT id FROM payment WHERE jobCard = $jobcardId LIMIT 1");
+        if ($checkPay && mysqli_num_rows($checkPay) > 0) {
+            $payRow = mysqli_fetch_assoc($checkPay);
+            $payId = $payRow['id'];
+            $updPay = "UPDATE payment 
+                       SET amount = $paidAmount, 
+                           mode = '$paymentModeEsc', 
+                           modifiedBy = '$user', 
+                           modifiedOn = '$now' 
+                       WHERE id = '$payId'";
+            @mysqli_query($conn, $updPay);
+        } else {
+            $payId = 'PAY' . dechex(time()) . bin2hex(random_bytes(3));
+            $insPay = "INSERT INTO payment 
+                       (id, createdBy, createdOn, modifiedBy, modifiedOn, amount, category, inward, mode, refNo, transactionDate, jobCard)
+                       VALUES 
+                       ('$payId', '$user', '$now', '$user', '$now', $paidAmount, 'JobCard', b'1', '$paymentModeEsc', NULL, CURDATE(), $jobcardId)";
+            @mysqli_query($conn, $insPay);
+        }
+    }
+
     $uploadedPhotos = [];
     if (!empty($_POST['existing_photos']) && is_array($_POST['existing_photos'])) {
         foreach ($_POST['existing_photos'] as $existImg) {
@@ -239,14 +292,12 @@ try {
 
         foreach ($fileNames as $fIdx => $fName) {
             if (isset($fileErrors[$fIdx]) && $fileErrors[$fIdx] === UPLOAD_ERR_OK && !empty($fileTmpNames[$fIdx])) {
-                // File size limit 10MB
                 if (isset($fileSizes[$fIdx]) && $fileSizes[$fIdx] > 10 * 1024 * 1024) continue;
 
                 $ext = strtolower(pathinfo($fName, PATHINFO_EXTENSION));
                 if (in_array($ext, $forbiddenExts)) continue;
 
                 if (in_array($ext, $allowedExts)) {
-                    // Validate MIME / Image type safely
                     if (function_exists('mime_content_type')) {
                         $mime = @mime_content_type($fileTmpNames[$fIdx]);
                         if ($mime && strpos($mime, 'image/') !== 0) continue;
@@ -281,7 +332,7 @@ try {
     $itemCheck = mysqli_query($conn, "SELECT id FROM jobcarditems WHERE jobCard = $jobcardId OR id = $jobcardId LIMIT 1");
     if ($itemCheck && $itemRow = mysqli_fetch_assoc($itemCheck)) {
         $itemId = $itemRow['id'];
-        $updateItemSql = "UPDATE jobcarditems 
+        $updateItemSql = "UPDATE jobcarditems
                           SET machine = " . ($mId > 0 ? $mId : "NULL") . ",
                               machineName = '$mName',
                               serialNo = '$serial',
@@ -295,12 +346,11 @@ try {
         mysqli_query($conn, $updateItemSql);
     } else {
         $itemId = $jobcardId;
-        $insertItemSql = "INSERT INTO jobcarditems (id, jobCard, machine, machineName, serialNo, issueDetails, remark, picture, actualAmount, quoteAmount, assembledByUs, deleted, createdBy, createdOn, modifiedBy, modifiedOn) 
+        $insertItemSql = "INSERT INTO jobcarditems (id, jobCard, machine, machineName, serialNo, issueDetails, remark, picture, actualAmount, quoteAmount, assembledByUs, deleted, createdBy, createdOn, modifiedBy, modifiedOn)
                           VALUES ($jobcardId, $jobcardId, " . ($mId > 0 ? $mId : "NULL") . ", '$mName', '$serial', '$wDetails', '$remarks', '$pictureVal', $grandTotal, 0, 0, 0, '$user', '$now', '$user', '$now')";
         mysqli_query($conn, $insertItemSql);
     }
 
-    // 5. Delete old spares and insert new spares + DEDUCT stock
     mysqli_query($conn, "DELETE FROM jobcarditemspares WHERE jobCardItem = $itemId OR jobCardItem = $jobcardId");
 
     foreach ($sparesToDeduct as $sItem) {
@@ -310,28 +360,27 @@ try {
         $totalPrice = $sub + $gstVal;
 
         $spareIdVal = ($sItem['spare_id'] > 0) ? $sItem['spare_id'] : "NULL";
-        $stockIdEsc = mysqli_real_escape_string($conn, $sItem['stock_id']);
+        $stockColVal = !empty($sItem['stock_id']) ? "'" . mysqli_real_escape_string($conn, $sItem['stock_id']) . "'" : "NULL";
 
-        $insSpareSql = "INSERT INTO jobcarditemspares (id, jobCardItem, spares, stock, itemName, pricePerQty, quantity, gstPercentage, gstValue, totalPrice, deleted, createdBy, createdOn, modifiedBy, modifiedOn) 
-                        VALUES ('$spUuid', $itemId, $spareIdVal, '$stockIdEsc', '{$sItem['name']}', {$sItem['price']}, {$sItem['qty']}, {$sItem['gst']}, $gstVal, $totalPrice, 0, '$user', '{$sItem['createdOn']}', '$user', '$now')";
-        
+        $insSpareSql = "INSERT INTO jobcarditemspares (id, jobCardItem, spares, stock, itemName, pricePerQty, quantity, gstPercentage, gstValue, totalPrice, deleted, createdBy, createdOn, modifiedBy, modifiedOn)
+                        VALUES ('$spUuid', $itemId, $spareIdVal, $stockColVal, '{$sItem['name']}', {$sItem['price']}, {$sItem['qty']}, {$sItem['gst']}, $gstVal, $totalPrice, 0, '$user', '{$sItem['createdOn']}', '$user', '$now')";
+
         if (!mysqli_query($conn, $insSpareSql)) {
             throw new Exception("Error inserting spare item: " . mysqli_error($conn));
         }
 
-        if (!empty($stockIdEsc)) {
-            $deductSql = "UPDATE stock SET availableQty = availableQty - {$sItem['qty']} WHERE id = '$stockIdEsc'";
+        if (!empty($sItem['stock_id'])) {
+            $stockIdEsc = mysqli_real_escape_string($conn, $sItem['stock_id']);
+            $deductSql = "UPDATE stock SET availableQty = GREATEST(0, availableQty - {$sItem['qty']}) WHERE id = '$stockIdEsc'";
             mysqli_query($conn, $deductSql);
         }
     }
-
-    // Trigger WhatsApp Job Card Delivered Notification if delivered
     if ($isDelivered) {
         $cNoRes = mysqli_query($conn, "SELECT cardNo FROM jobcard WHERE id = $jobcardId LIMIT 1");
         $cNoRow = $cNoRes ? mysqli_fetch_assoc($cNoRes) : [];
         $finalCardNo = $cNoRow['cardNo'] ?? ("JC-" . $jobcardId);
 
-        send_job_card_delivered_notification(
+        send_job_card_delivered_dual_notification(
             $finalCardNo,
             $_POST['customerName'] ?? '',
             $_POST['customerPhone'] ?? '',
@@ -354,3 +403,4 @@ try {
     exit;
 }
 ?>
+

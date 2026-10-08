@@ -17,11 +17,10 @@ if ($salesId <= 0) {
     exit();
 }
 
-// Fetch Sales Order
 $sQuery = "
-    SELECT s.*, c.name as customer_name, c.phoneNo1, c.whatsAppNo 
-    FROM sales s 
-    LEFT JOIN customer c ON s.customer = c.id 
+    SELECT s.*, c.name as customer_name, c.phoneNo1, c.whatsAppNo
+    FROM sales s
+    LEFT JOIN customer c ON s.customer = c.id
     WHERE s.id = $salesId
 ";
 $sRes = mysqli_query($conn, $sQuery);
@@ -31,7 +30,6 @@ if (!$sRes || mysqli_num_rows($sRes) == 0) {
 }
 $sale = mysqli_fetch_assoc($sRes);
 
-// Fetch Sales Items
 $iQuery = "SELECT * FROM salesitems WHERE sales = $salesId AND deleted = 0";
 $iRes = mysqli_query($conn, $iQuery);
 $items = [];
@@ -48,49 +46,76 @@ while ($row = mysqli_fetch_assoc($iRes)) {
         @media print {
             .no-print { display: none !important; }
         }
-        .whatsapp-toolbar {
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            padding: 8px;
-            margin-bottom: 12px;
-            border-radius: 6px;
-            text-align: center;
+        .print-toolbar {
+            background: transparent !important;
+            border: none !important;
+            padding: 6px 0 !important;
+            margin-bottom: 12px !important;
+            text-align: center !important;
             font-family: system-ui, -apple-system, sans-serif;
-        }
-        .btn-wa {
-            display: inline-block;
-            background: #25D366;
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 11px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
         .btn-print {
-            display: inline-block;
-            background: #475569;
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #fef3c7;
+            color: #92400e;
+            border: 1.5px solid #d97706;
+            padding: 8px 24px;
+            border-radius: 8px;
             text-decoration: none;
-            font-weight: bold;
-            font-size: 11px;
-            margin-right: 5px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(217, 119, 6, 0.15);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-print:hover {
+            background: #fde68a;
+            color: #78350f;
+            border-color: #b45309;
+        }
+        .btn-whatsapp {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #25D366;
+            color: #fff;
+            border: 1.5px solid #128C7E;
+            padding: 8px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(37, 211, 102, 0.25);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-whatsapp:hover {
+            background: #128C7E;
+            color: #fff;
         }
         @page {
             size: 80mm auto;
             margin: 0;
         }
         body {
-            font-family: 'Courier New', Courier, monospace, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             width: 78mm;
             margin: 0 auto;
-            padding: 5mm 2mm;
+            padding: 4mm 2mm;
             color: #000;
             background: #fff;
             font-size: 11px;
-            line-height: 1.3;
+            line-height: 1.35;
         }
         .header {
             text-align: center;
@@ -102,14 +127,15 @@ while ($row = mysqli_fetch_assoc($iRes)) {
             margin-bottom: 4px;
         }
         .header h2 {
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: bold;
             margin: 2px 0;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .header p {
             margin: 1px 0;
-            font-size: 10px;
+            font-size: 9.5px;
         }
         .divider {
             border-top: 1px dashed #000;
@@ -157,28 +183,66 @@ while ($row = mysqli_fetch_assoc($iRes)) {
     </style>
 </head>
 <body>
-<?php
-$custPhoneRaw = !empty($sale['whatsAppNo']) ? $sale['whatsAppNo'] : $sale['phoneNo1'];
-$custPhoneClean = preg_replace('/[^0-9]/', '', $custPhoneRaw);
-if (strlen($custPhoneClean) === 10) {
-    $custPhoneClean = '91' . $custPhoneClean;
-}
-
-$waMessage = "Hello " . ($sale['customer_name'] ?: 'Customer') . ",\n\n" .
-             "Thank you for visiting *SUNDER MACHINES WORLD*!\n" .
-             "Here is your Invoice summary:\n" .
-             "📄 *Invoice No:* " . $sale['orderNo'] . "\n" .
-             "📅 *Date:* " . date('d/m/Y', strtotime($sale['orderDate'])) . "\n" .
-             "💰 *Total Amount:* ₹" . number_format($sale['actualAmountSum'], 2) . "\n" .
-             "💳 *Paid Amount:* ₹" . number_format($sale['paidAmountSum'], 2) . "\n\n" .
-             "Thank you for your business! Visit Again!";
-$waUrl = "https://api.whatsapp.com/send?phone=" . urlencode($custPhoneClean) . "&text=" . urlencode($waMessage);
-?>
-
-    <div class="no-print whatsapp-toolbar">
-        <a href="#" onclick="window.print(); return false;" class="btn-print">🖨️ Print Bill</a>
-        <a href="<?= $waUrl ?>" target="_blank" class="btn-wa">📲 Share Bill on WhatsApp</a>
+    <div class="no-print print-toolbar">
+        <a href="#" onclick="window.print(); return false;" class="btn-print">🖨️ Print</a>
+        <?php 
+        $saleWa = !empty($sale['whatsAppNo']) ? $sale['whatsAppNo'] : (!empty($sale['phoneNo1']) ? $sale['phoneNo1'] : '');
+        if (!empty($saleWa)): 
+        ?>
+        <a href="#" onclick="sendWhatsAppReceipt(); return false;" class="btn-whatsapp" id="btnSendWhatsApp">🟢 Send WhatsApp</a>
+        <?php else: ?>
+        <a href="#" onclick="alert('No WhatsApp or phone number saved for this customer.'); return false;" class="btn-whatsapp" style="opacity:0.5;">🟢 Send WhatsApp</a>
+        <?php endif; ?>
     </div>
+
+    <script>
+    function normalizeIndianWhatsApp(raw) {
+        var digits = String(raw).replace(/\D/g, '');
+        if (digits.length === 10) return '91' + digits;
+        if (digits.length === 12 && digits.substring(0,2) === '91') return digits;
+        if (digits.length === 11 && digits.charAt(0) === '0') return '91' + digits.substring(1);
+        if (digits.length === 13 && digits.substring(0,3) === '091') return '91' + digits.substring(3);
+        if (digits.length >= 11) return digits;
+        return null;
+    }
+
+    function sendWhatsAppReceipt() {
+        var rawNum = <?= json_encode($saleWa) ?>;
+        var waNum = normalizeIndianWhatsApp(rawNum);
+        if (!waNum) { alert('Invalid WhatsApp number for this customer.'); return; }
+
+        var orderNo = <?= json_encode($sale['orderNo'] ?? '') ?>;
+        var orderDate = <?= json_encode(date('d/m/Y', strtotime($sale['orderDate']))) ?>;
+        var custName = <?= json_encode($sale['customer_name'] ?: 'CASH BILL') ?>;
+
+        var lines = [];
+        lines.push('🧾 *SUNDER MACHNES WORLD*');
+        lines.push('─────────────────');
+        lines.push('Order#: ' + orderNo);
+        lines.push('Date: ' + orderDate);
+        lines.push('Customer: ' + custName);
+        lines.push('─────────────────');
+        <?php foreach ($items as $itm): ?>
+        lines.push(<?= json_encode(htmlspecialchars_decode($itm['itemName'])) ?> + ' × ' + <?= json_encode(intval($itm['quantity'])) ?> + ' = ₹' + <?= json_encode(number_format(round($itm['totalPrice']), 0)) ?>);
+        <?php endforeach; ?>
+        lines.push('─────────────────');
+        lines.push('*Total: ₹' + <?= json_encode(number_format(round($sale['actualAmountSum']), 0)) ?> + '*');
+        lines.push('*Paid:  ₹' + <?= json_encode(number_format(round($sale['paidAmountSum']), 0)) ?> + '*');
+        <?php
+        $balance = round($sale['actualAmountSum'] - $sale['paidAmountSum']);
+        if ($balance > 0):
+        ?>
+        lines.push('*Balance: ₹' + <?= json_encode(number_format($balance, 0)) ?> + '*');
+        <?php endif; ?>
+        lines.push('─────────────────');
+        lines.push('Thank you for your business!');
+        lines.push('~ _Sunder Machnes World_');
+
+        var msg = lines.join('\n');
+        var url = 'https://wa.me/' + waNum + '?text=' + encodeURIComponent(msg);
+        window.open(url, '_blank');
+    }
+    </script>
 
     <div class="header">
         <div class="sub-title">Sales</div>
@@ -246,3 +310,4 @@ $waUrl = "https://api.whatsapp.com/send?phone=" . urlencode($custPhoneClean) . "
 
 </body>
 </html>
+

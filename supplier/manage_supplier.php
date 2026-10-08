@@ -1,5 +1,4 @@
 <?php
-// manage_suppliers.php
 require_once("../config/db.php");
 require_once("../includes/auth.php");
 requireAdmin();
@@ -68,10 +67,14 @@ $row_end = min($offset + $limit, $total_records);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manage Suppliers – SUNDER MACHNES WORLD</title>
+
+  <link rel="icon" type="image/png" href="../img/logo.png">
+  <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
+  <link rel="apple-touch-icon" href="../img/logo.png">
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Grotesk:wght@700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../includes/local_icons.css?v=1.0">
   <style>
     :root {
       --green: #1a7a4a;
@@ -102,7 +105,6 @@ $row_end = min($offset + $limit, $total_records);
       min-height: 100vh;
     }
 
-    /* HEADER */
     .page-header {
       background: var(--green);
       color: #fff;
@@ -175,7 +177,6 @@ $row_end = min($offset + $limit, $total_records);
       background: #cdd7d1;
     }
 
-    /* FILTER */
     .filter-panel {
       display: none;
       background: var(--white);
@@ -228,7 +229,6 @@ $row_end = min($offset + $limit, $total_records);
       margin-top: 4px;
     }
 
-    /* TABLE */
     .table-wrap {
       padding: 20px 28px;
     }
@@ -334,7 +334,6 @@ $row_end = min($offset + $limit, $total_records);
       font-weight: 700;
     }
 
-    /* ACTION BUTTONS */
     .action-cell {
       display: flex;
       gap: 4px;
@@ -391,7 +390,6 @@ $row_end = min($offset + $limit, $total_records);
       color: #fff;
     }
 
-    /* PAGINATION */
     .pagination-bar {
       display: flex;
       align-items: center;
@@ -432,16 +430,23 @@ $row_end = min($offset + $limit, $total_records);
       cursor: not-allowed;
     }
 
-    /* MODALS */
     .modal-overlay {
       display: none;
       position: fixed;
-      inset: 0;
-      background: rgba(10, 30, 15, .45);
-      z-index: 1000;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(10, 30, 15, .55);
+      z-index: 10000;
       align-items: center;
       justify-content: center;
-      backdrop-filter: blur(2px);
+      backdrop-filter: blur(3px);
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
     }
 
     .modal-overlay.open {
@@ -451,32 +456,47 @@ $row_end = min($offset + $limit, $total_records);
     .modal {
       background: var(--white);
       border-radius: 14px;
-      box-shadow: 0 8px 40px rgba(0, 0, 0, .22);
-      width: 90%;
-      max-width: 520px;
-      max-height: 92vh;
-      overflow-y: auto;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, .25);
+      width: 95%;
+      max-width: 560px;
+      max-height: 90vh;
+      max-height: 90dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-sizing: border-box;
       animation: slideUp .22s ease;
+      margin: auto;
     }
 
-    @keyframes slideUp {
-      from {
-        transform: translateY(30px);
-        opacity: 0;
+    @media (max-width: 768px) {
+      .modal-overlay {
+        align-items: flex-start;
+        padding: 70px 10px calc(24px + env(safe-area-inset-bottom, 16px)) 10px;
       }
+      .modal {
+        max-height: calc(100dvh - 100px);
+        max-height: calc(100vh - 100px);
+        margin: 0 auto;
+      }
+    }
 
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
+    .modal > form {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
     }
 
     .modal-header {
-      padding: 18px 22px;
+      padding: 16px 20px;
       border-bottom: 1.5px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-shrink: 0;
+      background: var(--white);
     }
 
     .modal-header h2 {
@@ -499,18 +519,24 @@ $row_end = min($offset + $limit, $total_records);
     }
 
     .modal-body {
-      padding: 22px;
+      padding: 18px 20px 28px 20px;
+      flex: 1 1 auto;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
     }
 
     .modal-footer {
-      padding: 16px 22px;
+      padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px)) 20px;
       border-top: 1.5px solid var(--border);
       display: flex;
       justify-content: flex-end;
       gap: 10px;
+      flex-shrink: 0;
+      background: #ffffff;
+      z-index: 10;
     }
 
-    /* FORM */
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -532,6 +558,7 @@ $row_end = min($offset + $limit, $total_records);
       font-weight: 600;
       color: var(--muted);
       text-transform: uppercase;
+      margin-top: 2px;
     }
 
     .form-group input,
@@ -557,7 +584,6 @@ $row_end = min($offset + $limit, $total_records);
       cursor: not-allowed;
     }
 
-    /* Validation states */
     .form-group input.is-invalid,
     .form-group select.is-invalid {
       border-color: var(--red) !important;
@@ -623,7 +649,6 @@ $row_end = min($offset + $limit, $total_records);
       transform: translateX(20px);
     }
 
-    /* ADDRESS CARD */
     .addr-card {
       background: var(--green-l);
       border-radius: 10px;
@@ -644,7 +669,6 @@ $row_end = min($offset + $limit, $total_records);
       color: var(--green);
     }
 
-    /* TOAST */
     .toast {
       position: fixed;
       bottom: 28px;
@@ -695,7 +719,6 @@ $row_end = min($offset + $limit, $total_records);
       </div>
     </div>
 
-    <!-- FILTER -->
     <form method="GET" action="" id="filterForm">
       <div class="erp-filter-panel filter-panel <?= ($filter_id || $filter_name || $filter_phone || $filter_email || $filter_active !== '' || $filter_city || $filter_zip) ? 'open' : '' ?>" id="filterPanel">
       <div class="filter-group">
@@ -743,7 +766,6 @@ $row_end = min($offset + $limit, $total_records);
     </div>
   </form>
 
-  <!-- TABLE -->
   <div class="table-wrap">
     <table>
       <thead>
@@ -800,7 +822,6 @@ $row_end = min($offset + $limit, $total_records);
     </table>
   </div>
 
-  <!-- PAGINATION -->
   <div class="pagination-bar">
     <span>Showing <?= $row_start ?>–<?= $row_end ?> of <?= $total_records ?> records. &nbsp;|&nbsp; Page <?= $page ?> of <?= $total_pages ?></span>
     <div class="pag-btns">
@@ -815,8 +836,8 @@ $row_end = min($offset + $limit, $total_records);
       <button class="pag-btn" <?= $page >= $total_pages ? 'disabled' : '' ?> onclick="location.href='<?= $qsp ?>page=<?= $total_pages ?>'">Last</button>
     </div>
   </div>
+  </div>
 
-  <!-- ══ ADDRESS MODAL ══ -->
   <div class="modal-overlay" id="addressModal">
     <div class="modal" style="max-width:420px">
       <div class="modal-header">
@@ -837,7 +858,6 @@ $row_end = min($offset + $limit, $total_records);
     </div>
   </div>
 
-  <!-- ══ DELETE CONFIRM MODAL ══ -->
   <div class="modal-overlay" id="deleteModal">
     <div class="modal" style="max-width:380px">
       <div class="modal-header">
@@ -857,7 +877,6 @@ $row_end = min($offset + $limit, $total_records);
     </div>
   </div>
 
-  <!-- ══ EDIT / NEW SUPPLIER MODAL ══ -->
   <div class="modal-overlay" id="editModal">
     <div class="modal" style="max-width:580px">
       <div class="modal-header">
@@ -870,21 +889,18 @@ $row_end = min($offset + $limit, $total_records);
           <input type="hidden" name="address_id" id="edit_address_id">
           <div class="form-grid">
 
-            <!-- Name -->
             <div class="form-group full">
               <label>Name <span style="color:var(--red)">*</span></label>
               <input type="text" name="name" id="edit_name" placeholder="Full supplier name" maxlength="100">
               <span class="field-error" id="err_name"></span>
             </div>
 
-            <!-- Phone Primary -->
             <div class="form-group">
               <label>Phone # Primary <span style="color:var(--red)">*</span></label>
               <input type="text" name="phoneNo1" id="edit_phoneNo1" placeholder="10-digit number" maxlength="10">
               <span class="field-error" id="err_phoneNo1"></span>
             </div>
 
-            <!-- WhatsApp -->
             <div class="form-group">
               <label>WhatsApp #</label>
               <input type="text" name="whatsAppNo" id="edit_whatsAppNo" placeholder="10-digit number (optional)"
@@ -892,7 +908,6 @@ $row_end = min($offset + $limit, $total_records);
               <span class="field-error" id="err_whatsAppNo"></span>
             </div>
 
-            <!-- Phone Secondary -->
             <div class="form-group">
               <label>Phone # Secondary</label>
               <input type="text" name="phoneNo2" id="edit_phoneNo2" placeholder="10-digit number (optional)"
@@ -900,14 +915,12 @@ $row_end = min($offset + $limit, $total_records);
               <span class="field-error" id="err_phoneNo2"></span>
             </div>
 
-            <!-- Email -->
             <div class="form-group">
               <label>Email ID</label>
               <input type="text" name="emailId" id="edit_emailId" placeholder="email@example.com" maxlength="150">
               <span class="field-error" id="err_emailId"></span>
             </div>
 
-            <!-- Active toggle -->
             <div class="form-group full">
               <label>Active</label>
               <div class="toggle-wrap">
@@ -917,33 +930,28 @@ $row_end = min($offset + $limit, $total_records);
               </div>
             </div>
 
-            <!-- Address section divider -->
             <div class="form-group full" style="border-top:1.5px solid var(--border);padding-top:12px;margin-top:4px">
               <label style="color:var(--green);font-size:.85rem">— Address —</label>
             </div>
 
-            <!-- Line 1 -->
             <div class="form-group full">
               <label>Line 1 <span style="color:var(--red)">*</span></label>
               <input type="text" name="line1" id="edit_line1" placeholder="Street / Area" maxlength="200">
               <span class="field-error" id="err_line1"></span>
             </div>
 
-            <!-- Line 2 -->
             <div class="form-group full">
               <label>Line 2</label>
               <input type="text" name="line2" id="edit_line2" placeholder="Landmark / etc." maxlength="200">
               <span class="field-error" id="err_line2"></span>
             </div>
 
-            <!-- City -->
             <div class="form-group">
               <label>City <span style="color:var(--red)">*</span></label>
               <input type="text" name="city" id="edit_city" placeholder="City" maxlength="100">
               <span class="field-error" id="err_city"></span>
             </div>
 
-            <!-- Zip Code -->
             <div class="form-group">
               <label>Zip Code <span style="color:var(--red)">*</span></label>
               <input type="text" name="zipCode" id="edit_zipCode" placeholder="6-digit PIN" maxlength="6">
@@ -961,9 +969,7 @@ $row_end = min($offset + $limit, $total_records);
   </div>
 
   <script>
-    /* ═══════════════════════════════════════════
-       HELPERS
-    ═══════════════════════════════════════════ */
+
     function toggleFilter() { document.getElementById('filterPanel').classList.toggle('open'); }
     function openModal(id) { document.getElementById(id).classList.add('open'); }
     function closeModal(id) {
@@ -974,9 +980,6 @@ $row_end = min($offset + $limit, $total_records);
       o.addEventListener('click', function (e) { if (e.target === o) { o.classList.remove('open'); clearFormErrors(); } });
     });
 
-    /* ═══════════════════════════════════════════
-       FILTER VALIDATION
-    ═══════════════════════════════════════════ */
     function submitFilter() {
       var ok = true;
 
@@ -1006,13 +1009,9 @@ $row_end = min($offset + $limit, $total_records);
       el.classList.remove('is-invalid'); el.title = '';
     }
 
-    /* Digits-only for filter phone / zip */
     document.getElementById('f_phoneNo1').addEventListener('input', function () { this.value = this.value.replace(/\D/g, ''); });
     document.getElementById('f_zipCode').addEventListener('input', function () { this.value = this.value.replace(/\D/g, ''); });
 
-    /* ═══════════════════════════════════════════
-       FORM VALIDATION RULES
-    ═══════════════════════════════════════════ */
     var RULES = {
       edit_name: {
         required: true,
@@ -1070,7 +1069,6 @@ $row_end = min($offset + $limit, $total_records);
       }
     };
 
-    /* Restrict digits-only fields */
     ['edit_phoneNo1', 'edit_phoneNo2', 'edit_whatsAppNo', 'edit_zipCode'].forEach(function (id) {
       document.getElementById(id).addEventListener('input', function () { this.value = this.value.replace(/\D/g, ''); });
     });
@@ -1095,7 +1093,6 @@ $row_end = min($offset + $limit, $total_records);
       });
     }
 
-    /* Live validation */
     Object.keys(RULES).forEach(function (id) {
       var el = document.getElementById(id);
       if (el) {
@@ -1108,7 +1105,6 @@ $row_end = min($offset + $limit, $total_records);
       }
     });
 
-    /* Submit */
     function submitEditForm(e) {
       e.preventDefault();
       var valid = true;
@@ -1142,9 +1138,6 @@ $row_end = min($offset + $limit, $total_records);
       return false;
     }
 
-    /* ═══════════════════════════════════════════
-       ADDRESS MODAL
-    ═══════════════════════════════════════════ */
     function showAddress(s) {
       document.getElementById('ad_name').textContent = s.name || '—';
       document.getElementById('ad_line1').textContent = s.line1 || '—';
@@ -1155,9 +1148,6 @@ $row_end = min($offset + $limit, $total_records);
       openModal('addressModal');
     }
 
-    /* ═══════════════════════════════════════════
-       EDIT EXISTING
-    ═══════════════════════════════════════════ */
     function openEdit(s) {
       document.getElementById('editModalTitle').innerHTML = '<i class="fa fa-pen" style="margin-right:8px"></i>Edit Supplier';
       clearFormErrors();
@@ -1177,9 +1167,6 @@ $row_end = min($offset + $limit, $total_records);
       openModal('editModal');
     }
 
-    /* ═══════════════════════════════════════════
-       NEW SUPPLIER
-    ═══════════════════════════════════════════ */
     function openNewSupplier() {
       document.getElementById('editModalTitle').innerHTML = '<i class="fa fa-plus" style="margin-right:8px"></i>New Supplier';
       document.getElementById('editForm').reset();
@@ -1195,9 +1182,6 @@ $row_end = min($offset + $limit, $total_records);
       document.getElementById('activeLabel').textContent = this.checked ? 'Active' : 'Inactive';
     });
 
-    /* ═══════════════════════════════════════════
-       DELETE
-    ═══════════════════════════════════════════ */
     var deleteTargetId = null;
     function confirmDelete(id) {
       deleteTargetId = id;

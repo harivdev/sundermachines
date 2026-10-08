@@ -16,7 +16,7 @@ if ($termEsc !== '') {
 }
 
 $query = "
-    SELECT 
+    SELECT
         sp.id AS spare_id,
         sp.spareName,
         COALESCE(sp.partNo, '-') AS partNo,
@@ -57,3 +57,4 @@ if ($res) {
 
 echo json_encode(['success' => true, 'items' => $items]);
 exit;
+

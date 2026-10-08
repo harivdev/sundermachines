@@ -10,23 +10,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    $empId = mysqli_real_escape_string($conn, trim($_POST['empId'] ?? ''));
+    $rawEmpId = trim($_POST['empId'] ?? '');
+    $num = $id;
+    if (preg_match('/\d+/', $rawEmpId, $m)) {
+        $num = intval($m[0]);
+    }
+    $empId = mysqli_real_escape_string($conn, 'EMP' . str_pad($num, 4, '0', STR_PAD_LEFT));
     $name = mysqli_real_escape_string($conn, trim($_POST['name'] ?? ''));
     $phoneNo1 = mysqli_real_escape_string($conn, trim($_POST['phoneNo1'] ?? ''));
     $phoneNo2 = mysqli_real_escape_string($conn, trim($_POST['phoneNo2'] ?? ''));
     $email = mysqli_real_escape_string($conn, trim($_POST['email'] ?? ''));
-    
+
     $line1 = mysqli_real_escape_string($conn, trim($_POST['line1'] ?? ''));
     $line2 = mysqli_real_escape_string($conn, trim($_POST['line2'] ?? ''));
     $city = mysqli_real_escape_string($conn, trim($_POST['city'] ?? ''));
     $zipCode = mysqli_real_escape_string($conn, trim($_POST['zipCode'] ?? ''));
-    
+
     $employmentType = mysqli_real_escape_string($conn, trim($_POST['employmentType'] ?? 'Full-Time'));
     $designation = mysqli_real_escape_string($conn, trim($_POST['designation'] ?? ''));
     $joinedDate = !empty($_POST['joinedDate']) ? $_POST['joinedDate'] : NULL;
     $dob = !empty($_POST['dob']) ? $_POST['dob'] : NULL;
     $gender = mysqli_real_escape_string($conn, trim($_POST['gender'] ?? ''));
-    
+
     $username = mysqli_real_escape_string($conn, trim($_POST['username'] ?? ''));
     $rawPassword = $_POST['password'] ?? '';
     $role = mysqli_real_escape_string($conn, trim($_POST['role'] ?? 'STAFF'));
@@ -37,15 +42,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     $active = isset($_POST['active']) ? intval($_POST['active']) : 1;
-    
+
     $modifiedBy = $_SESSION['username'] ?? 'SYSTEM';
     $now = date('Y-m-d H:i:s');
 
-    // Build update query depending on whether password was changed
     if (!empty($rawPassword)) {
         $hashedPassword = password_hash($rawPassword, PASSWORD_DEFAULT);
         $stmt = mysqli_prepare($conn, "
-            UPDATE employee SET 
+            UPDATE employee SET
                 empId = ?, name = ?, phoneNo1 = ?, phoneNo2 = ?, email = ?,
                 line1 = ?, line2 = ?, city = ?, zipCode = ?,
                 employmentType = ?, designation = ?, joinedDate = ?, dob = ?, gender = ?,
@@ -64,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
     } else {
         $stmt = mysqli_prepare($conn, "
-            UPDATE employee SET 
+            UPDATE employee SET
                 empId = ?, name = ?, phoneNo1 = ?, phoneNo2 = ?, email = ?,
                 line1 = ?, line2 = ?, city = ?, zipCode = ?,
                 employmentType = ?, designation = ?, joinedDate = ?, dob = ?, gender = ?,
@@ -84,12 +88,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (mysqli_stmt_execute($stmt)) {
-        // Sync with legacy employee_auth if present
         if (!empty($username)) {
             if (!empty($rawPassword)) {
                 $passHash = password_hash($rawPassword, PASSWORD_DEFAULT);
                 @mysqli_query($conn, "
-                    INSERT INTO employee_auth (username, password, role, createdBy, createdOn) 
+                    INSERT INTO employee_auth (username, password, role, createdBy, createdOn)
                     VALUES ('$username', '$passHash', '$role', '$modifiedBy', '$now')
                     ON DUPLICATE KEY UPDATE password='$passHash', role='$role'
                 ");
@@ -109,3 +112,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 }
+

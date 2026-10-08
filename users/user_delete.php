@@ -1,5 +1,4 @@
 <?php
-// user_delete.php – Delete an admin user from billing_login.user
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -18,7 +17,6 @@ if ($id <= 0) {
     exit();
 }
 
-// Prevent admin from deleting their own account
 $result = $conn_login->query("SELECT username FROM user WHERE id = $id");
 if ($result && $result->num_rows > 0) {
     $row = $result->fetch_assoc();
@@ -32,3 +30,4 @@ $conn_login->query("DELETE FROM user WHERE id = $id");
 
 header("Location: manage_users.php?deleted=1");
 exit();
+

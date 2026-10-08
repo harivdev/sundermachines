@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/auth.php';
+requireAdmin();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
@@ -9,7 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($username === '' || $password === '') {
         $msg = 'Username and password required.';
     } else {
-        // Ensure both `employee_auth` (preferred) and legacy `credential` tables exist
         $create_auth = "CREATE TABLE IF NOT EXISTS employee_auth (
             id BIGINT NOT NULL AUTO_INCREMENT,
             createdBy VARCHAR(255) DEFAULT NULL,
@@ -41,12 +42,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $msg = 'Failed to create credential table: ' . mysqli_error($conn);
         } else {
             $hash = password_hash($password, PASSWORD_BCRYPT);
-            // Insert into preferred table first, then legacy table for compatibility
             $stmt = mysqli_prepare($conn, "INSERT INTO employee_auth (username, password, role, createdBy, createdOn) VALUES (?, ?, ?, 'SYSTEM', NOW())");
             if ($stmt) {
                 mysqli_stmt_bind_param($stmt, 'sss', $username, $hash, $role);
                 if (mysqli_stmt_execute($stmt)) {
-                    // also insert into legacy credential for backwards compatibility
                     $stmt2 = mysqli_prepare($conn, "INSERT INTO credential (username, password, role, createdBy, createdOn) VALUES (?, ?, ?, 'SYSTEM', NOW())");
                     if ($stmt2) {
                         mysqli_stmt_bind_param($stmt2, 'sss', $username, $hash, $role);
@@ -69,6 +68,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="utf-8">
     <title>Create Employee</title>
+
+    <link rel="icon" type="image/png" href="../img/logo.png">
+    <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
+    <link rel="apple-touch-icon" href="../img/logo.png">
 </head>
 
 <body style="font-family:Arial,sans-serif;padding:20px;">

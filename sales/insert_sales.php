@@ -16,15 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-/* ── Error helper ── */
 function err($msg) {
     echo "<script>alert(" . json_encode("❌ " . $msg) . "); window.history.back();</script>";
     exit;
 }
 
-/* ══════════════════════════════════════
-   1. COLLECT POST DATA
-══════════════════════════════════════ */
 $orderNo     = trim($_POST['orderNo']     ?? '');
 $orderStatus = trim($_POST['orderStatus'] ?? 'New');
 $orderDate   = trim($_POST['orderDate']   ?? date('Y-m-d'));
@@ -37,9 +33,6 @@ $whatsApp        = trim($_POST['customerWhatsApp']  ?? '');
 $addressLine1    = trim($_POST['addressLine1']      ?? '');
 $city            = trim($_POST['city']              ?? '');
 
-/* ══════════════════════════════════════
-   2. VALIDATE
-══════════════════════════════════════ */
 if (empty($orderNo)) {
     $year = date('Y');
     $maxRes = mysqli_query($conn, "SELECT orderNo FROM sales WHERE orderNo LIKE '$year%' ORDER BY id DESC LIMIT 1");
@@ -59,27 +52,21 @@ if (empty($customerPhone)) err("Customer phone is required");
 if (empty($customerName))  err("Customer name is required");
 if (empty($_POST['item'])) err("Please add at least one item");
 
-// Make sure at least one item has a name
 $hasItem = false;
 foreach ($_POST['item'] as $itm) {
     if (trim($itm) !== '') { $hasItem = true; break; }
 }
 if (!$hasItem) err("Please add at least one item");
 
-/* ══════════════════════════════════════
-   3. FIND OR CREATE CUSTOMER
-══════════════════════════════════════ */
 $customerId = null;
 
 if ($existingCustId > 0) {
-    // Verify the customer exists
     $chk = mysqli_prepare($conn, "SELECT id FROM customer WHERE id = ? LIMIT 1");
     mysqli_stmt_bind_param($chk, "i", $existingCustId);
     mysqli_stmt_execute($chk);
     $chkRes = mysqli_stmt_get_result($chk);
     if ($chkRes && mysqli_num_rows($chkRes) > 0) {
         $customerId = $existingCustId;
-        // Update customer info
         $upd = mysqli_prepare($conn, "UPDATE customer SET name=?, whatsAppNo=?, phoneNo1=? WHERE id=?");
         mysqli_stmt_bind_param($upd, "sssi", $customerName, $whatsApp, $customerPhone, $customerId);
         mysqli_stmt_execute($upd);
@@ -87,7 +74,6 @@ if ($existingCustId > 0) {
 }
 
 if (!$customerId) {
-    // Search by phone
     $stmt = mysqli_prepare($conn, "SELECT id FROM customer WHERE phoneNo1 = ? LIMIT 1");
     mysqli_stmt_bind_param($stmt, "s", $customerPhone);
     mysqli_stmt_execute($stmt);
@@ -98,7 +84,6 @@ if (!$customerId) {
         mysqli_stmt_bind_param($upd, "ssi", $customerName, $whatsApp, $customerId);
         mysqli_stmt_execute($upd);
     } else {
-        // Create new customer
         $ins = mysqli_prepare($conn, "INSERT INTO customer (active, name, phoneNo1, whatsAppNo) VALUES (1,?,?,?)");
         mysqli_stmt_bind_param($ins, "sss", $customerName, $customerPhone, $whatsApp);
         mysqli_stmt_execute($ins);
@@ -107,9 +92,6 @@ if (!$customerId) {
     }
 }
 
-/* ══════════════════════════════════════
-   4. TRANSACTION
-══════════════════════════════════════ */
 $now       = date('Y-m-d H:i:s.') . str_pad(rand(0,999999), 6, '0', STR_PAD_LEFT);
 $createdBy = $_SESSION['username'] ?? "System Admin";
 
@@ -117,7 +99,6 @@ mysqli_begin_transaction($conn);
 
 try {
 
-    /* 4a. Insert sales header */
     $stmt = mysqli_prepare($conn, "
         INSERT INTO sales
             (orderNo, orderDate, orderStatus, customer,
@@ -135,7 +116,36 @@ try {
     $salesId = mysqli_insert_id($conn);
     if (!$salesId) throw new Exception("Could not get sales ID");
 
-    /* 4b. Insert sales items */
+    $stockRequestedTotals = [];
+    foreach ($_POST['item'] as $k => $iName) {
+        $iName = trim($iName);
+        if ($iName === '') continue;
+        $sId = trim($_POST['stockId'][$k] ?? '');
+        $spId = intval($_POST['spareId'][$k] ?? 0) ?: NULL;
+        $q = max(1, intval($_POST['qty'][$k] ?? 1));
+
+        if (empty($sId) && !empty($spId)) {
+            $fb = mysqli_query($conn, "SELECT id FROM stock WHERE spare = $spId AND availableQty > 0 ORDER BY availableQty DESC LIMIT 1");
+            if ($fb && $fbR = mysqli_fetch_assoc($fb)) {
+                $sId = $fbR['id'];
+                $_POST['stockId'][$k] = $sId;
+            }
+        }
+        if (!empty($sId)) {
+            $stockRequestedTotals[$sId] = ($stockRequestedTotals[$sId] ?? 0) + $q;
+        }
+    }
+
+    foreach ($stockRequestedTotals as $stkId => $reqQty) {
+        $chkStk = mysqli_query($conn, "SELECT availableQty, itemName FROM stock WHERE id = '" . mysqli_real_escape_string($conn, $stkId) . "' LIMIT 1");
+        if ($chkStk && $stkRow = mysqli_fetch_assoc($chkStk)) {
+            $avail = intval($stkRow['availableQty']);
+            if ($reqQty > $avail) {
+                throw new Exception("Insufficient stock for item '{$stkRow['itemName']}'. Available: {$avail}, Requested: {$reqQty}");
+            }
+        }
+    }
+
     $actualSum = 0;
 
     $iStmt = mysqli_prepare($conn, "
@@ -164,7 +174,6 @@ try {
         $price    = floatval($_POST['price'][$key] ?? 0);
         $gst      = floatval($_POST['gst'][$key]   ?? 0);
 
-        // Recalculate server-side
         $subtotal  = round($qty * $price);
         $gstValue  = round($subtotal * $gst / 100);
         $rowTotal  = round($subtotal + $gstValue);
@@ -172,10 +181,10 @@ try {
         $stockIdVal = ($stockId !== '') ? $stockId : NULL;
 
         mysqli_stmt_bind_param($iStmt, "ssssddsdisdssi",
-            $createdBy, $now, $createdBy, $now,   // s s s s
-            $gst, $gstValue, $itemName,             // d d s
-            $price, $qty, $serial, $rowTotal,       // d i s d
-            $spareId, $stockIdVal, $salesId         // i s i
+            $createdBy, $now, $createdBy, $now,
+            $gst, $gstValue, $itemName,
+            $price, $qty, $serial, $rowTotal,
+            $spareId, $stockIdVal, $salesId
         );
 
         if (!mysqli_stmt_execute($iStmt)) {
@@ -184,15 +193,13 @@ try {
 
         $actualSum += $rowTotal;
 
-        // Deduct stock
-        if ($stockId !== '') {
+        if (!empty($stockId)) {
             $dq = mysqli_prepare($conn, "UPDATE stock SET availableQty = GREATEST(0, availableQty - ?) WHERE id = ?");
             mysqli_stmt_bind_param($dq, "is", $qty, $stockId);
             mysqli_stmt_execute($dq);
         }
     }
 
-    /* 4c. Process Payment if added */
     $paidSum = 0;
     $paymentAdded = !empty($_POST['isPaymentAdded']) && $_POST['isPaymentAdded'] == '1';
     $paymentAmount = floatval($_POST['paymentAmountSubmitted'] ?? 0);
@@ -250,26 +257,40 @@ try {
         $orderStatus = 'Invoiced';
     }
 
-    /* 4d. Update sales totals and final status */
     $upd = mysqli_prepare($conn, "UPDATE sales SET actualAmountSum = ?, paidAmountSum = ?, orderStatus = ? WHERE id = ?");
     mysqli_stmt_bind_param($upd, "ddsi", $actualSum, $paidSum, $orderStatus, $salesId);
     if (!mysqli_stmt_execute($upd)) {
         throw new Exception("Sales total update failed: " . mysqli_stmt_error($upd));
     }
 
+    if (!empty($paymentMode)) {
+        @mysqli_query($conn, "UPDATE sales SET paymentMode = '" . mysqli_real_escape_string($conn, $paymentMode) . "' WHERE id = $salesId");
+    }
+
     mysqli_commit($conn);
 
-    // Send Admin WhatsApp Notification (sales_order_created template)
+    $sparesList = [];
+    if (!empty($_POST['item']) && is_array($_POST['item'])) {
+        foreach ($_POST['item'] as $k => $iName) {
+            $iName = trim($iName);
+            if ($iName !== '') {
+                $q = max(1, intval($_POST['qty'][$k] ?? 1));
+                $sparesList[] = ($q > 1 ? "{$iName} (x{$q})" : $iName);
+            }
+            if (count($sparesList) >= 5) break;
+        }
+    }
+    $sparesSummary = !empty($sparesList) ? implode(", ", $sparesList) : "Purchased Spares";
+
     send_sales_order_notification(
         $orderNo,
         $customerName,
         $customerPhone,
-        $whatsApp,
+        $sparesSummary,
         $actualSum,
         $salesId
     );
 
-    // Check sold stock items for Stock Reorder Reminder trigger
     if (!empty($_POST['stockId']) && is_array($_POST['stockId'])) {
         foreach ($_POST['stockId'] as $stkId) {
             $stkId = trim($stkId);

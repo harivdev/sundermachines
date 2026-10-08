@@ -1,5 +1,8 @@
 <?php
-// Simple diagnostic page to inspect MySQL and credential table availability
+require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/includes/auth.php';
+requireAdmin();
+
 header('Content-Type: text/plain; charset=utf-8');
 
 $host = 'localhost';
@@ -30,7 +33,7 @@ foreach ($dbs as $d) {
     echo " - $d" . PHP_EOL;
 }
 
-$candidates = ['Sunder', 'billing', 'billing_login'];
+$candidates = ['Sunder', 'sunder_billing', 'billing_login'];
 echo "\nChecking candidate DBs for 'credential' table...\n";
 foreach ($candidates as $db) {
     if (!in_array($db, $dbs)) {

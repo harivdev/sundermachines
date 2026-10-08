@@ -1,8 +1,7 @@
-<!-- UNIFIED ERP CAMERA MODAL COMPONENT -->
+
 <div id="erpCameraModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:999999; align-items:center; justify-content:center; padding:15px; box-sizing:border-box;">
     <div style="background:#fff; border-radius:14px; max-width:540px; width:100%; max-height:92vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,0.4);">
-        
-        <!-- MODAL HEADER -->
+
         <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:#f8fafc; border-bottom:1px solid #e2e8f0;">
             <div style="display:flex; align-items:center; gap:8px;">
                 <span style="font-size:18px;">📷</span>
@@ -11,10 +10,8 @@
             <button type="button" onclick="closeErpCamera()" style="background:none; border:none; font-size:24px; color:#64748b; cursor:pointer; line-height:1;" title="Close Modal">&times;</button>
         </div>
 
-        <!-- MODAL BODY -->
         <div style="padding:14px; overflow-y:auto; flex:1; display:flex; flex-direction:column; align-items:center;">
-            
-            <!-- CAMERA SELECTOR BAR -->
+
             <div id="erpCameraControlsBar" style="display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; margin-bottom:10px;">
                 <select id="erpCameraDeviceSelect" style="flex:1; padding:7px 10px; font-size:12.5px; border-radius:6px; border:1px solid #cbd5e1; background:#f8fafc;" onchange="onErpCameraDeviceChange()"></select>
                 <button type="button" onclick="switchErpCamera()" style="background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; padding:7px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px; white-space:nowrap;">
@@ -22,36 +19,30 @@
                 </button>
             </div>
 
-            <!-- LIVE STREAM / PREVIEW CONTAINER -->
             <div style="position:relative; width:100%; height:320px; background:#0f172a; border-radius:10px; overflow:hidden; display:flex; align-items:center; justify-content:center;">
                 <video id="erpCameraVideo" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover; display:block;"></video>
                 <img id="erpCameraCapturedImg" src="" alt="Captured Photo" style="width:100%; height:100%; object-fit:cover; display:none;">
                 <canvas id="erpCameraCanvas" style="display:none;"></canvas>
             </div>
 
-            <!-- STATUS NOTICE -->
             <div id="erpCameraStatus" style="margin-top:10px; width:100%; padding:8px 12px; background:#f1f5f9; border-radius:6px; font-size:12px; color:#475569; text-align:center; box-sizing:border-box;">
                 Click <strong>Capture Photo</strong> to take snapshot.
             </div>
 
-            <!-- FALLBACK CAMERA INPUT -->
             <input type="file" id="erpCameraFallbackInput" accept="image/*" capture="environment" style="display:none;" onchange="handleErpCameraFallbackSelect(this)">
         </div>
 
-        <!-- MODAL FOOTER ACTIONS -->
         <div style="padding:12px 18px; background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; gap:10px;">
             <button type="button" onclick="closeErpCamera()" style="background:#cbd5e1; color:#0f172a; border:none; padding:8px 14px; border-radius:6px; font-size:12.5px; font-weight:600; cursor:pointer;">
                 Cancel
             </button>
 
-            <!-- LIVE MODE BUTTONS -->
             <div id="erpCameraLiveActions" style="display:flex; gap:8px;">
                 <button type="button" id="btnErpCapturePhoto" onclick="captureErpPhoto()" style="background:#16a34a; color:#fff; border:none; padding:8px 18px; border-radius:6px; font-size:13px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
                     📸 Capture Photo
                 </button>
             </div>
 
-            <!-- PREVIEW MODE BUTTONS -->
             <div id="erpCameraPreviewActions" style="display:none; gap:8px;">
                 <button type="button" onclick="retakeErpPhoto()" style="background:#0284c7; color:#fff; border:none; padding:8px 14px; border-radius:6px; font-size:12.5px; font-weight:700; cursor:pointer;">
                     🔄 Retake
@@ -89,7 +80,6 @@ function openErpCamera(callback, options = {}) {
     if (img) img.style.display = 'none';
     if (status) status.innerHTML = '⌛ Accessing camera...';
 
-    // If HTTP origin or unsupported WebRTC mediaDevices, fallback to native camera file picker
     const isHttpRemote = (location.protocol === 'http:' && !['localhost', '127.0.0.1'].includes(location.hostname));
     if (isHttpRemote || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         if (status) status.innerHTML = '📷 Opening native device camera picker...';
@@ -128,7 +118,6 @@ async function initErpCameraDevices() {
                 opt.text = label;
                 select.appendChild(opt);
             });
-            // Default to rear camera if present
             const rearIdx = erpCameraVideoDevices.findIndex(d => {
                 const l = d.label.toLowerCase();
                 return l.includes('back') || l.includes('rear') || l.includes('environment');
@@ -175,7 +164,6 @@ async function startErpCameraStream() {
         if (status) {
             status.innerHTML = '<span style="color:#dc2626; font-weight:700;">Please allow camera permission to take a photo.</span>';
         }
-        // Fallback to native camera input
         setTimeout(() => {
             const modal = document.getElementById('erpCameraModal');
             if (modal) modal.style.display = 'none';
@@ -321,3 +309,4 @@ function closeErpCamera() {
 window.addEventListener('beforeunload', closeErpCameraStreamOnly);
 window.addEventListener('pagehide', closeErpCameraStreamOnly);
 </script>
+

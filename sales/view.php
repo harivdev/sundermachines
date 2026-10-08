@@ -9,11 +9,10 @@ if ($salesId <= 0) {
     exit;
 }
 
-// Fetch sales info
 $sQuery = "
-    SELECT s.*, c.name as customer_name, c.phoneNo1, c.whatsAppNo 
-    FROM sales s 
-    LEFT JOIN customer c ON s.customer = c.id 
+    SELECT s.*, c.name as customer_name, c.phoneNo1, c.whatsAppNo
+    FROM sales s
+    LEFT JOIN customer c ON s.customer = c.id
     WHERE s.id = $salesId
 ";
 $sRes = mysqli_query($conn, $sQuery);
@@ -23,7 +22,6 @@ if (!$sRes || mysqli_num_rows($sRes) == 0) {
 }
 $sale = mysqli_fetch_assoc($sRes);
 
-// Fetch items
 $iQuery = "SELECT * FROM salesitems WHERE sales = $salesId AND deleted = 0";
 $iRes = mysqli_query($conn, $iQuery);
 $items = [];
@@ -32,15 +30,27 @@ while ($row = mysqli_fetch_assoc($iRes)) {
 }
 ?>
 
-<div class="page-main-container erp-container" style="padding: 20px; background: #f8fafc; min-height: calc(100vh - 110px); display: flex; justify-content: center;">
-    
+<div class="page-main-container erp-container" style="padding: 20px; background: #f8fafc; display: flex; justify-content: center;">
+
     <div style="width: 100%; max-width: 900px;">
-        <!-- ACTION BAR -->
+
         <div class="no-print" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
             <a href="list.php" style="text-decoration: none; color: #475569; font-weight: 600; display: flex; align-items: center; gap: 8px;">
                 <span>←</span> Back to List
             </a>
             <div style="display: flex; gap: 10px;">
+                <?php 
+                $saleWa = !empty($sale['whatsAppNo']) ? $sale['whatsAppNo'] : (!empty($sale['phoneNo1']) ? $sale['phoneNo1'] : '');
+                if (!empty($saleWa)): 
+                ?>
+                <button onclick="sendWhatsAppInvoice()" style="background: #25D366; color: #fff; border: 1.5px solid #128C7E; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 5px rgba(37,211,102,0.25); transition: all 0.2s ease;" onmouseover="this.style.background='#128C7E'" onmouseout="this.style.background='#25D366'">
+                    <span>🟢</span> Send WhatsApp
+                </button>
+                <?php else: ?>
+                <button onclick="alert('No WhatsApp or phone number saved for this customer.')" style="background: #25D366; color: #fff; border: 1.5px solid #128C7E; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; opacity: 0.5;">
+                    <span>🟢</span> Send WhatsApp
+                </button>
+                <?php endif; ?>
                 <button onclick="window.open('print_receipt.php?id=<?= $salesId ?>', '_blank')" style="background: #198754; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
                     <span>🧾</span> Thermal Receipt
                 </button>
@@ -50,17 +60,15 @@ while ($row = mysqli_fetch_assoc($iRes)) {
             </div>
         </div>
 
-        <!-- INVOICE CARD -->
         <div style="background: #fff; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden; padding: 40px;">
-            
-            <!-- INVOICE HEADER -->
+
             <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #f1f5f9; padding-bottom: 30px; margin-bottom: 30px;">
                 <div>
                     <h1 style="margin: 0; color: #1e293b; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">INVOICE</h1>
                     <div style="color: #64748b; font-weight: 600; margin-top: 5px;">#<?= htmlspecialchars($sale['orderNo']) ?></div>
                     <div style="margin-top: 15px; font-size: 14px; line-height: 1.6; color: #475569;">
                         <strong>Date:</strong> <?= date('d M Y', strtotime($sale['orderDate'])) ?><br>
-                        <strong>Status:</strong> 
+                        <strong>Status:</strong>
                         <span style="font-weight: 700; color: <?= $sale['orderStatus'] == 'Completed' ? '#16a34a' : '#ea580c' ?>;">
                             <?= htmlspecialchars($sale['orderStatus']) ?>
                         </span>
@@ -76,7 +84,6 @@ while ($row = mysqli_fetch_assoc($iRes)) {
                 </div>
             </div>
 
-            <!-- CUSTOMER DETAILS -->
             <div style="margin-bottom: 40px;">
                 <h3 style="margin: 0 0 15px 0; color: #1e293b; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Bill To</h3>
                 <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
@@ -92,7 +99,6 @@ while ($row = mysqli_fetch_assoc($iRes)) {
                 </div>
             </div>
 
-            <!-- ITEMS TABLE -->
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
                 <thead>
                     <tr style="background: #1e293b; color: #fff;">
@@ -105,16 +111,16 @@ while ($row = mysqli_fetch_assoc($iRes)) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php 
+                    <?php
                     $counter = 1;
                     $subtotal = 0;
                     $totalGst = 0;
-                    foreach ($items as $item): 
+                    foreach ($items as $item):
                         $qty = intval($item['quantity'] ?? 1);
                         $rate = floatval($item['pricePerQty'] ?? 0);
                         $gstVal = floatval($item['gstValue'] ?? 0);
                         $lineTotal = floatval($item['totalPrice'] ?? 0);
-                        
+
                         $lineBase = $qty * $rate;
                         $subtotal += $lineBase;
                         $totalGst += $gstVal;
@@ -136,7 +142,6 @@ while ($row = mysqli_fetch_assoc($iRes)) {
                 </tbody>
             </table>
 
-            <!-- TOTALS -->
             <div style="display: flex; justify-content: flex-end; padding-top: 20px;">
                 <div style="width: 350px;">
                     <div style="display: flex; justify-content: space-between; padding: 10px 0; color: #475569; font-size: 15px;">
@@ -151,7 +156,7 @@ while ($row = mysqli_fetch_assoc($iRes)) {
                         <span>Grand Total</span>
                         <span style="color: #16a34a;">₹<?= number_format(round($sale['actualAmountSum']), 0) ?></span>
                     </div>
-                    
+
                     <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin-top: 15px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #475569; font-size: 14px;">
                             <span>Paid Amount</span>
@@ -164,8 +169,7 @@ while ($row = mysqli_fetch_assoc($iRes)) {
                     </div>
                 </div>
             </div>
-            
-            <!-- FOOTER -->
+
             <div style="margin-top: 50px; padding-top: 20px; border-top: 2px dashed #e2e8f0; text-align: center; color: #64748b; font-size: 13px;">
                 Thank you for your business!<br>
                 For any queries regarding this invoice, please contact support.
@@ -175,14 +179,67 @@ while ($row = mysqli_fetch_assoc($iRes)) {
     </div>
 </div>
 
+<script>
+function normalizeIndianWhatsApp(raw) {
+    var digits = String(raw).replace(/\D/g, '');
+    if (digits.length === 10) return '91' + digits;
+    if (digits.length === 12 && digits.substring(0,2) === '91') return digits;
+    if (digits.length === 11 && digits.charAt(0) === '0') return '91' + digits.substring(1);
+    if (digits.length === 13 && digits.substring(0,3) === '091') return '91' + digits.substring(3);
+    if (digits.length >= 11) return digits;
+    return null;
+}
+
+function sendWhatsAppInvoice() {
+    var rawNum = <?= json_encode($saleWa ?? '') ?>;
+    var waNum = normalizeIndianWhatsApp(rawNum);
+    if (!waNum) { alert('Invalid WhatsApp number for this customer.'); return; }
+
+    var orderNo = <?= json_encode($sale['orderNo'] ?? '') ?>;
+    var orderDate = <?= json_encode(date('d M Y', strtotime($sale['orderDate']))) ?>;
+    var custName = <?= json_encode($sale['customer_name'] ?: 'Guest / Cash') ?>;
+
+    var lines = [];
+    lines.push('🧾 *SUNDER MACHNES WORLD*');
+    lines.push('─────────────────');
+    lines.push('Invoice#: ' + orderNo);
+    lines.push('Date: ' + orderDate);
+    lines.push('Customer: ' + custName);
+    lines.push('─────────────────');
+    <?php foreach ($items as $itm):
+        $iqty = intval($itm['quantity'] ?? 1);
+        $itotal = round(floatval($itm['totalPrice'] ?? 0));
+    ?>
+    lines.push(<?= json_encode(htmlspecialchars_decode($itm['itemName'])) ?> + ' × ' + <?= json_encode($iqty) ?> + ' = ₹' + <?= json_encode(number_format($itotal, 0)) ?>);
+    <?php endforeach; ?>
+    lines.push('─────────────────');
+    lines.push('*Grand Total: ₹' + <?= json_encode(number_format(round($sale['actualAmountSum']), 0)) ?> + '*');
+    lines.push('*Paid: ₹' + <?= json_encode(number_format(round($sale['paidAmountSum']), 0)) ?> + '*');
+    <?php
+    $vBalance = round($sale['actualAmountSum'] - $sale['paidAmountSum']);
+    if ($vBalance > 0):
+    ?>
+    lines.push('*Balance Due: ₹' + <?= json_encode(number_format($vBalance, 0)) ?> + '*');
+    <?php endif; ?>
+    lines.push('─────────────────');
+    lines.push('Thank you for your business!');
+    lines.push('~ _Sunder Machnes World_');
+
+    var msg = lines.join('\n');
+    var url = 'https://wa.me/' + waNum + '?text=' + encodeURIComponent(msg);
+    window.open(url, '_blank');
+}
+</script>
+
 <style>
 @media print {
     body { background: #fff !important; padding: 0 !important; }
     .no-print, .topbar, .menu-container { display: none !important; }
     .footer { display: none !important; }
-    
+
     table th { background: #f1f5f9 !important; color: #1e293b !important; -webkit-print-color-adjust: exact; }
 }
 </style>
 
 <?php include("../includes/footer.php"); ?>
+

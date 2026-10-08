@@ -10,9 +10,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ADMIN') {
     exit();
 }
 
-// Fetch Machine Stocks
 $mcQuery = "
-    SELECT 
+    SELECT
         mc.machineName,
         b.brandName,
         m.model AS modelName,
@@ -32,9 +31,8 @@ if ($mcRes) {
     }
 }
 
-// Fetch Spare Stocks
 $spQuery = "
-    SELECT 
+    SELECT
         sp.spareName,
         b.brandName,
         m.model AS modelName,
@@ -169,3 +167,4 @@ if ($spRes) {
     </script>
 </body>
 </html>
+

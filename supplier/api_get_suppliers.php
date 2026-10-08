@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $query = "
-    SELECT 
+    SELECT
         s.id,
         s.name,
         s.phoneNo1,
@@ -45,3 +45,4 @@ if ($res) {
 
 echo json_encode(['success' => true, 'suppliers' => $suppliers]);
 exit;
+

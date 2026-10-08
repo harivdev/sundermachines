@@ -33,7 +33,6 @@ if (!$res) {
 
 $data = [];
 while ($row = mysqli_fetch_assoc($res)) {
-    // Cast active to bool for JS
     $row['active'] = (bool)$row['active'];
     $data[] = $row;
 }

@@ -25,7 +25,7 @@ $data = [];
 
 if ($barcode !== '') {
     $safeBarcode = mysqli_real_escape_string($conn, $barcode);
-    $query = "SELECT 
+    $query = "SELECT
                 sp.id,
                 sp.spareName,
                 sp.partNo,
@@ -75,7 +75,7 @@ $query = "SELECT DISTINCT
             st.purchaseItem
           FROM spares sp
           LEFT JOIN stock st ON sp.id = st.spare
-          WHERE sp.spareName LIKE '%$safeTerm%' 
+          WHERE sp.spareName LIKE '%$safeTerm%'
              OR sp.partNo LIKE '%$safeTerm%'
              OR st.barCode LIKE '%$safeTerm%'
           ORDER BY sp.spareName ASC

@@ -1,11 +1,28 @@
-# Scratch and temporary files
+# Environment files (CRITICAL: NEVER COMMIT)
+.env
+.env.*
+!.env.example
+
+# Scratch, debug and temporary files
 .db_cleaned_v2
 config/.db_cleaned_v2
 scratch_*
 scratch/
-uploads/
 test.php
+test_cust_api.php
+check_db.php
+db_diagnostic.php
+scratch_create_purchase.php
+setup_users.php
+uotput.txt
+php_errors.log
 *.tmp
 *.log
+logs/
 
+# Database dumps & SQL files (prevent customer data leak)
+*.sql
+Dump*/
 
+# Uploaded media
+uploads/

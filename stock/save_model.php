@@ -19,7 +19,6 @@ if (empty($name)) {
     exit();
 }
 
-// Check duplicate model
 $stmtChk = mysqli_prepare($conn, "SELECT id, model FROM model WHERE LOWER(model) = LOWER(?)");
 mysqli_stmt_bind_param($stmtChk, "s", $name);
 mysqli_stmt_execute($stmtChk);

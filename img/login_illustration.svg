@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400" width="100%" height="100%">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="screenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#fefce8"/>
+    </linearGradient>
+    <linearGradient id="primaryGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="accentYellow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDD017"/>
+      <stop offset="100%" stop-color="#eab308"/>
+    </linearGradient>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="phoneGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#fffbeb"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="10" stdDeviation="15" flood-color="#1e293b" flood-opacity="0.12"/>
+    </filter>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#f59e0b" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background Leaves / Foliage Accent in Gold Tones -->
+  <g opacity="0.85">
+    <path d="M 90 210 Q 70 170 85 140 Q 110 160 100 200 Z" fill="#f59e0b" opacity="0.25"/>
+    <path d="M 75 190 Q 50 160 60 135 Q 85 145 80 185 Z" fill="#fbbf24" opacity="0.35"/>
+    <path d="M 110 180 Q 95 140 120 120 Q 135 145 115 185 Z" fill="#d97706" opacity="0.2"/>
+    
+    <path d="M 400 220 Q 430 180 415 145 Q 390 165 395 210 Z" fill="#f59e0b" opacity="0.25"/>
+    <path d="M 415 200 Q 445 170 435 140 Q 410 155 410 195 Z" fill="#fbbf24" opacity="0.35"/>
+  </g>
+
+  <!-- Floating Wireframe Backdrop -->
+  <rect x="120" y="150" width="220" height="150" rx="8" fill="none" stroke="#d97706" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.35"/>
+  <circle cx="120" cy="150" r="3" fill="#d97706"/>
+  <circle cx="340" cy="150" r="3" fill="#d97706"/>
+  <circle cx="120" cy="300" r="3" fill="#d97706"/>
+  <circle cx="340" cy="300" r="3" fill="#d97706"/>
+
+  <!-- DESKTOP MONITOR -->
+  <g filter="url(#shadow)">
+    <!-- Stand -->
+    <path d="M 195 285 L 235 285 L 240 310 L 190 310 Z" fill="#1e293b"/>
+    <rect x="170" y="310" width="90" height="8" rx="4" fill="#0f172a"/>
+    <!-- Screen Frame -->
+    <rect x="100" y="155" width="230" height="135" rx="10" fill="#1e293b"/>
+    <!-- Display Area -->
+    <rect x="106" y="161" width="218" height="123" rx="6" fill="url(#screenGrad)"/>
+    
+    <!-- Top Bar of Monitor UI -->
+    <rect x="106" y="161" width="218" height="18" rx="6" fill="#fef3c7"/>
+    <circle cx="118" cy="170" r="3" fill="#ef4444"/>
+    <circle cx="128" cy="170" r="3" fill="#f59e0b"/>
+    <circle cx="138" cy="170" r="3" fill="#10b981"/>
+
+    <!-- Monitor Content Widgets -->
+    <!-- Donut Chart -->
+    <circle cx="140" cy="205" r="16" fill="none" stroke="#fef3c7" stroke-width="6"/>
+    <circle cx="140" cy="205" r="16" fill="none" stroke="#f59e0b" stroke-width="6" stroke-dasharray="60 100" stroke-dashoffset="10"/>
+    <circle cx="140" cy="205" r="16" fill="none" stroke="#d97706" stroke-width="6" stroke-dasharray="30 100" stroke-dashoffset="-50"/>
+    
+    <!-- Route Line -->
+    <path d="M 175 205 Q 195 190 215 205 T 255 200" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3 3"/>
+    <circle cx="175" cy="205" r="5" fill="#d97706"/>
+    <circle cx="215" cy="205" r="5" fill="#10b981"/>
+    <circle cx="255" cy="200" r="5" fill="#f59e0b"/>
+
+    <!-- Content Blocks -->
+    <rect x="116" y="232" width="95" height="42" rx="4" fill="#ffffff" stroke="#fde68a" stroke-width="1"/>
+    <rect x="124" y="240" width="50" height="5" rx="2" fill="#d97706"/>
+    <rect x="124" y="250" width="70" height="4" rx="2" fill="#fde68a"/>
+    <rect x="124" y="258" width="40" height="4" rx="2" fill="#fef3c7"/>
+
+    <rect x="219" y="232" width="95" height="42" rx="4" fill="#ffffff" stroke="#fde68a" stroke-width="1"/>
+    <path d="M 225 262 L 240 252 L 255 258 L 270 244 L 285 250 L 305 238" fill="none" stroke="#d97706" stroke-width="2"/>
+  </g>
+
+  <!-- SMARTPHONE -->
+  <g filter="url(#shadow)">
+    <!-- Phone Body -->
+    <rect x="310" y="165" width="75" height="145" rx="14" fill="#1e293b"/>
+    <!-- Screen -->
+    <rect x="314" y="169" width="67" height="137" rx="10" fill="url(#phoneGrad)"/>
+    <!-- Speaker Notch -->
+    <rect x="338" y="173" width="19" height="3" rx="1.5" fill="#0f172a"/>
+    <!-- Phone App Icons -->
+    <rect x="322" y="186" width="14" height="14" rx="3" fill="#f59e0b" opacity="0.3"/>
+    <rect x="341" y="186" width="14" height="14" rx="3" fill="#d97706" opacity="0.3"/>
+    <rect x="360" y="186" width="14" height="14" rx="3" fill="#10b981" opacity="0.3"/>
+
+    <rect x="322" y="206" width="14" height="14" rx="3" fill="#8b5cf6" opacity="0.3"/>
+    <rect x="341" y="206" width="14" height="14" rx="3" fill="#ec4899" opacity="0.3"/>
+    <rect x="360" y="206" width="14" height="14" rx="3" fill="#f59e0b" opacity="0.3"/>
+
+    <!-- UI List items on phone -->
+    <rect x="322" y="228" width="51" height="8" rx="2" fill="#fde68a"/>
+    <rect x="322" y="240" width="51" height="8" rx="2" fill="#fde68a"/>
+    <rect x="322" y="252" width="51" height="8" rx="2" fill="#fde68a"/>
+  </g>
+
+  <!-- SECURITY SHIELD (Gold Shield) -->
+  <g filter="url(#glow)">
+    <path d="M 375 240 C 375 240 395 242 405 235 C 405 255 403 275 375 288 C 347 275 345 255 345 235 C 355 242 375 240 375 240 Z" fill="url(#shieldGrad)"/>
+    <!-- Shield Checkmark -->
+    <path d="M 362 258 L 371 267 L 389 249" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- CHARACTER / USER ILLUSTRATION -->
+  <g filter="url(#shadow)">
+    <!-- Legs / Trousers -->
+    <path d="M 276 260 L 273 335 L 282 335 L 285 285 L 297 335 L 306 335 L 292 260 Z" fill="#334155"/>
+    <!-- Shoes -->
+    <path d="M 265 335 C 265 332 273 332 282 335 L 282 340 L 265 340 Z" fill="#0f172a"/>
+    <path d="M 297 335 C 297 332 305 332 314 335 L 314 340 L 297 340 Z" fill="#0f172a"/>
+
+    <!-- Torso / Gold Sweater -->
+    <path d="M 262 210 Q 280 205 295 210 L 296 262 L 265 262 Z" fill="url(#accentYellow)"/>
+    
+    <!-- Laptop in Hand -->
+    <path d="M 245 220 L 272 220 L 268 238 L 241 238 Z" fill="#fef3c7"/>
+    <rect x="238" y="238" width="36" height="3" rx="1.5" fill="#d97706"/>
+    <path d="M 248 223 L 268 223" stroke="#f59e0b" stroke-width="1.5"/>
+
+    <!-- Arms -->
+    <path d="M 264 212 L 246 230 L 255 235 L 270 220 Z" fill="#d97706"/>
+    <path d="M 290 212 L 275 230 L 270 225 L 283 210 Z" fill="#fde68a"/>
+    <!-- Hands -->
+    <circle cx="245" cy="232" r="4" fill="#fbcfe8"/>
+    <circle cx="272" cy="226" r="4" fill="#fbcfe8"/>
+
+    <!-- Head & Hair -->
+    <circle cx="278" cy="192" r="11" fill="#fbcfe8"/>
+    <path d="M 268 190 C 268 180 282 178 288 185 C 292 188 288 196 284 196 C 278 196 274 198 268 190 Z" fill="#1e293b"/>
+  </g>
+
+  <!-- DECORATIVE ACCENTS -->
+  <g opacity="0.75">
+    <path d="M 115 130 V 140 M 110 135 H 120" stroke="#d97706" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 330 115 V 125 M 325 120 H 335" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 370 140 V 148 M 366 144 H 374" stroke="#d97706" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M 70 290 V 298 M 66 294 H 74" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M 385 320 V 328 M 381 324 H 389" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+
+    <circle cx="60" cy="280" r="4" fill="none" stroke="#d97706" stroke-width="1.5"/>
+    <circle cx="75" cy="298" r="3" fill="#d97706"/>
+    <circle cx="370" cy="335" r="4" fill="none" stroke="#d97706" stroke-width="1.5"/>
+    <circle cx="385" cy="345" r="3" fill="#f59e0b"/>
+  </g>
+
+  <!-- Soft Bottom Waves -->
+  <path d="M 0 350 Q 100 310 220 360 T 500 340 L 500 400 L 0 400 Z" fill="#fef9c3" opacity="0.6"/>
+  <path d="M 0 370 Q 140 330 280 380 T 500 360 L 500 400 L 0 400 Z" fill="#fefce8" opacity="0.8"/>
+</svg>
